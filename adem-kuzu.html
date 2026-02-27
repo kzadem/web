@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adem Kuzu - Profil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            width: 380px;
+            max-width: 90vw;
+            backdrop-filter: blur(20px);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(79, 172, 254, 0.1), transparent, rgba(67, 233, 123, 0.1), transparent);
+            animation: rotate 8s linear infinite;
+        }
+
+        .profile-card>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes rotate {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(79, 172, 254, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 15px rgba(79, 172, 254, 0);
+            }
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4facfe, #43e97b, #38f9d7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            animation: pulse 3s ease-in-out infinite;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            background: linear-gradient(90deg, #4facfe, #43e97b, #38f9d7);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title {
+            font-size: 1rem;
+            color: #aaa;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .divider {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #4facfe, #43e97b);
+            border-radius: 2px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .bio {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #ccc;
+            margin-bottom: 2rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4facfe;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.2rem;
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .skill-tag {
+            background: rgba(79, 172, 254, 0.15);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            color: #43e97b;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .skill-tag:hover {
+            background: rgba(79, 172, 254, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .social-link {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #ccc;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: rgba(79, 172, 254, 0.2);
+            border-color: rgba(79, 172, 254, 0.5);
+            color: #4facfe;
+            transform: translateY(-3px);
+        }
+
+        .back-link {
+            margin-top: 2rem;
+            display: inline-block;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #4facfe;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="profile-card">
+        <div class="avatar">AK</div>
+        <h1 class="name">Adem Kuzu</h1>
+        <p class="title">Software Developer</p>
+        <div class="divider"></div>
+        <p class="bio">
+            Yazılım dünyasına tutkuyla bağlı, modern teknolojilerle
+            yenilikçi projeler geliştiren bir yazılım geliştiricisi.
+        </p>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">10+</div>
+                <div class="stat-label">Proje</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">2+</div>
+                <div class="stat-label">Yıl Deneyim</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">∞</div>
+                <div class="stat-label">Motivasyon</div>
+            </div>
+        </div>
+
+        <div class="skills">
+            <span class="skill-tag">HTML</span>
+            <span class="skill-tag">CSS</span>
+            <span class="skill-tag">JavaScript</span>
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">React</span>
+            <span class="skill-tag">Node.js</span>
+        </div>
+
+        <div class="social-links">
+            <a href="https://github.com/ademkuzu" class="social-link" title="GitHub">⌨</a>
+            <a href="https://linkedin.com/in/ademkuzu" class="social-link" title="LinkedIn">in</a>
+            <a href="mailto:adem@example.com" class="social-link" title="E-posta">✉</a>
+        </div>
+    </div>
+
+    <a href="index.html" class="back-link">← Ana Sayfaya Dön</a>
+</body>
+
+</html>
