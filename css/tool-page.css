@@ -1,0 +1,125 @@
+< !-- Tool Page Shared Styles --><style>.tool-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--sp-lg);
+    align-items: start;
+}
+
+.tool-main {}
+
+.tool-sidebar {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--sp-lg));
+}
+
+.info-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-lg);
+    margin-bottom: var(--sp-md);
+}
+
+.info-card__title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: var(--sp-md);
+}
+
+.info-card ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-sm);
+}
+
+.info-card li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-sm);
+    line-height: 1.5;
+}
+
+.info-card li::before {
+    content: '✓';
+    color: var(--accent-teal);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.result-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(6, 214, 160, 0.3);
+    border-radius: var(--radius-xl);
+    padding: var(--sp-3xl);
+    text-align: center;
+    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.result-card__icon {
+    font-size: 64px;
+    margin-bottom: var(--sp-lg);
+    display: block;
+    animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.result-card__title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: var(--sp-sm);
+}
+
+.result-card__sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: var(--sp-2xl);
+}
+
+.result-actions {
+    display: flex;
+    gap: var(--sp-md);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.progress-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: var(--sp-3xl);
+    text-align: center;
+}
+
+.progress-card__title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: var(--sp-sm);
+}
+
+#progress-status {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: var(--sp-lg);
+}
+
+#progress-wrap {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+    .tool-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .tool-sidebar {
+        position: static;
+        order: -1;
+    }
+}
+
+</style>

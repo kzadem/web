@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Birleştir – PDFix</title>
+    <meta name="description"
+        content="Birden fazla PDF dosyasını tek bir dosyada birleştirin. Ücretsiz, hızlı ve güvenli." />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/tool-page.css" />
+</head>
+
+<body>
+
+    <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+
+    <nav class="navbar" id="navbar">
+        <div class="container navbar__inner">
+            <a href="index.html" class="navbar__logo">
+                <div class="logo-icon">⚡</div><span>PDFix</span>
+            </a>
+            <div class="navbar__nav">
+                <a href="index.html">Ana Sayfa</a>
+                <a href="split.html">PDF Böl</a>
+                <a href="compress.html">Sıkıştır</a>
+                <a href="protect.html">Koru</a>
+            </div>
+            <div class="navbar__actions">
+                <a href="index.html" class="btn btn-outline btn-sm">Tüm Araçlar</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-hero" style="background: linear-gradient(180deg, rgba(255,107,53,0.05) 0%, transparent 100%);">
+        <div class="hero__bg">
+            <div class="hero__orb hero__orb--1" style="opacity:0.07;"></div>
+        </div>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Ana Sayfa</a>
+                <span class="sep">›</span>
+                <span>PDF Birleştir</span>
+            </div>
+            <div class="page-hero__icon" style="background: rgba(255,107,53,0.15);">🔗</div>
+            <h1 class="page-hero__title">PDF Birleştir</h1>
+            <p class="page-hero__sub">PDF dosyalarınızı sürükleyip bırakın, sıralayın ve tek bir dosyada birleştirin.
+            </p>
+        </div>
+    </section>
+
+    <section style="padding: var(--sp-2xl) 0 var(--sp-4xl); position:relative;z-index:1;">
+        <div class="container">
+            <div class="tool-layout">
+                <div class="tool-main">
+
+                    <!-- Upload Zone - NO onclick on the div itself -->
+                    <div id="upload-zone" class="upload-zone">
+                        <div id="zone-content">
+                            <div class="upload-zone__icon icon-bounce">🔗</div>
+                            <div class="upload-zone__title">PDF Dosyalarını Sürükleyin</div>
+                            <p class="upload-zone__sub">veya aşağıdaki butona tıklayın · Maksimum 100 MB her dosya</p>
+                            <div style="margin-top:var(--sp-lg);position:relative;z-index:10;">
+                                <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">
+                                    📂 Dosya Seç
+                                </button>
+                            </div>
+                        </div>
+                        <input type="file" id="file-input" accept=".pdf,application/pdf" multiple hidden />
+                    </div>
+
+                    <!-- File List -->
+                    <div id="file-section" style="display:none; margin-top: var(--sp-lg);">
+                        <div
+                            style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-md);">
+                            <h3 style="font-size:15px;font-weight:700;">Seçilen Dosyalar <span id="file-count"
+                                    style="color:var(--text-muted);font-weight:500;"></span></h3>
+                            <button type="button" class="btn btn-ghost btn-sm" id="add-more-btn">+ Dosya Ekle</button>
+                        </div>
+                        <div id="file-list" class="file-list"></div>
+                        <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                            style="width:100%;margin-top:var(--sp-lg);" disabled>
+                            🔗 PDF Dosyalarını Birleştir
+                        </button>
+                    </div>
+
+                    <!-- Progress -->
+                    <div id="progress-section" style="display:none; margin-top:var(--sp-lg);">
+                        <div class="progress-card">
+                            <div style="font-size:48px;margin-bottom:var(--sp-md);">⚙️</div>
+                            <div class="progress-card__title">PDF'ler Birleştiriliyor...</div>
+                            <div id="progress-status">Dosyalar analiz ediliyor...</div>
+                            <div id="progress-wrap" class="progress-bar-wrap">
+                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result -->
+                    <div id="result-section" style="display:none; margin-top:var(--sp-lg);">
+                        <div class="result-card">
+                            <span class="result-card__icon">✅</span>
+                            <div class="result-card__title">PDF'ler Başarıyla Birleştirildi!</div>
+                            <div class="result-card__sub" id="result-info">Dosyalarınız tek bir PDF'de birleştirildi.
+                            </div>
+                            <div class="result-actions">
+                                <button type="button" id="download-btn"
+                                    class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ İndir</button>
+                                <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden
+                                    Başla</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="tool-sidebar">
+                    <div class="info-card">
+                        <div class="info-card__title">Nasıl Kullanılır?</div>
+                        <ul>
+                            <li>PDF dosyalarınızı yükleyin veya sürükleyin</li>
+                            <li>"Birleştir" butonuna tıklayın</li>
+                            <li>Tek PDF'inizi indirin</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card__title">Özellikler</div>
+                        <ul>
+                            <li>Gerçek PDF birleştirme (pdf-lib)</li>
+                            <li>Tüm işlem tarayıcınızda çalışır</li>
+                            <li>Orijinal kalite korunur</li>
+                            <li>Veriler sunucuya yüklenmez</li>
+                        </ul>
+                    </div>
+                    <div class="info-card"
+                        style="background: var(--brand-gradient-soft); border-color: rgba(255,107,53,0.2);">
+                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
+                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                            Tüm işlemler tarayıcınızda gerçekleşir. Dosyalarınız sunucuya gönderilmez.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer__bottom">
+                <span>© 2025 PDFix. Tüm hakları saklıdır.</span>
+                <a href="index.html" style="color:var(--brand-primary);">← Tüm Araçlar</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- pdf-lib for REAL PDF merging in browser -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <!-- main.js for navbar/particles only -->
+    <script src="js/main.js"></script>
+
+    <script>
+        // ═══════════════════════════════════════════
+        //  SELF-CONTAINED PDF MERGE - NO tool-page.js
+        // ═══════════════════════════════════════════
+        (function () {
+            var pdfFiles = [];
+            var mergedBlob = null;
+            var mergedName = 'merged.pdf';
+
+            var zone = document.getElementById('upload-zone');
+            var zoneContent = document.getElementById('zone-content');
+            var fileInput = document.getElementById('file-input');
+            var fileListEl = document.getElementById('file-list');
+            var fileSection = document.getElementById('file-section');
+            var processBtn = document.getElementById('process-btn');
+            var progressSec = document.getElementById('progress-section');
+            var resultSec = document.getElementById('result-section');
+            var resultInfo = document.getElementById('result-info');
+            var bar = document.getElementById('progress-bar');
+            var statusEl = document.getElementById('progress-status');
+            var countEl = document.getElementById('file-count');
+
+            function fmtSize(b) {
+                if (!b) return '0 B';
+                var k = 1024, s = ['B', 'KB', 'MB', 'GB'];
+                var i = Math.floor(Math.log(b) / Math.log(k));
+                return (b / Math.pow(k, i)).toFixed(1) + ' ' + s[i];
+            }
+
+            function toast(msg, type) {
+                if (window.Toast) window.Toast.show(msg, type || 'info');
+            }
+
+            // ── UI ──
+            function refreshUI() {
+                var n = pdfFiles.length;
+                processBtn.disabled = n < 2;
+                processBtn.style.opacity = n < 2 ? '0.5' : '1';
+                fileSection.style.display = n > 0 ? 'block' : 'none';
+                zoneContent.style.display = n > 0 ? 'none' : '';
+                countEl.textContent = n > 0 ? '(' + n + ' dosya)' : '';
+            }
+
+            function renderList() {
+                fileListEl.innerHTML = '';
+                for (var i = 0; i < pdfFiles.length; i++) {
+                    var f = pdfFiles[i];
+                    var div = document.createElement('div');
+                    div.className = 'file-item';
+                    div.innerHTML =
+                        '<div class="file-item__icon">📄</div>' +
+                        '<div class="file-item__info">' +
+                        '<div class="file-item__name">' + f.name + '</div>' +
+                        '<div class="file-item__size">' + fmtSize(f.size) + '</div>' +
+                        '</div>' +
+                        '<button type="button" class="file-item__remove" data-i="' + i + '" style="cursor:pointer;font-size:16px;color:var(--text-muted);background:none;border:none;">✕</button>';
+                    fileListEl.appendChild(div);
+                }
+                // Removal handlers
+                var btns = fileListEl.querySelectorAll('.file-item__remove');
+                for (var j = 0; j < btns.length; j++) {
+                    btns[j].addEventListener('click', function () {
+                        pdfFiles.splice(parseInt(this.getAttribute('data-i')), 1);
+                        renderList();
+                        refreshUI();
+                    });
+                }
+            }
+
+            function addFiles(fileList) {
+                for (var i = 0; i < fileList.length; i++) {
+                    var f = fileList[i];
+                    var isPdf = (f.type === 'application/pdf') || f.name.toLowerCase().endsWith('.pdf');
+                    if (!isPdf) { toast(f.name + ' PDF değil!', 'error'); continue; }
+                    if (f.size > 100 * 1024 * 1024) { toast(f.name + ' 100MB limitini aşıyor.', 'error'); continue; }
+                    // Skip duplicates
+                    var exists = false;
+                    for (var k = 0; k < pdfFiles.length; k++) {
+                        if (pdfFiles[k].name === f.name && pdfFiles[k].size === f.size) { exists = true; break; }
+                    }
+                    if (!exists) pdfFiles.push(f);
+                }
+                renderList();
+                refreshUI();
+                if (pdfFiles.length > 0) toast(pdfFiles.length + ' dosya yüklendi.', 'success');
+            }
+
+            // ── File Input Events ──
+            // ONLY the buttons trigger file input - zone does NOT auto-click
+            document.getElementById('browse-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileInput.click();
+            });
+
+            document.getElementById('add-more-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function () {
+                if (this.files.length > 0) {
+                    addFiles(this.files);
+                }
+                this.value = '';
+            });
+
+            // ── Drag & Drop (zone only) ──
+            zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
+            zone.addEventListener('dragleave', function (e) {
+                if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over');
+            });
+            zone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                if (e.dataTransfer.files.length > 0) addFiles(e.dataTransfer.files);
+            });
+            // Prevent body drops
+            document.body.addEventListener('dragover', function (e) { e.preventDefault(); });
+            document.body.addEventListener('drop', function (e) { e.preventDefault(); });
+
+            // ═══════════════════════════════
+            //  REAL PDF MERGE WITH PDF-LIB
+            // ═══════════════════════════════
+            processBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                if (pdfFiles.length < 2) {
+                    toast('En az 2 PDF dosyası seçin.', 'error');
+                    return;
+                }
+
+                // Show progress
+                progressSec.style.display = 'block';
+                fileSection.style.display = 'none';
+                resultSec.style.display = 'none';
+                processBtn.disabled = true;
+                processBtn.textContent = '⏳ Birleştiriliyor...';
+                bar.style.width = '0%';
+
+                // Use async IIFE since we need await
+                (async function () {
+                    try {
+                        // 1. Read all PDF files
+                        statusEl.textContent = 'Dosyalar okunuyor...';
+                        bar.style.width = '5%';
+
+                        var buffers = [];
+                        for (var i = 0; i < pdfFiles.length; i++) {
+                            statusEl.textContent = 'Dosya ' + (i + 1) + '/' + pdfFiles.length + ' okunuyor...';
+                            bar.style.width = (5 + (i / pdfFiles.length) * 20) + '%';
+                            var buf = await pdfFiles[i].arrayBuffer();
+                            buffers.push(buf);
+                        }
+                        bar.style.width = '25%';
+
+                        // 2. Merge with pdf-lib
+                        statusEl.textContent = 'PDF birleştiriliyor...';
+                        var merged = await PDFLib.PDFDocument.create();
+
+                        for (var i = 0; i < buffers.length; i++) {
+                            statusEl.textContent = 'Dosya ' + (i + 1) + '/' + buffers.length + ' ekleniyor...';
+                            bar.style.width = (25 + ((i + 1) / buffers.length) * 55) + '%';
+
+                            var donor = await PDFLib.PDFDocument.load(buffers[i]);
+                            var indices = donor.getPageIndices();
+                            var pages = await merged.copyPages(donor, indices);
+                            for (var p = 0; p < pages.length; p++) {
+                                merged.addPage(pages[p]);
+                            }
+                        }
+
+                        // 3. Save
+                        statusEl.textContent = 'PDF kaydediliyor...';
+                        bar.style.width = '85%';
+                        var pdfBytes = await merged.save();
+                        bar.style.width = '100%';
+
+                        mergedBlob = new Blob([pdfBytes], { type: 'application/pdf' });
+                        mergedName = pdfFiles[0].name.replace(/\.pdf$/i, '') + '_merged.pdf';
+
+                        var totalPages = merged.getPageCount();
+                        var sizeStr = fmtSize(mergedBlob.size);
+
+                        console.log('[PDFix] Merge OK:', totalPages, 'pages,', mergedBlob.size, 'bytes');
+
+                        statusEl.textContent = 'Tamamlandı!';
+
+                        setTimeout(function () {
+                            progressSec.style.display = 'none';
+                            resultSec.style.display = 'block';
+                            resultInfo.textContent = pdfFiles.length + ' dosya, ' + totalPages + ' sayfa birleştirildi (' + sizeStr + ').';
+                            toast(totalPages + ' sayfa birleştirildi — ' + sizeStr, 'success');
+                        }, 400);
+
+                    } catch (err) {
+                        console.error('[PDFix] Merge Error:', err);
+                        toast('Birleştirme hatası: ' + (err.message || String(err)), 'error');
+                        progressSec.style.display = 'none';
+                        fileSection.style.display = 'block';
+                    }
+
+                    processBtn.textContent = '🔗 PDF Dosyalarını Birleştir';
+                    processBtn.disabled = pdfFiles.length < 2;
+                    processBtn.style.opacity = pdfFiles.length < 2 ? '0.5' : '1';
+                })();
+            });
+
+            // ═══════════════════════════
+            //  DOWNLOAD REAL MERGED PDF
+            // ═══════════════════════════
+            document.getElementById('download-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                if (!mergedBlob || mergedBlob.size < 500) {
+                    toast('Önce PDF birleştirme yapın!', 'error');
+                    return;
+                }
+
+                console.log('[PDFix] Download:', mergedName, mergedBlob.size, 'bytes');
+
+                var url = URL.createObjectURL(mergedBlob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = mergedName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+                toast('İndirme başladı! (' + fmtSize(mergedBlob.size) + ')', 'success');
+            });
+
+            // ── Again ──
+            document.getElementById('again-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                resultSec.style.display = 'none';
+                progressSec.style.display = 'none';
+                mergedBlob = null;
+                pdfFiles = [];
+                renderList();
+                refreshUI();
+            });
+
+            // Init
+            refreshUI();
+        })();
+    </script>
+</body>
+
+</html>

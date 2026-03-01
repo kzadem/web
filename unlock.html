@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Kilidi Aç – PDFix</title>
+    <meta name="description" content="Şifreli PDF dosyasının kilidini açın. Ücretsiz online PDF kilit açıcı." />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/tool-page.css" />
+</head>
+
+<body>
+    <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+    <nav class="navbar" id="navbar">
+        <div class="container navbar__inner">
+            <a href="index.html" class="navbar__logo">
+                <div class="logo-icon">⚡</div><span>PDFix</span>
+            </a>
+            <div class="navbar__nav"><a href="index.html">Ana Sayfa</a><a href="protect.html">Koru</a><a
+                    href="compress.html">Sıkıştır</a></div>
+            <div class="navbar__actions"><a href="index.html" class="btn btn-outline btn-sm">Tüm Araçlar</a></div>
+        </div>
+    </nav>
+
+    <section class="page-hero" style="background:linear-gradient(180deg,rgba(255,183,3,0.05) 0%,transparent 100%);">
+        <div class="container">
+            <div class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="sep">›</span><span>PDF Kilidi
+                    Aç</span></div>
+            <div class="page-hero__icon" style="background:rgba(255,183,3,0.15);">🔓</div>
+            <h1 class="page-hero__title">PDF Kilidini Aç</h1>
+            <p class="page-hero__sub">Şifre korumalı PDF dosyalarının kilidini kaldırın ve serbestçe kullanın.</p>
+        </div>
+    </section>
+
+    <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
+        <div class="container">
+            <div class="tool-layout">
+                <div class="tool-main">
+                    <div id="upload-zone" class="upload-zone">
+                        <div class="upload-zone__content">
+                            <div class="upload-zone__icon icon-bounce"
+                                style="background:rgba(255,183,3,0.15);color:var(--accent-yellow);">🔓</div>
+                            <div class="upload-zone__title">Kilitli PDF'i Sürükleyin</div>
+                            <p class="upload-zone__sub">Maksimum 100 MB</p>
+                            <div class="upload-zone__btn">
+                                <button class="btn btn-primary btn-lg ripple-btn"
+                                    onclick="document.getElementById('file-input').click()">📂 PDF Seç</button>
+                            </div>
+                        </div>
+                        <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+                    </div>
+
+                    <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div id="file-list" class="file-list"></div>
+                        <div class="options-panel" style="margin-top:var(--sp-lg);">
+                            <div class="options-panel__title">🔑 Şifre Girişi</div>
+                            <div class="options-row">
+                                <div>
+                                    <div>PDF Şifresi</div>
+                                    <div class="hint">Dosyanın şifresini girin</div>
+                                </div>
+                                <input type="password" placeholder="Şifre" style="
+                background:var(--bg-input);border:1px solid var(--border-color);
+                color:var(--text-primary);border-radius:var(--radius-sm);
+                padding:8px 12px;font-size:14px;font-family:inherit;width:160px;outline:none;
+              " />
+                            </div>
+                            <div style="padding:var(--sp-md) 0;border-bottom:1px solid var(--border-color);">
+                                <div
+                                    style="background:rgba(255,183,3,0.08);border:1px solid rgba(255,183,3,0.2);border-radius:var(--radius-sm);padding:var(--sp-md);">
+                                    <span style="font-size:13px;color:var(--accent-yellow);">⚠️ Yalnızca kendi sahip
+                                        olduğunuz veya izninizin olduğu PDF'lerin kilidini açın.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                            style="width:100%;margin-top:var(--sp-lg);" disabled>
+                            🔓 Kilidi Kaldır
+                        </button>
+                    </div>
+
+                    <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="progress-card">
+                            <div style="font-size:48px;margin-bottom:var(--sp-md);">🔓</div>
+                            <div class="progress-card__title">Kilit Kaldırılıyor...</div>
+                            <div id="progress-status">Şifre doğrulanıyor...</div>
+                            <div id="progress-wrap" class="progress-bar-wrap">
+                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="result-card">
+                            <span class="result-card__icon">🔓</span>
+                            <div class="result-card__title">PDF Kilidi Başarıyla Kaldırıldı!</div>
+                            <div class="result-card__sub">Şifre koruması kaldırıldı. PDF artık serbestçe kullanılabilir.
+                            </div>
+                            <div class="result-actions">
+                                <button id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ PDF
+                                    İndir</button>
+                                <button id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-sidebar">
+                    <div class="info-card">
+                        <div class="info-card__title">Kilit Türleri</div>
+                        <ul>
+                            <li>Açma şifresi kaldırma</li>
+                            <li>Sahip şifresi kaldırma</li>
+                            <li>Yazdırma kısıtlaması kaldırma</li>
+                            <li>Kopyalama kısıtlaması kaldırma</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer__bottom"><span>© 2025 PDFix.</span><a href="index.html"
+                    style="color:var(--brand-primary);">← Tüm Araçlar</a></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+    <script>window.TOOL_CONFIG = { multiple: false, btnLabel: "🔓 Kilidi Kaldır" };</script>
+    <script src="js/tool-page.js"></script>
+</body>
+
+</html>

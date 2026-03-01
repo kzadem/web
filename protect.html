@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Koru – PDFix</title>
+    <meta name="description" content="PDF dosyalarınıza şifre ve güvenlik ekleyin. Ücretsiz online PDF şifreleme." />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/tool-page.css" />
+</head>
+
+<body>
+    <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+    <nav class="navbar" id="navbar">
+        <div class="container navbar__inner">
+            <a href="index.html" class="navbar__logo">
+                <div class="logo-icon">⚡</div><span>PDFix</span>
+            </a>
+            <div class="navbar__nav"><a href="index.html">Ana Sayfa</a><a href="merge.html">Birleştir</a><a
+                    href="compress.html">Sıkıştır</a></div>
+            <div class="navbar__actions"><a href="index.html" class="btn btn-outline btn-sm">Tüm Araçlar</a></div>
+        </div>
+    </nav>
+
+    <section class="page-hero" style="background:linear-gradient(180deg,rgba(239,35,60,0.05) 0%,transparent 100%);">
+        <div class="container">
+            <div class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="sep">›</span><span>PDF Koru</span>
+            </div>
+            <div class="page-hero__icon" style="background:rgba(239,35,60,0.15);">🔐</div>
+            <h1 class="page-hero__title">PDF'i Şifrele &amp; Koru</h1>
+            <p class="page-hero__sub">PDF'inizi şifre ile koruyun ve izinleri yönetin.</p>
+        </div>
+    </section>
+
+    <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
+        <div class="container">
+            <div class="tool-layout">
+                <div class="tool-main">
+                    <div id="upload-zone" class="upload-zone">
+                        <div class="upload-zone__content">
+                            <div class="upload-zone__icon icon-bounce"
+                                style="background:rgba(239,35,60,0.15);color:var(--accent-red);">🔐</div>
+                            <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
+                            <p class="upload-zone__sub">Maksimum 100 MB</p>
+                            <div class="upload-zone__btn">
+                                <button class="btn btn-primary btn-lg ripple-btn"
+                                    onclick="document.getElementById('file-input').click()">📂 PDF Seç</button>
+                            </div>
+                        </div>
+                        <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+                    </div>
+
+                    <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div id="file-list" class="file-list"></div>
+                        <div class="options-panel" style="margin-top:var(--sp-lg);">
+                            <div class="options-panel__title">🔐 Güvenlik Ayarları</div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Açma Şifresi</div>
+                                    <div class="hint">Kullanıcıların açmak için girmesi gereken şifre</div>
+                                </div>
+                                <input type="password" placeholder="Şifre girin" id="open-pwd" style="
+                background:var(--bg-input);border:1px solid var(--border-color);
+                color:var(--text-primary);border-radius:var(--radius-sm);
+                padding:8px 12px;font-size:14px;font-family:inherit;width:160px;outline:none;
+              " />
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Şifre Onayla</div>
+                                </div>
+                                <input type="password" placeholder="Tekrar girin" id="confirm-pwd" style="
+                background:var(--bg-input);border:1px solid var(--border-color);
+                color:var(--text-primary);border-radius:var(--radius-sm);
+                padding:8px 12px;font-size:14px;font-family:inherit;width:160px;outline:none;
+              " />
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Yazdırmaya İzin Ver</div>
+                                </div>
+                                <label class="toggle"><input type="checkbox" checked /><span
+                                        class="toggle__slider"></span></label>
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Kopyalamaya İzin Ver</div>
+                                </div>
+                                <label class="toggle"><input type="checkbox" /><span
+                                        class="toggle__slider"></span></label>
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Düzenlemeye İzin Ver</div>
+                                </div>
+                                <label class="toggle"><input type="checkbox" /><span
+                                        class="toggle__slider"></span></label>
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Şifreleme Seviyesi</div>
+                                </div>
+                                <select class="select">
+                                    <option>AES 256-bit</option>
+                                    <option>AES 128-bit</option>
+                                    <option>RC4 128-bit</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                            style="width:100%;margin-top:var(--sp-lg);" disabled>
+                            🔐 PDF'i Koru
+                        </button>
+                    </div>
+
+                    <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="progress-card">
+                            <div style="font-size:48px;margin-bottom:var(--sp-md);">🔐</div>
+                            <div class="progress-card__title">PDF Şifreleniyor...</div>
+                            <div id="progress-status">Güvenlik katmanları uygulanıyor...</div>
+                            <div id="progress-wrap" class="progress-bar-wrap">
+                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="result-card">
+                            <span class="result-card__icon">🔐</span>
+                            <div class="result-card__title">PDF Başarıyla Koruma Altına Alındı!</div>
+                            <div class="result-card__sub">AES 256-bit şifreleme uygulandı. Dosyanız artık güvende.</div>
+                            <div class="result-actions">
+                                <button id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ Şifreli
+                                    PDF İndir</button>
+                                <button id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="tool-sidebar">
+                    <div class="info-card">
+                        <div class="info-card__title">Güvenlik Seviyeleri</div>
+                        <ul>
+                            <li>AES 256-bit: En güçlü şifreleme</li>
+                            <li>İzin yönetimi ile erişim kontrolü</li>
+                            <li>Açma ve düzenleme şifreleri</li>
+                            <li>Kullanıcı/sahip şifre ayrımı</li>
+                        </ul>
+                    </div>
+                    <div class="info-card"
+                        style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);">
+                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
+                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Şifreler yalnızca
+                            tarayıcınızda işlenir, sunucuya gönderilmez.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer__bottom"><span>© 2025 PDFix.</span><a href="index.html"
+                    style="color:var(--brand-primary);">← Tüm Araçlar</a></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+    <script>window.TOOL_CONFIG = { multiple: false, btnLabel: "🔐 PDF'i Koru" };</script>
+    <script src="js/tool-page.js"></script>
+</body>
+
+</html>

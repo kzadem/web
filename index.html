@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDFix – Tüm PDF Araçları Tek Yerde</title>
+  <meta name="description" content="PDFix ile PDF dosyalarınızı birleştirin, bölün, sıkıştırın, dönüştürün ve daha fazlasını yapın. Ücretsiz, hızlı ve güvenli PDF araçları." />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+</head>
+<body>
+
+<!-- Particle Canvas -->
+<canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+
+<!-- ══════════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="container navbar__inner">
+    <a href="index.html" class="navbar__logo">
+      <div class="logo-icon">⚡</div>
+      <span>PDFix</span>
+    </a>
+
+    <div class="navbar__nav">
+      <a href="#tools">Araçlar</a>
+      <a href="#features">Özellikler</a>
+      <a href="compress.html">Sıkıştır</a>
+      <a href="merge.html">Birleştir</a>
+      <a href="split.html">Böl</a>
+    </div>
+
+    <div class="navbar__actions">
+      <a href="#tools" class="btn btn-outline btn-sm">Araçlara Git</a>
+      <a href="merge.html" class="btn btn-primary btn-sm ripple-btn btn-glow">Başla →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero__bg">
+    <div class="hero__orb hero__orb--1"></div>
+    <div class="hero__orb hero__orb--2"></div>
+    <div class="hero__orb hero__orb--3"></div>
+  </div>
+
+  <div class="container">
+    <div class="hero__content">
+      <div class="hero__badge anim-fade-up">
+        <span class="dot"></span>
+        Tamamen Ücretsiz &amp; Güvenli
+      </div>
+
+      <h1 class="hero__title anim-fade-up delay-1">
+        PDF Araçlarının<br />
+        <span class="text-gradient">Güçlü Merkezi</span>
+      </h1>
+
+      <p class="hero__subtitle anim-fade-up delay-2">
+        PDF dosyalarınızı saniyeler içinde dönüştürün, birleştirin, bölün ve optimize edin.
+        Kurulum gereksiz, hiçbir dosya sunucularımızda saklanmaz.
+      </p>
+
+      <div class="hero__actions anim-fade-up delay-3">
+        <a href="#tools" class="btn btn-primary btn-lg ripple-btn btn-glow">
+          🚀 Ücretsiz Başla
+        </a>
+        <a href="#features" class="btn btn-outline btn-lg">
+          Nasıl Çalışır?
+        </a>
+      </div>
+
+      <div class="hero__stats anim-fade-up delay-4">
+        <div class="hero__stat">
+          <div class="hero__stat-value counter" data-count="2500000" data-suffix="+">0</div>
+          <div class="hero__stat-label">İşlenen Dosya</div>
+        </div>
+        <div class="hero__stat">
+          <div class="hero__stat-value counter" data-count="180" data-suffix="+">0</div>
+          <div class="hero__stat-label">Ülkeden Kullanıcı</div>
+        </div>
+        <div class="hero__stat">
+          <div class="hero__stat-value counter" data-count="99" data-suffix="%">0</div>
+          <div class="hero__stat-label">Memnuniyet Oranı</div>
+        </div>
+        <div class="hero__stat">
+          <div class="hero__stat-value">0ms</div>
+          <div class="hero__stat-label">Bekleme Süresi</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     TOOLS GRID
+══════════════════════════════════════════ -->
+<section class="tools-section" id="tools">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">Tüm Araçlar</p>
+      <h2 class="section-title">İhtiyacınız Olan Her Şey<br /><span class="text-gradient">Tek Platformda</span></h2>
+      <p class="section-desc">20+ ücretsiz PDF aracıyla dosyalarınızı istediğiniz gibi işleyin.</p>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="category-tabs reveal">
+      <button class="category-tab active" data-filter="all">Tümü</button>
+      <button class="category-tab" data-filter="organize">Düzenle</button>
+      <button class="category-tab" data-filter="convert">Dönüştür</button>
+      <button class="category-tab" data-filter="security">Güvenlik</button>
+      <button class="category-tab" data-filter="optimize">Optimize Et</button>
+    </div>
+
+    <!-- Grid -->
+    <div class="tools-grid">
+
+      <!-- Organize -->
+      <a href="merge.html" class="tool-card" data-category="organize">
+        <div class="tool-card__icon icon-orange">🔗</div>
+        <div class="tool-card__name">PDF Birleştir</div>
+        <div class="tool-card__desc">Birden fazla PDF'i tek dosyada birleştir</div>
+      </a>
+
+      <a href="split.html" class="tool-card" data-category="organize">
+        <div class="tool-card__icon icon-blue">✂️</div>
+        <div class="tool-card__name">PDF Böl</div>
+        <div class="tool-card__desc">PDF'i sayfa aralıklarına göre böl</div>
+      </a>
+
+      <a href="rotate.html" class="tool-card" data-category="organize">
+        <div class="tool-card__icon icon-teal">🔄</div>
+        <div class="tool-card__name">PDF Döndür</div>
+        <div class="tool-card__desc">Sayfaları istediğin açıya döndür</div>
+      </a>
+
+      <a href="watermark.html" class="tool-card" data-category="organize">
+        <div class="tool-card__icon icon-purple">🔖</div>
+        <div class="tool-card__name">Filigran Ekle</div>
+        <div class="tool-card__desc">PDF'e metin veya görsel filigran ekle</div>
+      </a>
+
+      <!-- Convert -->
+      <a href="pdf-to-word.html" class="tool-card" data-category="convert">
+        <div class="tool-card__icon icon-blue">📝</div>
+        <div class="tool-card__name">PDF → Word</div>
+        <div class="tool-card__desc">PDF'i düzenlenebilir Word dosyasına çevir</div>
+      </a>
+
+      <a href="word-to-pdf.html" class="tool-card" data-category="convert">
+        <div class="tool-card__icon icon-orange">📄</div>
+        <div class="tool-card__name">Word → PDF</div>
+        <div class="tool-card__desc">Word belgesini PDF'e dönüştür</div>
+      </a>
+
+      <a href="pdf-to-jpg.html" class="tool-card" data-category="convert">
+        <div class="tool-card__icon icon-yellow">🖼️</div>
+        <div class="tool-card__name">PDF → JPG</div>
+        <div class="tool-card__desc">Her sayfayı yüksek kaliteli görsel yap</div>
+      </a>
+
+      <a href="jpg-to-pdf.html" class="tool-card" data-category="convert">
+        <div class="tool-card__icon icon-green">🗂️</div>
+        <div class="tool-card__name">JPG → PDF</div>
+        <div class="tool-card__desc">Resimleri tek PDF dosyasına dönüştür</div>
+      </a>
+
+      <a href="pdf-to-excel.html" class="tool-card" data-category="convert">
+        <div class="tool-card__icon icon-green">📊</div>
+        <div class="tool-card__name">PDF → Excel</div>
+        <div class="tool-card__desc">Tabloları Excel formatına aktar</div>
+      </a>
+
+      <a href="excel-to-pdf.html" class="tool-card" data-category="convert">
+        <div class="tool-card__icon icon-teal">📈</div>
+        <div class="tool-card__name">Excel → PDF</div>
+        <div class="tool-card__desc">Elektronik tabloları PDF'e dönüştür</div>
+      </a>
+
+      <a href="pdf-to-pptx.html" class="tool-card" data-category="convert">
+        <div class="tool-card__icon icon-pink">📊</div>
+        <div class="tool-card__name">PDF → PPT</div>
+        <div class="tool-card__desc">Sunumu PowerPoint olarak çıkar</div>
+      </a>
+
+      <a href="html-to-pdf.html" class="tool-card" data-category="convert">
+        <div class="tool-card__icon icon-purple">🌐</div>
+        <div class="tool-card__name">HTML → PDF</div>
+        <div class="tool-card__desc">Web sayfalarını PDF'e kaydet</div>
+      </a>
+
+      <!-- Security -->
+      <a href="protect.html" class="tool-card" data-category="security">
+        <div class="tool-card__icon icon-red">🔐</div>
+        <div class="tool-card__name">PDF Koru</div>
+        <div class="tool-card__desc">PDF'e şifre ve izin kilidi ekle</div>
+      </a>
+
+      <a href="unlock.html" class="tool-card" data-category="security">
+        <div class="tool-card__icon icon-yellow">🔓</div>
+        <div class="tool-card__name">PDF Kilidi Aç</div>
+        <div class="tool-card__desc">Şifreli PDF'i kaldır ve serbest bırak</div>
+      </a>
+
+      <a href="sign.html" class="tool-card" data-category="security">
+        <div class="tool-card__icon icon-teal">✍️</div>
+        <div class="tool-card__name">PDF İmzala</div>
+        <div class="tool-card__desc">PDF'e dijital imza ekle</div>
+      </a>
+
+      <a href="redact.html" class="tool-card" data-category="security">
+        <div class="tool-card__icon icon-red">🚫</div>
+        <div class="tool-card__name">Sansürle</div>
+        <div class="tool-card__desc">Hassas bilgileri kalıcı olarak sil</div>
+      </a>
+
+      <!-- Optimize -->
+      <a href="compress.html" class="tool-card" data-category="optimize">
+        <div class="tool-card__icon icon-green">⚡</div>
+        <div class="tool-card__name">PDF Sıkıştır</div>
+        <div class="tool-card__desc">Kalite kaybetmeden dosya boyutunu küçült</div>
+      </a>
+
+      <a href="repair.html" class="tool-card" data-category="optimize">
+        <div class="tool-card__icon icon-yellow">🔧</div>
+        <div class="tool-card__name">PDF Onar</div>
+        <div class="tool-card__desc">Bozuk PDF dosyalarını kurtar ve onar</div>
+      </a>
+
+      <a href="ocr.html" class="tool-card" data-category="optimize">
+        <div class="tool-card__icon icon-purple">🔍</div>
+        <div class="tool-card__name">OCR – Metin Tanı</div>
+        <div class="tool-card__desc">Görsellerden metinleri çıkar ve düzenle</div>
+      </a>
+
+      <a href="pagenumber.html" class="tool-card" data-category="organize">
+        <div class="tool-card__icon icon-orange">🔢</div>
+        <div class="tool-card__name">Sayfa Numarası</div>
+        <div class="tool-card__desc">PDF sayfalarına otomatik numara ekle</div>
+      </a>
+
+    </div><!-- /tools-grid -->
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FEATURES SECTION
+══════════════════════════════════════════ -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <p class="section-eyebrow">Neden PDFix?</p>
+      <h2 class="section-title">Neden <span class="text-gradient">Bizi Seçmeli</span>siniz?</h2>
+      <p class="section-desc">Kullanıcı gizliliği ve hız ön planda, her zaman.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal delay-1">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">%100 Güvenli</div>
+        <div class="feature-desc">Dosyalarınız asla sunucularımızda saklanmaz. Tüm işlemler tarayıcınızda gerçekleştirilir ve anında silinir.</div>
+      </div>
+
+      <div class="feature-card reveal delay-2">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Yıldırım Hızında</div>
+        <div class="feature-desc">Gelişmiş işleme altyapımız sayesinde en büyük dosyalar bile saniyeler içinde işlenir.</div>
+      </div>
+
+      <div class="feature-card reveal delay-3">
+        <div class="feature-icon">🌍</div>
+        <div class="feature-title">Her Cihazda Çalışır</div>
+        <div class="feature-desc">Windows, Mac, Linux, iOS ve Android'de kusursuz çalışır. Uygulama indirmenize gerek yok.</div>
+      </div>
+
+      <div class="feature-card reveal delay-4">
+        <div class="feature-icon">🆓</div>
+        <div class="feature-title">Tamamen Ücretsiz</div>
+        <div class="feature-desc">Temel araçların tamamı ücretsiz. Kayıt veya kredi kartı gerektirmiyor.</div>
+      </div>
+
+      <div class="feature-card reveal delay-5">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">Yüksek Kalite</div>
+        <div class="feature-desc">En gelişmiş PDF motorları kullanılarak en iyi çıktı kalitesi garanti edilir.</div>
+      </div>
+
+      <div class="feature-card reveal delay-6">
+        <div class="feature-icon">🔧</div>
+        <div class="feature-title">Toplu İşleme</div>
+        <div class="feature-desc">Birden fazla dosyayı aynı anda işleyin ve değerli zamanınızdan tasarruf edin.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CTA BANNER
+══════════════════════════════════════════ -->
+<section style="padding: var(--sp-4xl) 0; position: relative; z-index:1;">
+  <div class="container">
+    <div style="
+      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(255,107,53,0.05) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: var(--sp-3xl) var(--sp-2xl);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    " class="reveal">
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center, rgba(255,107,53,0.08) 0%, transparent 70%);pointer-events:none;"></div>
+      <h2 style="font-size:clamp(24px,4vw,40px);font-weight:800;letter-spacing:-1px;margin-bottom:var(--sp-md);position:relative;z-index:1;">
+        PDF İşlemlerinizi <span class="text-gradient">Bugün Başlatın</span>
+      </h2>
+      <p style="font-size:16px;color:var(--text-secondary);max-width:480px;margin:0 auto var(--sp-xl);position:relative;z-index:1;">
+        2.5 milyonun üzerinde işleme katılın. Ücretsiz, kayıtsız, saniyeler içinde.
+      </p>
+      <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap;position:relative;z-index:1;">
+        <a href="merge.html" class="btn btn-primary btn-lg ripple-btn btn-glow">
+          🚀 Hemen Dene
+        </a>
+        <a href="compress.html" class="btn btn-outline btn-lg">
+          PDF Sıkıştır
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__logo" style="margin-bottom:0;">
+          <div class="logo-icon">⚡</div>
+          <span>PDFix</span>
+        </a>
+        <p>PDF dosyalarınız için hızlı, güvenli ve ücretsiz araçlar. Her zaman, her yerde.</p>
+      </div>
+
+      <div>
+        <div class="footer__col-title">PDF Düzenle</div>
+        <ul class="footer__links">
+          <li><a href="merge.html">PDF Birleştir</a></li>
+          <li><a href="split.html">PDF Böl</a></li>
+          <li><a href="rotate.html">PDF Döndür</a></li>
+          <li><a href="watermark.html">Filigran Ekle</a></li>
+          <li><a href="pagenumber.html">Sayfa Numarası</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer__col-title">Dönüştür</div>
+        <ul class="footer__links">
+          <li><a href="pdf-to-word.html">PDF → Word</a></li>
+          <li><a href="word-to-pdf.html">Word → PDF</a></li>
+          <li><a href="pdf-to-jpg.html">PDF → JPG</a></li>
+          <li><a href="jpg-to-pdf.html">JPG → PDF</a></li>
+          <li><a href="pdf-to-excel.html">PDF → Excel</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer__col-title">Güvenlik &amp; Optimize</div>
+        <ul class="footer__links">
+          <li><a href="compress.html">PDF Sıkıştır</a></li>
+          <li><a href="protect.html">PDF Koru</a></li>
+          <li><a href="unlock.html">Kilit Aç</a></li>
+          <li><a href="sign.html">PDF İmzala</a></li>
+          <li><a href="ocr.html">OCR</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <span>© 2025 PDFix. Tüm hakları saklıdır.</span>
+      <div style="display:flex;gap:var(--sp-lg);">
+        <a href="#">Gizlilik Politikası</a>
+        <a href="#">Kullanım Şartları</a>
+        <a href="#">İletişim</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

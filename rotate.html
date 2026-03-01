@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PDF Döndür – PDFix</title>
+    <meta name="description" content="PDF sayfalarını döndürün. Ücretsiz online PDF döndürücü." />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/tool-page.css" />
+    <style>
+        .rotate-options {
+            display: flex;
+            gap: var(--sp-md);
+            justify-content: center;
+            margin: var(--sp-lg) 0;
+            flex-wrap: wrap;
+        }
+
+        .rotate-btn {
+            width: 90px;
+            height: 90px;
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            color: var(--text-secondary);
+        }
+
+        .rotate-btn:hover {
+            border-color: var(--brand-primary);
+            color: var(--brand-primary);
+            background: rgba(255, 107, 53, 0.06);
+        }
+
+        .rotate-btn.active {
+            border-color: var(--brand-primary);
+            background: rgba(255, 107, 53, 0.12);
+            color: var(--brand-primary);
+        }
+
+        .rotate-btn .ri {
+            font-size: 28px;
+            transition: transform 0.3s ease;
+        }
+
+        .rotate-btn:hover .ri {
+            transform: rotate(15deg);
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+    <nav class="navbar" id="navbar">
+        <div class="container navbar__inner">
+            <a href="index.html" class="navbar__logo">
+                <div class="logo-icon">⚡</div><span>PDFix</span>
+            </a>
+            <div class="navbar__nav"><a href="index.html">Ana Sayfa</a><a href="merge.html">Birleştir</a><a
+                    href="compress.html">Sıkıştır</a></div>
+            <div class="navbar__actions"><a href="index.html" class="btn btn-outline btn-sm">Tüm Araçlar</a></div>
+        </div>
+    </nav>
+
+    <section class="page-hero" style="background:linear-gradient(180deg,rgba(76,201,240,0.05) 0%,transparent 100%);">
+        <div class="container">
+            <div class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="sep">›</span><span>PDF Döndür</span>
+            </div>
+            <div class="page-hero__icon" style="background:rgba(76,201,240,0.15);">🔄</div>
+            <h1 class="page-hero__title">PDF Döndür</h1>
+            <p class="page-hero__sub">PDF sayfalarını 90°, 180° veya 270° döndürün. Tüm sayfalar veya tek tek seçin.</p>
+        </div>
+    </section>
+
+    <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
+        <div class="container">
+            <div class="tool-layout">
+                <div class="tool-main">
+                    <div id="upload-zone" class="upload-zone">
+                        <div class="upload-zone__content">
+                            <div class="upload-zone__icon icon-bounce"
+                                style="background:rgba(76,201,240,0.15);color:#4CC9F0;">🔄</div>
+                            <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
+                            <p class="upload-zone__sub">Maksimum 100 MB</p>
+                            <div class="upload-zone__btn">
+                                <button class="btn btn-primary btn-lg ripple-btn"
+                                    onclick="document.getElementById('file-input').click()">📂 PDF Seç</button>
+                            </div>
+                        </div>
+                        <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+                    </div>
+
+                    <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div id="file-list" class="file-list"></div>
+
+                        <div class="options-panel" style="margin-top:var(--sp-lg);">
+                            <div class="options-panel__title">🔄 Döndürme Yönü</div>
+                            <div class="rotate-options">
+                                <button class="rotate-btn" onclick="selectRotate(this, 90)">
+                                    <span class="ri">↻</span><span>90° Sağ</span>
+                                </button>
+                                <button class="rotate-btn active" onclick="selectRotate(this, 180)">
+                                    <span class="ri">↶</span><span>180°</span>
+                                </button>
+                                <button class="rotate-btn" onclick="selectRotate(this, 270)">
+                                    <span class="ri">↺</span><span>90° Sol</span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="rotate-angle" value="180" />
+
+                            <div class="options-row">
+                                <div>
+                                    <div>Hangi Sayfalar?</div>
+                                </div>
+                                <select class="select" id="rotate-pages">
+                                    <option value="all">Tüm Sayfalar</option>
+                                    <option value="odd">Tek Sayfalar</option>
+                                    <option value="even">Çift Sayfalar</option>
+                                    <option value="custom">Belirli Sayfalar</option>
+                                </select>
+                            </div>
+                            <div id="custom-pages-row" class="options-row" style="display:none;">
+                                <div>
+                                    <div>Sayfa Aralığı</div>
+                                    <div class="hint">Örn: 1, 3-5, 8</div>
+                                </div>
+                                <input type="text" placeholder="1,3-5,8" style="
+                background:var(--bg-input);border:1px solid var(--border-color);
+                color:var(--text-primary);border-radius:var(--radius-sm);
+                padding:8px 12px;font-size:14px;font-family:inherit;width:140px;outline:none;
+              " />
+                            </div>
+                        </div>
+
+                        <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                            style="width:100%;margin-top:var(--sp-lg);" disabled>
+                            🔄 PDF'i Döndür
+                        </button>
+                    </div>
+
+                    <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="progress-card">
+                            <div style="font-size:48px;margin-bottom:var(--sp-md);">🔄</div>
+                            <div class="progress-card__title">Sayfalar Döndürülüyor...</div>
+                            <div id="progress-status">Sayfalar işleniyor...</div>
+                            <div id="progress-wrap" class="progress-bar-wrap">
+                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="result-card">
+                            <span class="result-card__icon">✅</span>
+                            <div class="result-card__title">PDF Döndürüldü!</div>
+                            <div class="result-card__sub">Sayfalar başarıyla döndürüldü. PDF indirmeye hazır.</div>
+                            <div class="result-actions">
+                                <button id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️
+                                    İndir</button>
+                                <button id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-sidebar">
+                    <div class="info-card">
+                        <div class="info-card__title">Döndürme Seçenekleri</div>
+                        <ul>
+                            <li>90° sağa döndürme</li>
+                            <li>180° ters çevirme</li>
+                            <li>90° sola döndürme</li>
+                            <li>Seçili sayfalara uygula</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer__bottom"><span>© 2025 PDFix.</span><a href="index.html"
+                    style="color:var(--brand-primary);">← Tüm Araçlar</a></div>
+        </div>
+    </footer>
+    <script src="js/main.js"></script>
+    <script>
+        window.TOOL_CONFIG = { multiple: false, btnLabel: "🔄 PDF'i Döndür" };
+        function selectRotate(btn, angle) {
+            document.querySelectorAll('.rotate-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('rotate-angle').value = angle;
+        }
+        document.getElementById('rotate-pages') && document.getElementById('rotate-pages').addEventListener('change', function () {
+            const row = document.getElementById('custom-pages-row');
+            if (row) row.style.display = this.value === 'custom' ? '' : 'none';
+        });
+    </script>
+    <script src="js/tool-page.js"></script>
+</body>
+
+</html>
