@@ -375,12 +375,21 @@
 
                         <div class="setting-group">
                             <label class="setting-label">Açı</label>
-                            <select id="wm-angle" class="setting-input" onchange="WM.preview()">
-                                <option value="-45" selected>Çapraz (↘)</option>
-                                <option value="-30">Hafif Çapraz</option>
-                                <option value="0">Yatay</option>
-                                <option value="90">Dikey</option>
-                            </select>
+                            <div style="display:flex;gap:6px;margin-bottom:6px;">
+                                <button type="button" class="scope-chip active" data-angle="-45"
+                                    onclick="WM.setAngle(-45,this)">↘ Çapraz</button>
+                                <button type="button" class="scope-chip" data-angle="0" onclick="WM.setAngle(0,this)">→
+                                    Yatay</button>
+                                <button type="button" class="scope-chip" data-angle="90"
+                                    onclick="WM.setAngle(90,this)">↑ Dikey</button>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <label style="font-size:11px;color:var(--text-muted);white-space:nowrap;">Özel
+                                    açı:</label>
+                                <input type="number" id="wm-angle" value="-45" min="-180" max="180"
+                                    class="setting-input" style="width:90px;padding:6px 10px;" oninput="WM.preview()" />
+                                <span style="font-size:12px;color:var(--text-muted);">°</span>
+                            </div>
                         </div>
 
                         <div class="setting-group">
@@ -401,11 +410,16 @@
                         <div class="setting-group">
                             <label class="setting-label">Hangi Sayfalara Uygulansın?</label>
                             <div class="scope-chips">
-                                <div class="scope-chip active" data-scope="all">Tümü</div>
-                                <div class="scope-chip" data-scope="odd">Tek Sayfalar</div>
-                                <div class="scope-chip" data-scope="even">Çift Sayfalar</div>
-                                <div class="scope-chip" data-scope="first">Sadece İlk</div>
+                                <div class="scope-chip active" data-scope="all" onclick="WM.setScope('all',this)">Tümü
+                                </div>
+                                <div class="scope-chip" data-scope="odd" onclick="WM.setScope('odd',this)">Tek Sayfalar
+                                </div>
+                                <div class="scope-chip" data-scope="even" onclick="WM.setScope('even',this)">Çift
+                                    Sayfalar</div>
+                                <div class="scope-chip" data-scope="first" onclick="WM.setScope('first',this)">Sadece
+                                    İlk</div>
                             </div>
+                            <div id="scope-info" style="font-size:11px;color:var(--text-muted);margin-top:6px;"></div>
                         </div>
 
                         <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
@@ -537,6 +551,7 @@
                 // Render first page in preview
                 renderMainPreview(1);
                 renderMiniPages();
+                updateScopeInfo();
                 toast(file.name + ' yüklendi.', 'success');
             }
 
@@ -588,20 +603,42 @@
             });
 
             // ── SCOPE ──
-            document.querySelectorAll('.scope-chip').forEach(function (chip) {
-                chip.addEventListener('click', function () {
-                    document.querySelectorAll('.scope-chip').forEach(function (c) { c.classList.remove('active'); });
-                    this.classList.add('active'); wmScope = this.dataset.scope;
+            function setScope(scope, el) {
+                wmScope = scope;
+                document.querySelectorAll('.scope-chip[data-scope]').forEach(function (c) { c.classList.remove('active'); });
+                if (el) el.classList.add('active');
+                updateScopeInfo();
+            }
+
+            function updateScopeInfo() {
+                var pages = getPages();
+                var infoEl = document.getElementById('scope-info');
+                if (infoEl) infoEl.textContent = pages.length + '/' + totalPages + ' sayfaya filigran eklenecek';
+                // Highlight mini pages
+                document.querySelectorAll('.wm-mini-page').forEach(function (mp, idx) {
+                    var isAffected = pages.indexOf(idx) !== -1;
+                    mp.style.borderColor = isAffected ? 'var(--brand-primary)' : 'var(--border-color)';
+                    mp.style.opacity = isAffected ? '1' : '0.4';
                 });
-            });
+            }
+
+            // ── ANGLE ──
+            function setAngle(deg, el) {
+                document.getElementById('wm-angle').value = deg;
+                document.querySelectorAll('[data-angle]').forEach(function (b) { b.classList.remove('active'); });
+                if (el) el.classList.add('active');
+                preview();
+            }
 
             // ── PREVIEW ──
             function preview() {
                 var text = document.getElementById('wm-text').value || 'GİZLİ';
                 var color = document.getElementById('wm-color').value || '#FF6B35';
-                var opacity = (parseInt(document.getElementById('wm-opacity').value) || 25) / 100;
+                var opVal = parseInt(document.getElementById('wm-opacity').value);
+                var opacity = (isNaN(opVal) ? 25 : opVal) / 100;
                 var size = parseInt(document.getElementById('wm-size').value) || 48;
-                var angle = parseInt(document.getElementById('wm-angle').value) || -45;
+                var angVal = parseInt(document.getElementById('wm-angle').value);
+                var angle = isNaN(angVal) ? -45 : angVal;
 
                 var el = document.getElementById('preview-text');
                 el.textContent = text;
@@ -644,9 +681,11 @@
 
                 var text = document.getElementById('wm-text').value || 'GİZLİ';
                 var color = document.getElementById('wm-color').value || '#FF6B35';
-                var opacity = (parseInt(document.getElementById('wm-opacity').value) || 25) / 100;
+                var opVal = parseInt(document.getElementById('wm-opacity').value);
+                var opacity = (isNaN(opVal) ? 25 : opVal) / 100;
                 var fontSize = parseInt(document.getElementById('wm-size').value) || 48;
-                var angle = parseInt(document.getElementById('wm-angle').value) || -45;
+                var angVal = parseInt(document.getElementById('wm-angle').value);
+                var angle = isNaN(angVal) ? -45 : angVal;
                 var rgb = hexToRgb(color);
                 var pages = getPages();
 
@@ -717,7 +756,7 @@
             }
 
             preview();
-            return { preview: preview };
+            return { preview: preview, setScope: setScope, setAngle: setAngle };
         })();
     </script>
 </body>
