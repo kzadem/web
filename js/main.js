@@ -166,15 +166,11 @@ function createDropZone(options = {}) {
 
   let files = [];
 
-  // Click to browse
-  zone.addEventListener('click', (e) => {
-    if (e.target.closest('.upload-zone__btn') || e.target.id === inputId) return;
-    fileInput.click();
-  });
-
-  const browseBtn = zone.querySelector('.upload-zone__btn');
+  // Only the button opens file dialog — NO zone-level click
+  const browseBtn = zone.querySelector('.upload-zone__btn button, .upload-zone__btn');
   if (browseBtn) {
     browseBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       fileInput.click();
     });
@@ -343,8 +339,8 @@ document.addEventListener('click', (e) => {
   const size = Math.max(rect.width, rect.height);
   circle.style.cssText = `
     width: ${size}px; height: ${size}px;
-    left: ${e.clientX - rect.left - size/2}px;
-    top: ${e.clientY - rect.top - size/2}px;
+    left: ${e.clientX - rect.left - size / 2}px;
+    top: ${e.clientY - rect.top - size / 2}px;
   `;
   btn.appendChild(circle);
   circle.addEventListener('animationend', () => circle.remove());

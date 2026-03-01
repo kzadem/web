@@ -5,56 +5,207 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDF Döndür – PDFix</title>
-    <meta name="description" content="PDF sayfalarını döndürün. Ücretsiz online PDF döndürücü." />
+    <meta name="description" content="PDF sayfalarını 90°, 180° veya 270° döndürün. Ücretsiz online araç." />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/animations.css" />
     <link rel="stylesheet" href="css/tool-page.css" />
     <style>
-        .rotate-options {
+        .rotate-controls {
             display: flex;
-            gap: var(--sp-md);
+            gap: var(--sp-sm);
             justify-content: center;
             margin: var(--sp-lg) 0;
-            flex-wrap: wrap;
         }
 
         .rotate-btn {
-            width: 90px;
-            height: 90px;
-            background: var(--bg-input);
-            border: 2px solid var(--border-color);
+            width: 80px;
+            height: 80px;
             border-radius: var(--radius-lg);
+            border: 2px solid var(--border-color);
+            background: var(--bg-input);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            font-size: 13px;
-            font-weight: 600;
             cursor: pointer;
-            transition: all var(--transition-base);
-            color: var(--text-secondary);
+            transition: all 0.2s;
+            gap: 4px;
         }
 
         .rotate-btn:hover {
             border-color: var(--brand-primary);
-            color: var(--brand-primary);
-            background: rgba(255, 107, 53, 0.06);
+            transform: scale(1.05);
         }
 
         .rotate-btn.active {
             border-color: var(--brand-primary);
-            background: rgba(255, 107, 53, 0.12);
+            background: rgba(255, 107, 53, 0.1);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        .rotate-btn .rb-icon {
+            font-size: 28px;
+        }
+
+        .rotate-btn .rb-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .rotate-btn.active .rb-label {
             color: var(--brand-primary);
         }
 
-        .rotate-btn .ri {
-            font-size: 28px;
-            transition: transform 0.3s ease;
+        .page-carousel {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 8px 0 12px;
+            scroll-behavior: smooth;
         }
 
-        .rotate-btn:hover .ri {
-            transform: rotate(15deg);
+        .page-carousel::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .page-carousel::-webkit-scrollbar-track {
+            background: var(--bg-input);
+            border-radius: 3px;
+        }
+
+        .page-carousel::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .page-card {
+            flex: 0 0 auto;
+            width: 120px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .page-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .page-card.selected .pc-wrap {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+        }
+
+        .pc-wrap {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            aspect-ratio: 210/297;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .pc-wrap canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .pc-label {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .page-card.selected .pc-label {
+            color: var(--brand-primary);
+        }
+
+        .pc-badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--brand-gradient);
+            color: white;
+            font-size: 10px;
+            font-weight: 900;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-card.selected .pc-badge {
+            display: flex;
+        }
+
+        .pc-loader {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .pc-rotation-badge {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            padding: 2px 6px;
+            font-size: 9px;
+            font-weight: 700;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: none;
+        }
+
+        .page-select-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--sp-xs);
+            margin-bottom: var(--sp-sm);
+        }
+
+        .apply-scope {
+            display: flex;
+            gap: var(--sp-sm);
+            margin: var(--sp-md) 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .scope-chip {
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .scope-chip:hover {
+            border-color: var(--brand-primary);
+        }
+
+        .scope-chip.active {
+            background: var(--brand-gradient);
+            color: white;
+            border-color: transparent;
         }
     </style>
 </head>
@@ -66,19 +217,21 @@
             <a href="index.html" class="navbar__logo">
                 <div class="logo-icon">⚡</div><span>PDFix</span>
             </a>
-            <div class="navbar__nav"><a href="index.html">Ana Sayfa</a><a href="merge.html">Birleştir</a><a
-                    href="compress.html">Sıkıştır</a></div>
+            <div class="navbar__nav">
+                <a href="index.html">Ana Sayfa</a><a href="merge.html">Birleştir</a>
+                <a href="compress.html">Sıkıştır</a><a href="split.html">Böl</a>
+            </div>
             <div class="navbar__actions"><a href="index.html" class="btn btn-outline btn-sm">Tüm Araçlar</a></div>
         </div>
     </nav>
 
-    <section class="page-hero" style="background:linear-gradient(180deg,rgba(76,201,240,0.05) 0%,transparent 100%);">
+    <section class="page-hero" style="background:linear-gradient(180deg,rgba(6,214,160,0.05) 0%,transparent 100%);">
         <div class="container">
             <div class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="sep">›</span><span>PDF Döndür</span>
             </div>
-            <div class="page-hero__icon" style="background:rgba(76,201,240,0.15);">🔄</div>
+            <div class="page-hero__icon" style="background:rgba(6,214,160,0.15);">🔄</div>
             <h1 class="page-hero__title">PDF Döndür</h1>
-            <p class="page-hero__sub">PDF sayfalarını 90°, 180° veya 270° döndürün. Tüm sayfalar veya tek tek seçin.</p>
+            <p class="page-hero__sub">Sayfaları görsel olarak seçin ve istediğiniz açıda döndürün.</p>
         </div>
     </section>
 
@@ -86,65 +239,88 @@
         <div class="container">
             <div class="tool-layout">
                 <div class="tool-main">
+
                     <div id="upload-zone" class="upload-zone">
-                        <div class="upload-zone__content">
+                        <div id="zone-content">
                             <div class="upload-zone__icon icon-bounce"
-                                style="background:rgba(76,201,240,0.15);color:#4CC9F0;">🔄</div>
+                                style="background:rgba(6,214,160,0.15);color:var(--accent-green);">🔄</div>
                             <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
-                            <p class="upload-zone__sub">Maksimum 100 MB</p>
-                            <div class="upload-zone__btn">
-                                <button class="btn btn-primary btn-lg ripple-btn"
-                                    onclick="document.getElementById('file-input').click()">📂 PDF Seç</button>
+                            <p class="upload-zone__sub">veya butona tıklayın · Maksimum 100 MB</p>
+                            <div style="margin-top:var(--sp-lg);position:relative;z-index:10;">
+                                <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">📂 PDF
+                                    Seç</button>
                             </div>
                         </div>
                         <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
                     </div>
 
                     <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
-                        <div id="file-list" class="file-list"></div>
-
-                        <div class="options-panel" style="margin-top:var(--sp-lg);">
-                            <div class="options-panel__title">🔄 Döndürme Yönü</div>
-                            <div class="rotate-options">
-                                <button class="rotate-btn" onclick="selectRotate(this, 90)">
-                                    <span class="ri">↻</span><span>90° Sağ</span>
-                                </button>
-                                <button class="rotate-btn active" onclick="selectRotate(this, 180)">
-                                    <span class="ri">↶</span><span>180°</span>
-                                </button>
-                                <button class="rotate-btn" onclick="selectRotate(this, 270)">
-                                    <span class="ri">↺</span><span>90° Sol</span>
-                                </button>
-                            </div>
-                            <input type="hidden" id="rotate-angle" value="180" />
-
-                            <div class="options-row">
-                                <div>
-                                    <div>Hangi Sayfalar?</div>
+                        <!-- File info -->
+                        <div
+                            style="display:flex;align-items:center;gap:var(--sp-md);padding:var(--sp-md);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                            <div style="font-size:28px;">📄</div>
+                            <div style="flex:1;">
+                                <div id="file-name" style="font-size:14px;font-weight:700;"></div>
+                                <div id="file-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px;">
                                 </div>
-                                <select class="select" id="rotate-pages">
-                                    <option value="all">Tüm Sayfalar</option>
-                                    <option value="odd">Tek Sayfalar</option>
-                                    <option value="even">Çift Sayfalar</option>
-                                    <option value="custom">Belirli Sayfalar</option>
-                                </select>
                             </div>
-                            <div id="custom-pages-row" class="options-row" style="display:none;">
-                                <div>
-                                    <div>Sayfa Aralığı</div>
-                                    <div class="hint">Örn: 1, 3-5, 8</div>
+                            <button type="button" id="remove-file"
+                                style="cursor:pointer;font-size:18px;color:var(--text-muted);background:none;border:none;">✕</button>
+                        </div>
+
+                        <!-- Rotation angle selector -->
+                        <div style="margin-top:var(--sp-lg);text-align:center;">
+                            <div style="font-size:14px;font-weight:700;margin-bottom:var(--sp-sm);">Döndürme Açısı</div>
+                            <div class="rotate-controls">
+                                <div class="rotate-btn active" data-angle="90">
+                                    <div class="rb-icon">↻</div>
+                                    <div class="rb-label">90°</div>
                                 </div>
-                                <input type="text" placeholder="1,3-5,8" style="
-                background:var(--bg-input);border:1px solid var(--border-color);
-                color:var(--text-primary);border-radius:var(--radius-sm);
-                padding:8px 12px;font-size:14px;font-family:inherit;width:140px;outline:none;
-              " />
+                                <div class="rotate-btn" data-angle="180">
+                                    <div class="rb-icon">⟳</div>
+                                    <div class="rb-label">180°</div>
+                                </div>
+                                <div class="rotate-btn" data-angle="270">
+                                    <div class="rb-icon">↺</div>
+                                    <div class="rb-label">270°</div>
+                                </div>
                             </div>
                         </div>
 
-                        <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                        <!-- Apply scope -->
+                        <div style="margin-top:var(--sp-lg);">
+                            <div style="font-size:14px;font-weight:700;margin-bottom:var(--sp-sm);">Hangi Sayfalara
+                                Uygulansın?</div>
+                            <div class="apply-scope">
+                                <div class="scope-chip active" data-scope="all">Tümü</div>
+                                <div class="scope-chip" data-scope="selected">Seçilen Sayfalar</div>
+                                <div class="scope-chip" data-scope="odd">Tek Sayfalar</div>
+                                <div class="scope-chip" data-scope="even">Çift Sayfalar</div>
+                            </div>
+                        </div>
+
+                        <!-- Page preview carousel -->
+                        <div
+                            style="margin-top:var(--sp-lg);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:var(--sp-md);">
+                            <div
+                                style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-sm);">
+                                <h3 style="font-size:14px;font-weight:700;">📑 Sayfalar <span id="page-count-label"
+                                        style="color:var(--text-muted);font-weight:400;"></span></h3>
+                                <div class="page-select-bar">
+                                    <button type="button" class="btn btn-ghost btn-sm"
+                                        onclick="RotateTool.selAll()">Tümü Seç</button>
+                                    <button type="button" class="btn btn-ghost btn-sm"
+                                        onclick="RotateTool.selNone()">Temizle</button>
+                                </div>
+                            </div>
+                            <div class="page-carousel" id="page-carousel"></div>
+                            <div id="select-info"
+                                style="font-size:12px;color:var(--text-muted);margin-top:var(--sp-sm);"></div>
+                        </div>
+
+                        <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
                             style="width:100%;margin-top:var(--sp-lg);" disabled>
-                            🔄 PDF'i Döndür
+                            🔄 Döndür ve İndir
                         </button>
                     </div>
 
@@ -152,7 +328,7 @@
                         <div class="progress-card">
                             <div style="font-size:48px;margin-bottom:var(--sp-md);">🔄</div>
                             <div class="progress-card__title">Sayfalar Döndürülüyor...</div>
-                            <div id="progress-status">Sayfalar işleniyor...</div>
+                            <div id="progress-status">İşlem başlıyor...</div>
                             <div id="progress-wrap" class="progress-bar-wrap">
                                 <div id="progress-bar" class="progress-bar" style="width:0%"></div>
                             </div>
@@ -162,12 +338,13 @@
                     <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
                         <div class="result-card">
                             <span class="result-card__icon">✅</span>
-                            <div class="result-card__title">PDF Döndürüldü!</div>
-                            <div class="result-card__sub">Sayfalar başarıyla döndürüldü. PDF indirmeye hazır.</div>
+                            <div class="result-card__title">Sayfalar Döndürüldü!</div>
+                            <div class="result-card__sub" id="result-info"></div>
                             <div class="result-actions">
-                                <button id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️
-                                    İndir</button>
-                                <button id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                                <button type="button" id="download-btn"
+                                    class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ İndir</button>
+                                <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden
+                                    Başla</button>
                             </div>
                         </div>
                     </div>
@@ -175,13 +352,19 @@
 
                 <div class="tool-sidebar">
                     <div class="info-card">
-                        <div class="info-card__title">Döndürme Seçenekleri</div>
+                        <div class="info-card__title">Kullanım</div>
                         <ul>
-                            <li>90° sağa döndürme</li>
-                            <li>180° ters çevirme</li>
-                            <li>90° sola döndürme</li>
-                            <li>Seçili sayfalara uygula</li>
+                            <li>PDF yükleyin ve sayfaları önizleyin</li>
+                            <li>Döndürme açısını seçin</li>
+                            <li>Tüm veya belirli sayfaları döndürün</li>
+                            <li>Döndürülmüş PDF'i indirin</li>
                         </ul>
+                    </div>
+                    <div class="info-card"
+                        style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);">
+                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
+                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Tüm işlemler
+                            tarayıcınızda gerçekleşir.</p>
                     </div>
                 </div>
             </div>
@@ -194,20 +377,197 @@
                     style="color:var(--brand-primary);">← Tüm Araçlar</a></div>
         </div>
     </footer>
+
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="js/main.js"></script>
+
     <script>
-        window.TOOL_CONFIG = { multiple: false, btnLabel: "🔄 PDF'i Döndür" };
-        function selectRotate(btn, angle) {
-            document.querySelectorAll('.rotate-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('rotate-angle').value = angle;
-        }
-        document.getElementById('rotate-pages') && document.getElementById('rotate-pages').addEventListener('change', function () {
-            const row = document.getElementById('custom-pages-row');
-            if (row) row.style.display = this.value === 'custom' ? '' : 'none';
-        });
+        var RotateTool = (function () {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            var pdfFile = null, pdfBuffer = null, totalPages = 0, pdfJsDoc = null;
+            var rotateAngle = 90, applyScope = 'all', selectedPages = {}, resultBlob = null;
+
+            var zone = document.getElementById('upload-zone'),
+                zoneContent = document.getElementById('zone-content'),
+                fileInput = document.getElementById('file-input'),
+                fileSection = document.getElementById('file-section'),
+                processBtn = document.getElementById('process-btn'),
+                progressSec = document.getElementById('progress-section'),
+                resultSec = document.getElementById('result-section'),
+                bar = document.getElementById('progress-bar'),
+                statusEl = document.getElementById('progress-status'),
+                carousel = document.getElementById('page-carousel');
+
+            function fmtSize(b) { if (!b) return '0 B'; var k = 1024, s = ['B', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(b) / Math.log(k)); return (b / Math.pow(k, i)).toFixed(1) + ' ' + s[i]; }
+            function toast(m, t) { if (window.Toast) window.Toast.show(m, t || 'info'); }
+
+            // File handling
+            document.getElementById('browse-btn').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); fileInput.click(); });
+            fileInput.addEventListener('change', function () { if (this.files.length > 0) loadPDF(this.files[0]); this.value = ''; });
+            zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
+            zone.addEventListener('dragleave', function (e) { if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over'); });
+            zone.addEventListener('drop', function (e) { e.preventDefault(); zone.classList.remove('drag-over'); if (e.dataTransfer.files.length > 0) loadPDF(e.dataTransfer.files[0]); });
+            document.body.addEventListener('dragover', function (e) { e.preventDefault(); });
+            document.body.addEventListener('drop', function (e) { e.preventDefault(); });
+
+            document.getElementById('remove-file').addEventListener('click', resetAll);
+
+            async function loadPDF(file) {
+                if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') { toast('PDF dosyası seçin.', 'error'); return; }
+                if (file.size > 104857600) { toast('100MB limitini aşıyor.', 'error'); return; }
+                pdfFile = file; pdfBuffer = await file.arrayBuffer();
+                try { var doc = await PDFLib.PDFDocument.load(pdfBuffer); totalPages = doc.getPageCount(); } catch (e) { toast('PDF okunamadı.', 'error'); return; }
+                try { pdfJsDoc = await pdfjsLib.getDocument({ data: pdfBuffer.slice(0) }).promise; } catch (e) { toast('Render hatası.', 'error'); return; }
+
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('file-meta').textContent = fmtSize(file.size) + ' · ' + totalPages + ' sayfa';
+                document.getElementById('page-count-label').textContent = '(' + totalPages + ' sayfa)';
+                zoneContent.style.display = 'none'; fileSection.style.display = 'block';
+                processBtn.disabled = false; processBtn.style.opacity = '1';
+                selectedPages = {}; for (var p = 1; p <= totalPages; p++)selectedPages[p] = false;
+                renderCarousel();
+                toast(file.name + ' — ' + totalPages + ' sayfa', 'success');
+            }
+
+            async function renderCarousel() {
+                carousel.innerHTML = '';
+                for (var p = 1; p <= totalPages; p++) {
+                    var card = document.createElement('div'); card.className = 'page-card'; card.dataset.page = p;
+                    var wrap = document.createElement('div'); wrap.className = 'pc-wrap';
+                    var canvas = document.createElement('canvas'); canvas.id = 'pc-' + p; wrap.appendChild(canvas);
+                    var badge = document.createElement('div'); badge.className = 'pc-badge'; badge.textContent = '✓'; wrap.appendChild(badge);
+                    var loader = document.createElement('div'); loader.className = 'pc-loader'; loader.id = 'pl-' + p; loader.textContent = '⏳'; wrap.appendChild(loader);
+                    var rotBadge = document.createElement('div'); rotBadge.className = 'pc-rotation-badge'; rotBadge.id = 'rb-' + p; wrap.appendChild(rotBadge);
+                    card.appendChild(wrap);
+                    var label = document.createElement('div'); label.className = 'pc-label'; label.textContent = 'Sayfa ' + p; card.appendChild(label);
+                    (function (pg) {
+                        card.addEventListener('click', function () {
+                            if (applyScope === 'selected') { selectedPages[pg] = !selectedPages[pg]; this.classList.toggle('selected', selectedPages[pg]); updateInfo(); }
+                        });
+                    })(p);
+                    carousel.appendChild(card);
+                }
+                for (var i = 1; i <= totalPages; i++)renderThumb(i);
+                updateInfo();
+            }
+
+            async function renderThumb(num) {
+                try {
+                    var page = await pdfJsDoc.getPage(num); var vp = page.getViewport({ scale: 0.35 });
+                    var c = document.getElementById('pc-' + num); if (!c) return; c.width = vp.width; c.height = vp.height;
+                    await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+                    var l = document.getElementById('pl-' + num); if (l) l.style.display = 'none';
+                } catch (e) { }
+            }
+
+            // Rotation angle selector
+            document.querySelectorAll('.rotate-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.rotate-btn').forEach(function (b) { b.classList.remove('active'); });
+                    this.classList.add('active'); rotateAngle = parseInt(this.dataset.angle);
+                });
+            });
+
+            // Scope selector
+            document.querySelectorAll('.scope-chip').forEach(function (chip) {
+                chip.addEventListener('click', function () {
+                    document.querySelectorAll('.scope-chip').forEach(function (c) { c.classList.remove('active'); });
+                    this.classList.add('active'); applyScope = this.dataset.scope; updateInfo();
+                });
+            });
+
+            function updateInfo() {
+                var info = '', affected = getAffectedPages();
+                info = affected.length + '/' + totalPages + ' sayfa ' + rotateAngle + '° döndürülecek';
+                document.getElementById('select-info').textContent = info;
+                // Highlight affected pages
+                document.querySelectorAll('.page-card').forEach(function (c) {
+                    var pg = parseInt(c.dataset.page);
+                    var isAffected = affected.indexOf(pg) !== -1;
+                    if (applyScope === 'selected') c.classList.toggle('selected', !!selectedPages[pg]);
+                    else { c.classList.toggle('selected', isAffected); }
+                });
+            }
+
+            function getAffectedPages() {
+                var pages = [];
+                for (var p = 1; p <= totalPages; p++) {
+                    if (applyScope === 'all') pages.push(p);
+                    else if (applyScope === 'odd' && p % 2 === 1) pages.push(p);
+                    else if (applyScope === 'even' && p % 2 === 0) pages.push(p);
+                    else if (applyScope === 'selected' && selectedPages[p]) pages.push(p);
+                }
+                return pages;
+            }
+
+            function selAll() { for (var k in selectedPages) selectedPages[k] = true; updateInfo(); }
+            function selNone() { for (var k in selectedPages) selectedPages[k] = false; updateInfo(); }
+
+            // REAL ROTATION
+            processBtn.addEventListener('click', function (e) {
+                e.preventDefault(); e.stopImmediatePropagation();
+                if (!pdfBuffer) { toast('PDF yükleyin.', 'error'); return; }
+                var affected = getAffectedPages();
+                if (affected.length === 0) { toast('En az 1 sayfa seçin.', 'error'); return; }
+
+                progressSec.style.display = 'block'; fileSection.style.display = 'none';
+                resultSec.style.display = 'none'; processBtn.disabled = true;
+                bar.style.width = '0%';
+
+                (async function () {
+                    try {
+                        var doc = await PDFLib.PDFDocument.load(pdfBuffer);
+                        for (var i = 0; i < affected.length; i++) {
+                            statusEl.textContent = 'Sayfa ' + affected[i] + ' döndürülüyor...';
+                            bar.style.width = ((i + 1) / affected.length * 85) + '%';
+                            var page = doc.getPage(affected[i] - 1);
+                            var cur = page.getRotation().angle;
+                            page.setRotation(PDFLib.degrees(cur + rotateAngle));
+                        }
+                        statusEl.textContent = 'Kaydediliyor...'; bar.style.width = '90%';
+                        var bytes = await doc.save();
+                        resultBlob = new Blob([bytes], { type: 'application/pdf' });
+                        bar.style.width = '100%'; statusEl.textContent = 'Tamamlandı!';
+
+                        setTimeout(function () {
+                            progressSec.style.display = 'none'; resultSec.style.display = 'block';
+                            document.getElementById('result-info').textContent = affected.length + ' sayfa ' + rotateAngle + '° döndürüldü (' + fmtSize(resultBlob.size) + ').';
+                            toast('Döndürme tamamlandı!', 'success');
+                        }, 400);
+                    } catch (err) {
+                        console.error(err); toast('Hata: ' + (err.message || err), 'error');
+                        progressSec.style.display = 'none'; fileSection.style.display = 'block';
+                    }
+                    processBtn.disabled = false; processBtn.style.opacity = '1';
+                })();
+            });
+
+            // Download
+            document.getElementById('download-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (!resultBlob || resultBlob.size < 500) { toast('Önce döndürme yapın.', 'error'); return; }
+                var url = URL.createObjectURL(resultBlob); var a = document.createElement('a');
+                a.href = url; a.download = pdfFile.name.replace(/\.pdf$/i, '') + '_rotated.pdf';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+                toast('İndirme başladı!', 'success');
+            });
+
+            document.getElementById('again-btn').addEventListener('click', function (e) { e.preventDefault(); resetAll(); });
+
+            function resetAll() {
+                resultSec.style.display = 'none'; progressSec.style.display = 'none';
+                fileSection.style.display = 'none'; zoneContent.style.display = '';
+                pdfFile = null; pdfBuffer = null; totalPages = 0; pdfJsDoc = null; resultBlob = null;
+                selectedPages = {}; carousel.innerHTML = '';
+                processBtn.disabled = true; processBtn.style.opacity = '0.5';
+            }
+
+            return { selAll: selAll, selNone: selNone };
+        })();
     </script>
-    <script src="js/tool-page.js"></script>
 </body>
 
 </html>
