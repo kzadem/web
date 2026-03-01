@@ -5,10 +5,167 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDF Böl – PDFix</title>
-    <meta name="description" content="PDF'i sayfa aralıklarına göre bölün. Ücretsiz online PDF bölücü." />
+    <meta name="description" content="PDF dosyasını sayfa aralıklarına göre bölün. Ücretsiz online PDF bölücü." />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/animations.css" />
     <link rel="stylesheet" href="css/tool-page.css" />
+    <style>
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: var(--sp-md);
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+
+        .page-thumb {
+            aspect-ratio: 210/297;
+            background: white;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            user-select: none;
+        }
+
+        .page-thumb:hover {
+            border-color: var(--brand-primary);
+            transform: scale(1.05);
+        }
+
+        .page-thumb.selected {
+            border-color: var(--brand-primary);
+            background: rgba(255, 107, 53, 0.1);
+            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.3);
+        }
+
+        .page-thumb.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 10px;
+            color: var(--brand-primary);
+            font-weight: 900;
+        }
+
+        .split-mode-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--sp-sm);
+            margin-bottom: var(--sp-lg);
+        }
+
+        .split-mode-card {
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--sp-md);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .split-mode-card:hover {
+            border-color: rgba(255, 107, 53, 0.4);
+        }
+
+        .split-mode-card.active {
+            border-color: var(--brand-primary);
+            background: rgba(255, 107, 53, 0.08);
+        }
+
+        .split-mode-card .sm-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .split-mode-card .sm-title {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .split-mode-card .sm-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .split-mode-card.active .sm-title {
+            color: var(--brand-primary);
+        }
+
+        .result-parts {
+            margin-top: var(--sp-lg);
+        }
+
+        .part-item {
+            display: flex;
+            align-items: center;
+            gap: var(--sp-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--sp-md);
+            margin-bottom: var(--sp-sm);
+            animation: slideIn 0.3s ease;
+        }
+
+        .part-item__icon {
+            font-size: 24px;
+        }
+
+        .part-item__info {
+            flex: 1;
+        }
+
+        .part-item__name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .part-item__pages {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .part-item__dl {
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--brand-gradient);
+            color: white;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .part-item__dl:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-brand);
+        }
+
+        @media (max-width: 480px) {
+            .split-mode-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .page-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -33,8 +190,8 @@
             </div>
             <div class="page-hero__icon" style="background:rgba(67,97,238,0.15);">✂️</div>
             <h1 class="page-hero__title">PDF Böl</h1>
-            <p class="page-hero__sub">PDF dosyanızı sayfa aralıklarına göre kolayca bölün ve ayrı dosyalar oluşturun.
-            </p>
+            <p class="page-hero__sub">PDF dosyanızı sayfalara göre bölün, parçalara ayırın veya belirli sayfaları
+                çıkarın.</p>
         </div>
     </section>
 
@@ -43,80 +200,115 @@
             <div class="tool-layout">
                 <div class="tool-main">
 
+                    <!-- Upload Zone -->
                     <div id="upload-zone" class="upload-zone">
-                        <div class="upload-zone__content">
+                        <div id="zone-content">
                             <div class="upload-zone__icon icon-bounce"
                                 style="background:rgba(67,97,238,0.15);color:var(--accent-blue);">✂️</div>
                             <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
-                            <p class="upload-zone__sub">veya seçin · Maksimum 100 MB</p>
-                            <div class="upload-zone__btn">
-                                <button class="btn btn-primary btn-lg ripple-btn"
-                                    onclick="document.getElementById('file-input').click()">📂 PDF Seç</button>
+                            <p class="upload-zone__sub">veya butona tıklayın · Maksimum 100 MB</p>
+                            <div style="margin-top:var(--sp-lg);position:relative;z-index:10;">
+                                <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">📂 PDF
+                                    Seç</button>
                             </div>
                         </div>
                         <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
                     </div>
 
+                    <!-- File & Options Section -->
                     <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
                         <div id="file-list" class="file-list"></div>
 
-                        <div class="options-panel" style="margin-top:var(--sp-lg);">
-                            <div class="options-panel__title">✂️ Bölme Seçenekleri</div>
+                        <!-- PDF Info -->
+                        <div id="pdf-info"
+                            style="display:none;margin-top:var(--sp-md);padding:var(--sp-md);background:rgba(67,97,238,0.08);border:1px solid rgba(67,97,238,0.2);border-radius:var(--radius-md);">
+                            <span style="font-size:14px;">📑 <strong id="pdf-page-count">0</strong> sayfa tespit
+                                edildi</span>
+                        </div>
 
-                            <div class="options-row">
-                                <div>
-                                    <div>Bölme Modu</div>
-                                </div>
-                                <select class="select" id="split-mode" onchange="toggleSplitMode()">
-                                    <option value="range">Sayfa Aralığı</option>
-                                    <option value="every">Her N Sayfada</option>
-                                    <option value="extract">Belirli Sayfaları Çıkar</option>
-                                </select>
+                        <!-- Split Mode Cards -->
+                        <div style="margin-top:var(--sp-lg);">
+                            <div style="font-size:14px;font-weight:700;margin-bottom:var(--sp-sm);">✂️ Bölme Modu Seçin
                             </div>
-
-                            <div id="range-opts" class="options-row">
-                                <div>
-                                    <div>Sayfa Aralığı</div>
-                                    <div class="hint">Örn: 1-3, 5, 7-10</div>
+                            <div class="split-mode-cards">
+                                <div class="split-mode-card active" id="mode-range" onclick="setMode('range')">
+                                    <div class="sm-icon">📄</div>
+                                    <div class="sm-title">Sayfa Aralığı</div>
+                                    <div class="sm-desc">Belirli aralıkları ayır</div>
                                 </div>
-                                <input type="text" value="1-3" style="
-                background:var(--bg-input);border:1px solid var(--border-color);
-                color:var(--text-primary);border-radius:var(--radius-sm);
-                padding:8px 12px;font-size:14px;font-family:inherit;
-                width:140px;outline:none;
-              " placeholder="1-3, 5, 8-10" />
-                            </div>
-
-                            <div id="every-opts" class="options-row" style="display:none;">
-                                <div>
-                                    <div>Her kaç sayfada bir?</div>
+                                <div class="split-mode-card" id="mode-every" onclick="setMode('every')">
+                                    <div class="sm-icon">📚</div>
+                                    <div class="sm-title">Her N Sayfada</div>
+                                    <div class="sm-desc">Eşit parçalara böl</div>
                                 </div>
-                                <input type="number" value="1" min="1" style="
-                background:var(--bg-input);border:1px solid var(--border-color);
-                color:var(--text-primary);border-radius:var(--radius-sm);
-                padding:8px 12px;font-size:14px;font-family:inherit;
-                width:80px;outline:none;
-              " />
-                            </div>
-
-                            <div class="options-row">
-                                <div>
-                                    <div>ZIP olarak indir</div>
-                                    <div class="hint">Tüm parçaları tek arşivde</div>
+                                <div class="split-mode-card" id="mode-select" onclick="setMode('select')">
+                                    <div class="sm-icon">🎯</div>
+                                    <div class="sm-title">Sayfa Seç</div>
+                                    <div class="sm-desc">Tek tek sayfa seç</div>
                                 </div>
-                                <label class="toggle">
-                                    <input type="checkbox" checked />
-                                    <span class="toggle__slider"></span>
-                                </label>
                             </div>
                         </div>
 
-                        <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                        <!-- Mode: Range -->
+                        <div id="opts-range" class="options-panel">
+                            <div class="options-panel__title">📄 Sayfa Aralıkları</div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Aralıkları girin</div>
+                                    <div class="hint">Virgülle ayrılmış aralıklar. Örn: 1-3, 5, 7-10</div>
+                                </div>
+                            </div>
+                            <input type="text" id="range-input" value="1-3" placeholder="Örn: 1-3, 5, 7-10" style="
+              width:100%;margin-top:var(--sp-sm);
+              background:var(--bg-input);border:1px solid var(--border-color);
+              color:var(--text-primary);border-radius:var(--radius-sm);
+              padding:10px 14px;font-size:15px;font-family:inherit;outline:none;
+            " />
+                            <div class="hint" style="margin-top:var(--sp-xs);">Her aralık ayrı bir PDF dosyası olarak
+                                oluşturulur.</div>
+                        </div>
+
+                        <!-- Mode: Every N -->
+                        <div id="opts-every" class="options-panel" style="display:none;">
+                            <div class="options-panel__title">📚 Her N Sayfada Böl</div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Kaç sayfa aralığında bölünsün?</div>
+                                    <div class="hint">Örn: 2 seçerseniz her 2 sayfada bir yeni dosya oluşur</div>
+                                </div>
+                                <input type="number" id="every-n" value="1" min="1" style="
+                background:var(--bg-input);border:1px solid var(--border-color);
+                color:var(--text-primary);border-radius:var(--radius-sm);
+                padding:8px 12px;font-size:15px;font-family:inherit;width:80px;outline:none;
+              " />
+                            </div>
+                            <div id="every-preview" class="hint" style="margin-top:var(--sp-sm);"></div>
+                        </div>
+
+                        <!-- Mode: Select Pages -->
+                        <div id="opts-select" class="options-panel" style="display:none;">
+                            <div class="options-panel__title">🎯 Sayfaları Seçin</div>
+                            <div style="display:flex;gap:var(--sp-sm);margin-bottom:var(--sp-sm);">
+                                <button type="button" class="btn btn-ghost btn-sm" onclick="selectAllPages()">Tümünü
+                                    Seç</button>
+                                <button type="button" class="btn btn-ghost btn-sm" onclick="deselectAllPages()">Seçimi
+                                    Kaldır</button>
+                                <button type="button" class="btn btn-ghost btn-sm" onclick="selectOddPages()">Tek
+                                    Sayfalar</button>
+                                <button type="button" class="btn btn-ghost btn-sm" onclick="selectEvenPages()">Çift
+                                    Sayfalar</button>
+                            </div>
+                            <div id="page-grid" class="page-grid"></div>
+                            <div id="select-info" class="hint" style="margin-top:var(--sp-sm);">0 sayfa seçildi</div>
+                        </div>
+
+                        <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
                             style="width:100%;margin-top:var(--sp-lg);" disabled>
                             ✂️ PDF'i Böl
                         </button>
                     </div>
 
+                    <!-- Progress -->
                     <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
                         <div class="progress-card">
                             <div style="font-size:48px;margin-bottom:var(--sp-md);">✂️</div>
@@ -128,39 +320,53 @@
                         </div>
                     </div>
 
+                    <!-- Result -->
                     <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
                         <div class="result-card">
                             <span class="result-card__icon">✅</span>
                             <div class="result-card__title">PDF Başarıyla Bölündü!</div>
-                            <div class="result-card__sub">Parçalanmış dosyalar ZIP arşivine paketlendi ve indirmeye
-                                hazır.</div>
-                            <div class="result-actions">
-                                <button id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ ZIP
-                                    İndir</button>
-                                <button id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                            <div class="result-card__sub" id="result-info"></div>
+
+                            <!-- Individual part downloads -->
+                            <div id="result-parts" class="result-parts"></div>
+
+                            <div class="result-actions" style="margin-top:var(--sp-lg);">
+                                <button type="button" id="download-all-btn"
+                                    class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ Tümünü İndir (ZIP)</button>
+                                <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden
+                                    Başla</button>
                             </div>
                         </div>
                     </div>
 
                 </div>
 
+                <!-- Sidebar -->
                 <div class="tool-sidebar">
                     <div class="info-card">
                         <div class="info-card__title">Nasıl Kullanılır?</div>
                         <ul>
                             <li>PDF dosyanızı yükleyin</li>
                             <li>Bölme modunu seçin</li>
-                            <li>Sayfa aralıklarını belirtin</li>
+                            <li>Aralık, sayfa veya periyot belirleyin</li>
                             <li>"Böl" butonuna tıklayın</li>
+                            <li>Parçaları tek tek veya ZIP olarak indirin</li>
                         </ul>
                     </div>
                     <div class="info-card">
                         <div class="info-card__title">Bölme Modları</div>
                         <ul>
-                            <li>Aralık: Belirli sayfa aralıkları</li>
-                            <li>Her N sayfa: Eşit parçalara böl</li>
-                            <li>Çıkar: Sadece istenen sayfalar</li>
+                            <li><strong>Sayfa Aralığı:</strong> 1-3, 5, 7-10 gibi aralıklar</li>
+                            <li><strong>Her N Sayfa:</strong> Eşit parçalara bölme</li>
+                            <li><strong>Sayfa Seç:</strong> Görsel olarak sayfa seçimi</li>
                         </ul>
+                    </div>
+                    <div class="info-card"
+                        style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);">
+                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
+                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                            Tüm işlemler tarayıcınızda gerçekleşir. Dosyalarınız sunucuya gönderilmez.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -169,23 +375,402 @@
 
     <footer class="footer" style="margin-top:0;">
         <div class="container">
-            <div class="footer__bottom">
-                <span>© 2025 PDFix.</span>
-                <a href="index.html" style="color:var(--brand-primary);">← Tüm Araçlar</a>
-            </div>
+            <div class="footer__bottom"><span>© 2025 PDFix.</span><a href="index.html"
+                    style="color:var(--brand-primary);">← Tüm Araçlar</a></div>
         </div>
     </footer>
 
+    <!-- pdf-lib -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <!-- JSZip for ZIP downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- main.js for navbar/particles -->
     <script src="js/main.js"></script>
+
     <script>
-        window.TOOL_CONFIG = { multiple: false, btnLabel: "✂️ PDF'i Böl" };
-        function toggleSplitMode() {
-            const mode = document.getElementById('split-mode').value;
-            document.getElementById('range-opts').style.display = mode === 'range' || mode === 'extract' ? '' : 'none';
-            document.getElementById('every-opts').style.display = mode === 'every' ? '' : 'none';
-        }
+        (function () {
+            'use strict';
+
+            var pdfFile = null;
+            var pdfBuffer = null;
+            var totalPages = 0;
+            var currentMode = 'range';
+            var selectedPages = {};  // { pageNum: true/false }
+            var splitResults = [];   // [{ name, blob, pages }]
+
+            // DOM
+            var zone = document.getElementById('upload-zone');
+            var zoneContent = document.getElementById('zone-content');
+            var fileInput = document.getElementById('file-input');
+            var fileListEl = document.getElementById('file-list');
+            var fileSection = document.getElementById('file-section');
+            var processBtn = document.getElementById('process-btn');
+            var progressSec = document.getElementById('progress-section');
+            var resultSec = document.getElementById('result-section');
+            var resultInfo = document.getElementById('result-info');
+            var resultParts = document.getElementById('result-parts');
+            var bar = document.getElementById('progress-bar');
+            var statusEl = document.getElementById('progress-status');
+            var pdfInfoEl = document.getElementById('pdf-info');
+            var pageCountEl = document.getElementById('pdf-page-count');
+
+            function fmtSize(b) {
+                if (!b) return '0 B';
+                var k = 1024, s = ['B', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(b) / Math.log(k));
+                return (b / Math.pow(k, i)).toFixed(1) + ' ' + s[i];
+            }
+            function toast(m, t) { if (window.Toast) window.Toast.show(m, t || 'info'); }
+
+            // ── File Handling ──
+            document.getElementById('browse-btn').addEventListener('click', function (e) {
+                e.preventDefault(); e.stopPropagation(); fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function () {
+                if (this.files.length > 0) loadPDF(this.files[0]);
+                this.value = '';
+            });
+
+            zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
+            zone.addEventListener('dragleave', function (e) { if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over'); });
+            zone.addEventListener('drop', function (e) {
+                e.preventDefault(); zone.classList.remove('drag-over');
+                if (e.dataTransfer.files.length > 0) loadPDF(e.dataTransfer.files[0]);
+            });
+            document.body.addEventListener('dragover', function (e) { e.preventDefault(); });
+            document.body.addEventListener('drop', function (e) { e.preventDefault(); });
+
+            async function loadPDF(file) {
+                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                    toast('Lütfen geçerli bir PDF dosyası seçin.', 'error'); return;
+                }
+                if (file.size > 100 * 1024 * 1024) { toast('Dosya 100MB limitini aşıyor.', 'error'); return; }
+
+                pdfFile = file;
+                pdfBuffer = await file.arrayBuffer();
+
+                // Read page count
+                try {
+                    var doc = await PDFLib.PDFDocument.load(pdfBuffer);
+                    totalPages = doc.getPageCount();
+                } catch (err) {
+                    toast('PDF okunamadı: ' + err.message, 'error'); return;
+                }
+
+                // Show file
+                fileListEl.innerHTML =
+                    '<div class="file-item">' +
+                    '<div class="file-item__icon">📄</div>' +
+                    '<div class="file-item__info">' +
+                    '<div class="file-item__name">' + file.name + '</div>' +
+                    '<div class="file-item__size">' + fmtSize(file.size) + ' · ' + totalPages + ' sayfa</div>' +
+                    '</div>' +
+                    '<button type="button" class="file-item__remove" id="remove-file" style="cursor:pointer;font-size:16px;color:var(--text-muted);background:none;border:none;">✕</button>' +
+                    '</div>';
+
+                document.getElementById('remove-file').onclick = function () {
+                    pdfFile = null; pdfBuffer = null; totalPages = 0;
+                    fileListEl.innerHTML = '';
+                    fileSection.style.display = 'none';
+                    zoneContent.style.display = '';
+                    pdfInfoEl.style.display = 'none';
+                    processBtn.disabled = true;
+                    processBtn.style.opacity = '0.5';
+                };
+
+                zoneContent.style.display = 'none';
+                fileSection.style.display = 'block';
+                pdfInfoEl.style.display = 'block';
+                pageCountEl.textContent = totalPages;
+                processBtn.disabled = false;
+                processBtn.style.opacity = '1';
+
+                // Build page grid for select mode
+                buildPageGrid();
+                updateEveryPreview();
+                toast(file.name + ' yüklendi — ' + totalPages + ' sayfa', 'success');
+            }
+
+            // ── Mode Switching ──
+            window.setMode = function (mode) {
+                currentMode = mode;
+                ['range', 'every', 'select'].forEach(function (m) {
+                    document.getElementById('mode-' + m).classList.toggle('active', m === mode);
+                    document.getElementById('opts-' + m).style.display = m === mode ? '' : 'none';
+                });
+            };
+
+            // ── Page Grid for Select Mode ──
+            function buildPageGrid() {
+                var grid = document.getElementById('page-grid');
+                grid.innerHTML = '';
+                selectedPages = {};
+                for (var p = 1; p <= totalPages; p++) {
+                    selectedPages[p] = false;
+                    var thumb = document.createElement('div');
+                    thumb.className = 'page-thumb';
+                    thumb.textContent = p;
+                    thumb.dataset.page = p;
+                    thumb.addEventListener('click', function () {
+                        var pg = parseInt(this.dataset.page);
+                        selectedPages[pg] = !selectedPages[pg];
+                        this.classList.toggle('selected', selectedPages[pg]);
+                        updateSelectInfo();
+                    });
+                    grid.appendChild(thumb);
+                }
+                updateSelectInfo();
+            }
+
+            function updateSelectInfo() {
+                var count = 0;
+                for (var k in selectedPages) if (selectedPages[k]) count++;
+                document.getElementById('select-info').textContent = count + ' sayfa seçildi';
+            }
+
+            window.selectAllPages = function () {
+                for (var k in selectedPages) selectedPages[k] = true;
+                document.querySelectorAll('.page-thumb').forEach(function (t) { t.classList.add('selected'); });
+                updateSelectInfo();
+            };
+            window.deselectAllPages = function () {
+                for (var k in selectedPages) selectedPages[k] = false;
+                document.querySelectorAll('.page-thumb').forEach(function (t) { t.classList.remove('selected'); });
+                updateSelectInfo();
+            };
+            window.selectOddPages = function () {
+                window.deselectAllPages();
+                for (var k in selectedPages) { if (parseInt(k) % 2 === 1) selectedPages[k] = true; }
+                document.querySelectorAll('.page-thumb').forEach(function (t) {
+                    if (parseInt(t.dataset.page) % 2 === 1) t.classList.add('selected');
+                });
+                updateSelectInfo();
+            };
+            window.selectEvenPages = function () {
+                window.deselectAllPages();
+                for (var k in selectedPages) { if (parseInt(k) % 2 === 0) selectedPages[k] = true; }
+                document.querySelectorAll('.page-thumb').forEach(function (t) {
+                    if (parseInt(t.dataset.page) % 2 === 0) t.classList.add('selected');
+                });
+                updateSelectInfo();
+            };
+
+            // ── Every N Preview ──
+            function updateEveryPreview() {
+                var n = parseInt(document.getElementById('every-n').value) || 1;
+                if (totalPages > 0) {
+                    var parts = Math.ceil(totalPages / n);
+                    document.getElementById('every-preview').textContent =
+                        totalPages + ' sayfa → ' + parts + ' parça (' + n + ' sayfa/parça)';
+                }
+            }
+            document.getElementById('every-n').addEventListener('input', updateEveryPreview);
+
+            // ── Parse Ranges ──
+            function parseRanges(input) {
+                var groups = [];
+                var parts = input.split(',');
+                for (var i = 0; i < parts.length; i++) {
+                    var part = parts[i].trim();
+                    if (!part) continue;
+                    if (part.indexOf('-') !== -1) {
+                        var ab = part.split('-');
+                        var a = parseInt(ab[0]), b = parseInt(ab[1]);
+                        if (isNaN(a) || isNaN(b) || a < 1 || b < 1 || a > totalPages || b > totalPages) {
+                            toast('Geçersiz aralık: ' + part, 'error'); return null;
+                        }
+                        var pages = [];
+                        var start = Math.min(a, b), end = Math.max(a, b);
+                        for (var p = start; p <= end; p++) pages.push(p - 1); // 0-indexed
+                        groups.push({ label: a + '-' + b, indices: pages });
+                    } else {
+                        var num = parseInt(part);
+                        if (isNaN(num) || num < 1 || num > totalPages) {
+                            toast('Geçersiz sayfa: ' + part, 'error'); return null;
+                        }
+                        groups.push({ label: String(num), indices: [num - 1] });
+                    }
+                }
+                return groups;
+            }
+
+            // ═══════════════════════════
+            //  REAL PDF SPLIT with pdf-lib
+            // ═══════════════════════════
+            processBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                if (!pdfBuffer) { toast('Önce PDF yükleyin.', 'error'); return; }
+
+                // Determine page groups based on mode
+                var groups = [];
+
+                if (currentMode === 'range') {
+                    var val = document.getElementById('range-input').value.trim();
+                    if (!val) { toast('Aralık girin (Örn: 1-3, 5, 7-10)', 'error'); return; }
+                    groups = parseRanges(val);
+                    if (!groups) return;
+
+                } else if (currentMode === 'every') {
+                    var n = parseInt(document.getElementById('every-n').value) || 1;
+                    for (var start = 0; start < totalPages; start += n) {
+                        var end = Math.min(start + n, totalPages);
+                        var indices = [];
+                        for (var p = start; p < end; p++) indices.push(p);
+                        groups.push({ label: (start + 1) + '-' + end, indices: indices });
+                    }
+
+                } else if (currentMode === 'select') {
+                    var selIndices = [];
+                    for (var k in selectedPages) {
+                        if (selectedPages[k]) selIndices.push(parseInt(k) - 1);
+                    }
+                    if (selIndices.length === 0) { toast('En az 1 sayfa seçin.', 'error'); return; }
+                    selIndices.sort(function (a, b) { return a - b; });
+                    groups.push({ label: 'secilen_sayfalar', indices: selIndices });
+                }
+
+                if (groups.length === 0) { toast('Bölünecek sayfa bulunamadı.', 'error'); return; }
+
+                // Show progress
+                progressSec.style.display = 'block';
+                fileSection.style.display = 'none';
+                resultSec.style.display = 'none';
+                processBtn.disabled = true;
+                processBtn.textContent = '⏳ Bölünüyor...';
+                bar.style.width = '0%';
+                splitResults = [];
+
+                (async function () {
+                    try {
+                        var srcDoc = await PDFLib.PDFDocument.load(pdfBuffer);
+
+                        for (var g = 0; g < groups.length; g++) {
+                            var group = groups[g];
+                            statusEl.textContent = 'Parça ' + (g + 1) + '/' + groups.length + ' oluşturuluyor...';
+                            bar.style.width = ((g + 1) / groups.length * 85) + '%';
+
+                            var newDoc = await PDFLib.PDFDocument.create();
+                            var copiedPages = await newDoc.copyPages(srcDoc, group.indices);
+                            for (var ci = 0; ci < copiedPages.length; ci++) {
+                                newDoc.addPage(copiedPages[ci]);
+                            }
+
+                            var bytes = await newDoc.save();
+                            var blob = new Blob([bytes], { type: 'application/pdf' });
+                            var baseName = pdfFile.name.replace(/\.pdf$/i, '');
+                            var name = baseName + '_' + group.label + '.pdf';
+
+                            splitResults.push({
+                                name: name,
+                                blob: blob,
+                                pageCount: group.indices.length,
+                                label: group.label
+                            });
+                        }
+
+                        bar.style.width = '100%';
+                        statusEl.textContent = 'Tamamlandı!';
+
+                        setTimeout(function () {
+                            progressSec.style.display = 'none';
+                            resultSec.style.display = 'block';
+                            resultInfo.textContent = totalPages + ' sayfalık PDF, ' + splitResults.length + ' parçaya bölündü.';
+                            renderResultParts();
+                            toast(splitResults.length + ' parça oluşturuldu!', 'success');
+                        }, 400);
+
+                    } catch (err) {
+                        console.error('[PDFix] Split error:', err);
+                        toast('Bölme hatası: ' + (err.message || err), 'error');
+                        progressSec.style.display = 'none';
+                        fileSection.style.display = 'block';
+                    }
+
+                    processBtn.textContent = '✂️ PDF\'i Böl';
+                    processBtn.disabled = false;
+                    processBtn.style.opacity = '1';
+                })();
+            });
+
+            // ── Render Result Parts ──
+            function renderResultParts() {
+                resultParts.innerHTML = '';
+                for (var i = 0; i < splitResults.length; i++) {
+                    var r = splitResults[i];
+                    var div = document.createElement('div');
+                    div.className = 'part-item';
+                    div.innerHTML =
+                        '<div class="part-item__icon">📄</div>' +
+                        '<div class="part-item__info">' +
+                        '<div class="part-item__name">' + r.name + '</div>' +
+                        '<div class="part-item__pages">' + r.pageCount + ' sayfa · ' + fmtSize(r.blob.size) + '</div>' +
+                        '</div>' +
+                        '<button type="button" class="part-item__dl" data-idx="' + i + '">⬇️ İndir</button>';
+                    resultParts.appendChild(div);
+                }
+                // Individual download handlers
+                resultParts.querySelectorAll('.part-item__dl').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var idx = parseInt(this.dataset.idx);
+                        downloadBlob(splitResults[idx].blob, splitResults[idx].name);
+                    });
+                });
+            }
+
+            function downloadBlob(blob, name) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+            }
+
+            // ── Download All as ZIP ──
+            document.getElementById('download-all-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (splitResults.length === 0) { toast('İndirilecek dosya yok!', 'error'); return; }
+
+                if (splitResults.length === 1) {
+                    downloadBlob(splitResults[0].blob, splitResults[0].name);
+                    toast('İndirme başladı!', 'success');
+                    return;
+                }
+
+                // Use JSZip
+                toast('ZIP oluşturuluyor...', 'info');
+                var zip = new JSZip();
+                for (var i = 0; i < splitResults.length; i++) {
+                    zip.file(splitResults[i].name, splitResults[i].blob);
+                }
+                zip.generateAsync({ type: 'blob' }).then(function (content) {
+                    var baseName = pdfFile.name.replace(/\.pdf$/i, '');
+                    downloadBlob(content, baseName + '_parcalar.zip');
+                    toast('ZIP indiriliyor! (' + fmtSize(content.size) + ')', 'success');
+                });
+            });
+
+            // ── Again ──
+            document.getElementById('again-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                resultSec.style.display = 'none';
+                progressSec.style.display = 'none';
+                splitResults = [];
+                pdfFile = null; pdfBuffer = null; totalPages = 0;
+                fileListEl.innerHTML = '';
+                fileSection.style.display = 'none';
+                zoneContent.style.display = '';
+                pdfInfoEl.style.display = 'none';
+                processBtn.disabled = true;
+                processBtn.style.opacity = '0.5';
+            });
+
+        })();
     </script>
-    <script src="js/tool-page.js"></script>
 </body>
 
 </html>
