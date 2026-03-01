@@ -5,109 +5,222 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDF Böl – PDFix</title>
-    <meta name="description" content="PDF dosyasını sayfa aralıklarına göre bölün. Ücretsiz online PDF bölücü." />
+    <meta name="description"
+        content="PDF dosyasını sayfa aralıklarına göre bölün. Sayfaları görsel olarak önizleyin." />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/animations.css" />
     <link rel="stylesheet" href="css/tool-page.css" />
     <style>
-        .page-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 8px;
-            margin-top: var(--sp-md);
-            max-height: 300px;
-            overflow-y: auto;
-            padding: 4px;
+        /* ── Page Preview Carousel ── */
+        .page-carousel-wrap {
+            margin-top: var(--sp-lg);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--sp-md);
         }
 
-        .page-thumb {
-            aspect-ratio: 210/297;
-            background: white;
-            border-radius: 6px;
+        .page-carousel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--sp-md);
+        }
+
+        .page-carousel-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .page-carousel {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 8px 0 12px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .page-carousel::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .page-carousel::-webkit-scrollbar-track {
+            background: var(--bg-input);
+            border-radius: 3px;
+        }
+
+        .page-carousel::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .page-carousel::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        .page-card {
+            flex: 0 0 auto;
+            width: 140px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .page-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .page-card.selected .page-card__canvas-wrap {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.25);
+        }
+
+        .page-card__canvas-wrap {
             border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            aspect-ratio: 210/297;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-            color: #333;
-            cursor: pointer;
             transition: all 0.2s;
             position: relative;
-            user-select: none;
         }
 
-        .page-thumb:hover {
-            border-color: var(--brand-primary);
-            transform: scale(1.05);
+        .page-card__canvas-wrap canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
         }
 
-        .page-thumb.selected {
-            border-color: var(--brand-primary);
-            background: rgba(255, 107, 53, 0.1);
-            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.3);
-        }
-
-        .page-thumb.selected::after {
-            content: '✓';
+        .page-card__check {
+            display: none;
             position: absolute;
-            top: 2px;
-            right: 4px;
-            font-size: 10px;
-            color: var(--brand-primary);
+            top: 6px;
+            right: 6px;
+            width: 22px;
+            height: 22px;
+            background: var(--brand-gradient);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
             font-weight: 900;
+            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.4);
         }
 
-        .split-mode-cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--sp-sm);
-            margin-bottom: var(--sp-lg);
+        .page-card.selected .page-card__check {
+            display: flex;
         }
 
-        .split-mode-card {
-            background: var(--bg-input);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: var(--sp-md);
+        .page-card__label {
             text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            transition: color 0.2s;
+        }
+
+        .page-card.selected .page-card__label {
+            color: var(--brand-primary);
+        }
+
+        /* Split line between pages */
+        .split-divider {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
             cursor: pointer;
+            padding: 0 2px;
             transition: all 0.2s;
         }
 
-        .split-mode-card:hover {
-            border-color: rgba(255, 107, 53, 0.4);
+        .split-divider__line {
+            width: 3px;
+            flex: 1;
+            background: var(--border-color);
+            border-radius: 2px;
+            transition: background 0.2s;
         }
 
-        .split-mode-card.active {
-            border-color: var(--brand-primary);
-            background: rgba(255, 107, 53, 0.08);
+        .split-divider__icon {
+            font-size: 16px;
+            opacity: 0.4;
+            transition: all 0.2s;
         }
 
-        .split-mode-card .sm-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
+        .split-divider.active .split-divider__line {
+            background: var(--brand-primary);
         }
 
-        .split-mode-card .sm-title {
-            font-size: 13px;
-            font-weight: 700;
+        .split-divider.active .split-divider__icon {
+            opacity: 1;
+            transform: scale(1.2);
         }
 
-        .split-mode-card .sm-desc {
+        .split-divider:hover .split-divider__icon {
+            opacity: 0.8;
+        }
+
+        /* Loading state */
+        .page-card__loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
             font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 2px;
+            color: #999;
         }
 
-        .split-mode-card.active .sm-title {
-            color: var(--brand-primary);
+        /* Action bar */
+        .page-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--sp-xs);
+            margin-top: var(--sp-sm);
         }
 
-        .result-parts {
-            margin-top: var(--sp-lg);
+        /* Split mode tabs */
+        .mode-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: var(--sp-md);
         }
 
+        .mode-tab {
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .mode-tab:hover {
+            border-color: var(--brand-primary);
+            color: var(--text-primary);
+        }
+
+        .mode-tab.active {
+            background: var(--brand-gradient);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Result parts */
         .part-item {
             display: flex;
             align-items: center;
@@ -117,7 +230,6 @@
             border-radius: var(--radius-md);
             padding: var(--sp-md);
             margin-bottom: var(--sp-sm);
-            animation: slideIn 0.3s ease;
         }
 
         .part-item__icon {
@@ -156,13 +268,13 @@
             box-shadow: var(--shadow-brand);
         }
 
-        @media (max-width: 480px) {
-            .split-mode-cards {
-                grid-template-columns: 1fr;
+        @media (max-width:600px) {
+            .page-card {
+                width: 100px;
             }
 
-            .page-grid {
-                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            .mode-tabs {
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -190,8 +302,7 @@
             </div>
             <div class="page-hero__icon" style="background:rgba(67,97,238,0.15);">✂️</div>
             <h1 class="page-hero__title">PDF Böl</h1>
-            <p class="page-hero__sub">PDF dosyanızı sayfalara göre bölün, parçalara ayırın veya belirli sayfaları
-                çıkarın.</p>
+            <p class="page-hero__sub">PDF sayfalarını görsel olarak önizleyin ve istediğiniz yerden bölün.</p>
         </div>
     </section>
 
@@ -215,91 +326,92 @@
                         <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
                     </div>
 
-                    <!-- File & Options Section -->
+                    <!-- Loaded File + Preview -->
                     <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
-                        <div id="file-list" class="file-list"></div>
 
-                        <!-- PDF Info -->
-                        <div id="pdf-info"
-                            style="display:none;margin-top:var(--sp-md);padding:var(--sp-md);background:rgba(67,97,238,0.08);border:1px solid rgba(67,97,238,0.2);border-radius:var(--radius-md);">
-                            <span style="font-size:14px;">📑 <strong id="pdf-page-count">0</strong> sayfa tespit
-                                edildi</span>
+                        <!-- File info bar -->
+                        <div id="file-bar"
+                            style="display:flex;align-items:center;gap:var(--sp-md);padding:var(--sp-md);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                            <div style="font-size:28px;">📄</div>
+                            <div style="flex:1;">
+                                <div id="file-name" style="font-size:14px;font-weight:700;"></div>
+                                <div id="file-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px;">
+                                </div>
+                            </div>
+                            <button type="button" id="remove-file"
+                                style="cursor:pointer;font-size:18px;color:var(--text-muted);background:none;border:none;padding:4px 8px;">✕</button>
                         </div>
 
-                        <!-- Split Mode Cards -->
+                        <!-- Page Preview Carousel -->
+                        <div class="page-carousel-wrap" id="carousel-wrap">
+                            <div class="page-carousel-header">
+                                <h3>📑 Sayfa Önizleme <span id="page-count-label"
+                                        style="color:var(--text-muted);font-weight:400;"></span></h3>
+                                <div class="page-actions">
+                                    <button type="button" class="btn btn-ghost btn-sm"
+                                        onclick="PDFSplit.selectAll()">Tümü</button>
+                                    <button type="button" class="btn btn-ghost btn-sm"
+                                        onclick="PDFSplit.deselectAll()">Hiçbiri</button>
+                                    <button type="button" class="btn btn-ghost btn-sm"
+                                        onclick="PDFSplit.selectOdd()">Tek</button>
+                                    <button type="button" class="btn btn-ghost btn-sm"
+                                        onclick="PDFSplit.selectEven()">Çift</button>
+                                </div>
+                            </div>
+                            <div class="page-carousel" id="page-carousel"></div>
+                        </div>
+
+                        <!-- Mode Tabs -->
                         <div style="margin-top:var(--sp-lg);">
-                            <div style="font-size:14px;font-weight:700;margin-bottom:var(--sp-sm);">✂️ Bölme Modu Seçin
-                            </div>
-                            <div class="split-mode-cards">
-                                <div class="split-mode-card active" id="mode-range" onclick="setMode('range')">
-                                    <div class="sm-icon">📄</div>
-                                    <div class="sm-title">Sayfa Aralığı</div>
-                                    <div class="sm-desc">Belirli aralıkları ayır</div>
-                                </div>
-                                <div class="split-mode-card" id="mode-every" onclick="setMode('every')">
-                                    <div class="sm-icon">📚</div>
-                                    <div class="sm-title">Her N Sayfada</div>
-                                    <div class="sm-desc">Eşit parçalara böl</div>
-                                </div>
-                                <div class="split-mode-card" id="mode-select" onclick="setMode('select')">
-                                    <div class="sm-icon">🎯</div>
-                                    <div class="sm-title">Sayfa Seç</div>
-                                    <div class="sm-desc">Tek tek sayfa seç</div>
-                                </div>
+                            <div class="mode-tabs">
+                                <div class="mode-tab active" onclick="PDFSplit.setMode('visual')">✂️ Görsel Böl</div>
+                                <div class="mode-tab" onclick="PDFSplit.setMode('range')">📄 Aralık</div>
+                                <div class="mode-tab" onclick="PDFSplit.setMode('every')">📚 Her N Sayfa</div>
+                                <div class="mode-tab" onclick="PDFSplit.setMode('extract')">🎯 Sayfa Çıkar</div>
                             </div>
                         </div>
 
-                        <!-- Mode: Range -->
-                        <div id="opts-range" class="options-panel">
+                        <!-- Mode Options -->
+                        <div id="opts-visual" class="options-panel">
+                            <div class="options-panel__title">✂️ Görsel Bölme</div>
+                            <p style="font-size:13px;color:var(--text-secondary);">Yukarıdaki sayfalar arasındaki
+                                <strong style="color:var(--brand-primary);">✂️ makas</strong> simgelerine tıklayarak
+                                bölme noktalarını seçin. Kırmızı çizgi bölme noktasını gösterir.</p>
+                            <div id="visual-info" class="hint" style="margin-top:var(--sp-sm);">0 bölme noktası seçildi
+                                → 1 parça</div>
+                        </div>
+
+                        <div id="opts-range" class="options-panel" style="display:none;">
                             <div class="options-panel__title">📄 Sayfa Aralıkları</div>
-                            <div class="options-row">
-                                <div>
-                                    <div>Aralıkları girin</div>
-                                    <div class="hint">Virgülle ayrılmış aralıklar. Örn: 1-3, 5, 7-10</div>
-                                </div>
-                            </div>
-                            <input type="text" id="range-input" value="1-3" placeholder="Örn: 1-3, 5, 7-10" style="
-              width:100%;margin-top:var(--sp-sm);
-              background:var(--bg-input);border:1px solid var(--border-color);
+                            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--sp-sm);">Her aralık
+                                ayrı bir PDF dosyası olur.</p>
+                            <input type="text" id="range-input" value="" placeholder="Örn: 1-3, 5, 7-10" style="
+              width:100%;background:var(--bg-input);border:1px solid var(--border-color);
               color:var(--text-primary);border-radius:var(--radius-sm);
               padding:10px 14px;font-size:15px;font-family:inherit;outline:none;
             " />
-                            <div class="hint" style="margin-top:var(--sp-xs);">Her aralık ayrı bir PDF dosyası olarak
-                                oluşturulur.</div>
                         </div>
 
-                        <!-- Mode: Every N -->
                         <div id="opts-every" class="options-panel" style="display:none;">
                             <div class="options-panel__title">📚 Her N Sayfada Böl</div>
-                            <div class="options-row">
-                                <div>
-                                    <div>Kaç sayfa aralığında bölünsün?</div>
-                                    <div class="hint">Örn: 2 seçerseniz her 2 sayfada bir yeni dosya oluşur</div>
-                                </div>
+                            <div style="display:flex;align-items:center;gap:var(--sp-md);">
+                                <span style="font-size:13px;color:var(--text-secondary);">Her</span>
                                 <input type="number" id="every-n" value="1" min="1" style="
                 background:var(--bg-input);border:1px solid var(--border-color);
                 color:var(--text-primary);border-radius:var(--radius-sm);
-                padding:8px 12px;font-size:15px;font-family:inherit;width:80px;outline:none;
+                padding:8px 12px;font-size:15px;width:80px;outline:none;
               " />
+                                <span style="font-size:13px;color:var(--text-secondary);">sayfada böl</span>
                             </div>
                             <div id="every-preview" class="hint" style="margin-top:var(--sp-sm);"></div>
                         </div>
 
-                        <!-- Mode: Select Pages -->
-                        <div id="opts-select" class="options-panel" style="display:none;">
-                            <div class="options-panel__title">🎯 Sayfaları Seçin</div>
-                            <div style="display:flex;gap:var(--sp-sm);margin-bottom:var(--sp-sm);">
-                                <button type="button" class="btn btn-ghost btn-sm" onclick="selectAllPages()">Tümünü
-                                    Seç</button>
-                                <button type="button" class="btn btn-ghost btn-sm" onclick="deselectAllPages()">Seçimi
-                                    Kaldır</button>
-                                <button type="button" class="btn btn-ghost btn-sm" onclick="selectOddPages()">Tek
-                                    Sayfalar</button>
-                                <button type="button" class="btn btn-ghost btn-sm" onclick="selectEvenPages()">Çift
-                                    Sayfalar</button>
-                            </div>
-                            <div id="page-grid" class="page-grid"></div>
-                            <div id="select-info" class="hint" style="margin-top:var(--sp-sm);">0 sayfa seçildi</div>
+                        <div id="opts-extract" class="options-panel" style="display:none;">
+                            <div class="options-panel__title">🎯 Sayfa Çıkar</div>
+                            <p style="font-size:13px;color:var(--text-secondary);">Yukarıdaki sayfa kartlarına
+                                tıklayarak çıkarmak istediğiniz sayfaları seçin. Seçilen sayfalar tek bir PDF olarak
+                                birleştirilir.</p>
+                            <div id="extract-info" class="hint" style="margin-top:var(--sp-sm);">0 sayfa seçildi</div>
                         </div>
 
                         <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
@@ -313,7 +425,7 @@
                         <div class="progress-card">
                             <div style="font-size:48px;margin-bottom:var(--sp-md);">✂️</div>
                             <div class="progress-card__title">PDF Bölünüyor...</div>
-                            <div id="progress-status">Sayfalar analiz ediliyor...</div>
+                            <div id="progress-status">Sayfalar işleniyor...</div>
                             <div id="progress-wrap" class="progress-bar-wrap">
                                 <div id="progress-bar" class="progress-bar" style="width:0%"></div>
                             </div>
@@ -326,10 +438,7 @@
                             <span class="result-card__icon">✅</span>
                             <div class="result-card__title">PDF Başarıyla Bölündü!</div>
                             <div class="result-card__sub" id="result-info"></div>
-
-                            <!-- Individual part downloads -->
-                            <div id="result-parts" class="result-parts"></div>
-
+                            <div id="result-parts" style="margin-top:var(--sp-lg);"></div>
                             <div class="result-actions" style="margin-top:var(--sp-lg);">
                                 <button type="button" id="download-all-btn"
                                     class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ Tümünü İndir (ZIP)</button>
@@ -341,24 +450,14 @@
 
                 </div>
 
-                <!-- Sidebar -->
                 <div class="tool-sidebar">
                     <div class="info-card">
                         <div class="info-card__title">Nasıl Kullanılır?</div>
                         <ul>
                             <li>PDF dosyanızı yükleyin</li>
+                            <li>Sayfaları görsel olarak önizleyin</li>
                             <li>Bölme modunu seçin</li>
-                            <li>Aralık, sayfa veya periyot belirleyin</li>
-                            <li>"Böl" butonuna tıklayın</li>
-                            <li>Parçaları tek tek veya ZIP olarak indirin</li>
-                        </ul>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-card__title">Bölme Modları</div>
-                        <ul>
-                            <li><strong>Sayfa Aralığı:</strong> 1-3, 5, 7-10 gibi aralıklar</li>
-                            <li><strong>Her N Sayfa:</strong> Eşit parçalara bölme</li>
-                            <li><strong>Sayfa Seç:</strong> Görsel olarak sayfa seçimi</li>
+                            <li>Parçaları indirin</li>
                         </ul>
                     </div>
                     <div class="info-card"
@@ -380,29 +479,35 @@
         </div>
     </footer>
 
-    <!-- pdf-lib -->
+    <!-- Libraries -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
-    <!-- JSZip for ZIP downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <!-- main.js for navbar/particles -->
     <script src="js/main.js"></script>
 
     <script>
-        (function () {
+        // ═══════════════════════════════════════════
+        //  PDF SPLIT — Visual Preview + Real Splitting
+        // ═══════════════════════════════════════════
+        var PDFSplit = (function () {
             'use strict';
+
+            // Set pdf.js worker
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
             var pdfFile = null;
             var pdfBuffer = null;
             var totalPages = 0;
-            var currentMode = 'range';
-            var selectedPages = {};  // { pageNum: true/false }
-            var splitResults = [];   // [{ name, blob, pages }]
+            var currentMode = 'visual';
+            var selectedPages = {};    // for extract mode: {1: true, 2: false, ...}
+            var splitPoints = {};      // for visual mode: {1: true} means split AFTER page 1
+            var splitResults = [];
+            var pdfJsDoc = null;       // pdf.js document for rendering
 
             // DOM
             var zone = document.getElementById('upload-zone');
             var zoneContent = document.getElementById('zone-content');
             var fileInput = document.getElementById('file-input');
-            var fileListEl = document.getElementById('file-list');
             var fileSection = document.getElementById('file-section');
             var processBtn = document.getElementById('process-btn');
             var progressSec = document.getElementById('progress-section');
@@ -411,8 +516,7 @@
             var resultParts = document.getElementById('result-parts');
             var bar = document.getElementById('progress-bar');
             var statusEl = document.getElementById('progress-status');
-            var pdfInfoEl = document.getElementById('pdf-info');
-            var pageCountEl = document.getElementById('pdf-page-count');
+            var carousel = document.getElementById('page-carousel');
 
             function fmtSize(b) {
                 if (!b) return '0 B';
@@ -421,16 +525,19 @@
             }
             function toast(m, t) { if (window.Toast) window.Toast.show(m, t || 'info'); }
 
-            // ── File Handling ──
+            // ══════════════════════
+            //  FILE HANDLING
+            // ══════════════════════
             document.getElementById('browse-btn').addEventListener('click', function (e) {
                 e.preventDefault(); e.stopPropagation(); fileInput.click();
             });
 
             fileInput.addEventListener('change', function () {
-                if (this.files.length > 0) loadPDF(this.files[0]);
+                if (this.files && this.files.length > 0) loadPDF(this.files[0]);
                 this.value = '';
             });
 
+            // Drag & drop — only on zone
             zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
             zone.addEventListener('dragleave', function (e) { if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over'); });
             zone.addEventListener('drop', function (e) {
@@ -440,133 +547,239 @@
             document.body.addEventListener('dragover', function (e) { e.preventDefault(); });
             document.body.addEventListener('drop', function (e) { e.preventDefault(); });
 
+            document.getElementById('remove-file').addEventListener('click', resetAll);
+
             async function loadPDF(file) {
-                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-                    toast('Lütfen geçerli bir PDF dosyası seçin.', 'error'); return;
+                if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+                    toast('Lütfen PDF dosyası seçin.', 'error'); return;
                 }
                 if (file.size > 100 * 1024 * 1024) { toast('Dosya 100MB limitini aşıyor.', 'error'); return; }
 
                 pdfFile = file;
                 pdfBuffer = await file.arrayBuffer();
 
-                // Read page count
+                // Get page count with pdf-lib
                 try {
-                    var doc = await PDFLib.PDFDocument.load(pdfBuffer);
-                    totalPages = doc.getPageCount();
-                } catch (err) {
-                    toast('PDF okunamadı: ' + err.message, 'error'); return;
-                }
+                    var pdfLibDoc = await PDFLib.PDFDocument.load(pdfBuffer);
+                    totalPages = pdfLibDoc.getPageCount();
+                } catch (e) { toast('PDF okunamadı: ' + e.message, 'error'); return; }
 
-                // Show file
-                fileListEl.innerHTML =
-                    '<div class="file-item">' +
-                    '<div class="file-item__icon">📄</div>' +
-                    '<div class="file-item__info">' +
-                    '<div class="file-item__name">' + file.name + '</div>' +
-                    '<div class="file-item__size">' + fmtSize(file.size) + ' · ' + totalPages + ' sayfa</div>' +
-                    '</div>' +
-                    '<button type="button" class="file-item__remove" id="remove-file" style="cursor:pointer;font-size:16px;color:var(--text-muted);background:none;border:none;">✕</button>' +
-                    '</div>';
+                // Load with pdf.js for rendering
+                try {
+                    pdfJsDoc = await pdfjsLib.getDocument({ data: pdfBuffer.slice(0) }).promise;
+                } catch (e) { toast('PDF render edilemedi: ' + e.message, 'error'); return; }
 
-                document.getElementById('remove-file').onclick = function () {
-                    pdfFile = null; pdfBuffer = null; totalPages = 0;
-                    fileListEl.innerHTML = '';
-                    fileSection.style.display = 'none';
-                    zoneContent.style.display = '';
-                    pdfInfoEl.style.display = 'none';
-                    processBtn.disabled = true;
-                    processBtn.style.opacity = '0.5';
-                };
-
+                // Update UI
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('file-meta').textContent = fmtSize(file.size) + ' · ' + totalPages + ' sayfa';
+                document.getElementById('page-count-label').textContent = '(' + totalPages + ' sayfa)';
                 zoneContent.style.display = 'none';
                 fileSection.style.display = 'block';
-                pdfInfoEl.style.display = 'block';
-                pageCountEl.textContent = totalPages;
                 processBtn.disabled = false;
                 processBtn.style.opacity = '1';
 
-                // Build page grid for select mode
-                buildPageGrid();
-                updateEveryPreview();
-                toast(file.name + ' yüklendi — ' + totalPages + ' sayfa', 'success');
-            }
-
-            // ── Mode Switching ──
-            window.setMode = function (mode) {
-                currentMode = mode;
-                ['range', 'every', 'select'].forEach(function (m) {
-                    document.getElementById('mode-' + m).classList.toggle('active', m === mode);
-                    document.getElementById('opts-' + m).style.display = m === mode ? '' : 'none';
-                });
-            };
-
-            // ── Page Grid for Select Mode ──
-            function buildPageGrid() {
-                var grid = document.getElementById('page-grid');
-                grid.innerHTML = '';
+                // Init state
                 selectedPages = {};
+                splitPoints = {};
                 for (var p = 1; p <= totalPages; p++) {
                     selectedPages[p] = false;
-                    var thumb = document.createElement('div');
-                    thumb.className = 'page-thumb';
-                    thumb.textContent = p;
-                    thumb.dataset.page = p;
-                    thumb.addEventListener('click', function () {
-                        var pg = parseInt(this.dataset.page);
-                        selectedPages[pg] = !selectedPages[pg];
-                        this.classList.toggle('selected', selectedPages[pg]);
-                        updateSelectInfo();
-                    });
-                    grid.appendChild(thumb);
+                    splitPoints[p] = false;
                 }
-                updateSelectInfo();
+
+                // Default range
+                document.getElementById('range-input').value = '1-' + Math.ceil(totalPages / 2) + ', ' + (Math.ceil(totalPages / 2) + 1) + '-' + totalPages;
+                updateEveryPreview();
+
+                // Render page thumbnails
+                renderCarousel();
+                toast(file.name + ' — ' + totalPages + ' sayfa yüklendi', 'success');
             }
 
-            function updateSelectInfo() {
+            // ══════════════════════
+            //  RENDER PAGE THUMBNAILS
+            // ══════════════════════
+            async function renderCarousel() {
+                carousel.innerHTML = '';
+
+                for (var p = 1; p <= totalPages; p++) {
+                    // Page card
+                    var card = document.createElement('div');
+                    card.className = 'page-card';
+                    card.dataset.page = p;
+
+                    var cwrap = document.createElement('div');
+                    cwrap.className = 'page-card__canvas-wrap';
+
+                    var canvas = document.createElement('canvas');
+                    canvas.id = 'page-canvas-' + p;
+                    cwrap.appendChild(canvas);
+
+                    var check = document.createElement('div');
+                    check.className = 'page-card__check';
+                    check.textContent = '✓';
+                    cwrap.appendChild(check);
+
+                    var loading = document.createElement('div');
+                    loading.className = 'page-card__loading';
+                    loading.id = 'page-loading-' + p;
+                    loading.textContent = '⏳';
+                    cwrap.appendChild(loading);
+
+                    card.appendChild(cwrap);
+
+                    var label = document.createElement('div');
+                    label.className = 'page-card__label';
+                    label.textContent = 'Sayfa ' + p;
+                    card.appendChild(label);
+
+                    // Click handler for page selection
+                    (function (pageNum) {
+                        card.addEventListener('click', function () {
+                            if (currentMode === 'extract') {
+                                selectedPages[pageNum] = !selectedPages[pageNum];
+                                this.classList.toggle('selected', selectedPages[pageNum]);
+                                updateExtractInfo();
+                            }
+                        });
+                    })(p);
+
+                    carousel.appendChild(card);
+
+                    // Add split divider between pages (not after last)
+                    if (p < totalPages) {
+                        var divider = document.createElement('div');
+                        divider.className = 'split-divider';
+                        divider.dataset.after = p;
+                        divider.innerHTML =
+                            '<div class="split-divider__line"></div>' +
+                            '<div class="split-divider__icon">✂️</div>' +
+                            '<div class="split-divider__line"></div>';
+                        (function (afterPage) {
+                            divider.addEventListener('click', function () {
+                                if (currentMode === 'visual') {
+                                    splitPoints[afterPage] = !splitPoints[afterPage];
+                                    this.classList.toggle('active', splitPoints[afterPage]);
+                                    updateVisualInfo();
+                                }
+                            });
+                        })(p);
+                        carousel.appendChild(divider);
+                    }
+                }
+
+                // Render thumbnails async
+                for (var i = 1; i <= totalPages; i++) {
+                    renderPageThumb(i);
+                }
+            }
+
+            async function renderPageThumb(pageNum) {
+                try {
+                    var page = await pdfJsDoc.getPage(pageNum);
+                    var vp = page.getViewport({ scale: 0.4 });
+
+                    var canvas = document.getElementById('page-canvas-' + pageNum);
+                    if (!canvas) return;
+                    canvas.width = vp.width;
+                    canvas.height = vp.height;
+
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+
+                    var loader = document.getElementById('page-loading-' + pageNum);
+                    if (loader) loader.style.display = 'none';
+                } catch (e) {
+                    console.warn('Page ' + pageNum + ' render failed:', e);
+                }
+            }
+
+            // ══════════════════════
+            //  MODE SWITCHING
+            // ══════════════════════
+            function setMode(mode) {
+                currentMode = mode;
+                var modes = ['visual', 'range', 'every', 'extract'];
+                var tabs = document.querySelectorAll('.mode-tab');
+                modes.forEach(function (m, i) {
+                    var el = document.getElementById('opts-' + m);
+                    if (el) el.style.display = m === mode ? '' : 'none';
+                    if (tabs[i]) tabs[i].classList.toggle('active', m === mode);
+                });
+
+                // Update page card states
+                var cards = document.querySelectorAll('.page-card');
+                cards.forEach(function (c) { c.classList.remove('selected'); });
+                var dividers = document.querySelectorAll('.split-divider');
+                dividers.forEach(function (d) { d.classList.remove('active'); });
+
+                if (mode === 'extract') {
+                    cards.forEach(function (c) {
+                        var pg = parseInt(c.dataset.page);
+                        c.classList.toggle('selected', !!selectedPages[pg]);
+                    });
+                }
+                if (mode === 'visual') {
+                    dividers.forEach(function (d) {
+                        var after = parseInt(d.dataset.after);
+                        d.classList.toggle('active', !!splitPoints[after]);
+                    });
+                }
+            }
+
+            function updateVisualInfo() {
+                var count = 0;
+                for (var k in splitPoints) if (splitPoints[k]) count++;
+                document.getElementById('visual-info').textContent =
+                    count + ' bölme noktası seçildi → ' + (count + 1) + ' parça';
+            }
+
+            function updateExtractInfo() {
                 var count = 0;
                 for (var k in selectedPages) if (selectedPages[k]) count++;
-                document.getElementById('select-info').textContent = count + ' sayfa seçildi';
+                document.getElementById('extract-info').textContent = count + ' sayfa seçildi';
             }
 
-            window.selectAllPages = function () {
-                for (var k in selectedPages) selectedPages[k] = true;
-                document.querySelectorAll('.page-thumb').forEach(function (t) { t.classList.add('selected'); });
-                updateSelectInfo();
-            };
-            window.deselectAllPages = function () {
-                for (var k in selectedPages) selectedPages[k] = false;
-                document.querySelectorAll('.page-thumb').forEach(function (t) { t.classList.remove('selected'); });
-                updateSelectInfo();
-            };
-            window.selectOddPages = function () {
-                window.deselectAllPages();
-                for (var k in selectedPages) { if (parseInt(k) % 2 === 1) selectedPages[k] = true; }
-                document.querySelectorAll('.page-thumb').forEach(function (t) {
-                    if (parseInt(t.dataset.page) % 2 === 1) t.classList.add('selected');
-                });
-                updateSelectInfo();
-            };
-            window.selectEvenPages = function () {
-                window.deselectAllPages();
-                for (var k in selectedPages) { if (parseInt(k) % 2 === 0) selectedPages[k] = true; }
-                document.querySelectorAll('.page-thumb').forEach(function (t) {
-                    if (parseInt(t.dataset.page) % 2 === 0) t.classList.add('selected');
-                });
-                updateSelectInfo();
-            };
-
-            // ── Every N Preview ──
             function updateEveryPreview() {
                 var n = parseInt(document.getElementById('every-n').value) || 1;
                 if (totalPages > 0) {
-                    var parts = Math.ceil(totalPages / n);
                     document.getElementById('every-preview').textContent =
-                        totalPages + ' sayfa → ' + parts + ' parça (' + n + ' sayfa/parça)';
+                        totalPages + ' sayfa → ' + Math.ceil(totalPages / n) + ' parça';
                 }
             }
             document.getElementById('every-n').addEventListener('input', updateEveryPreview);
 
-            // ── Parse Ranges ──
+            // ══════════════════════
+            //  SELECT HELPERS
+            // ══════════════════════
+            function selectAll() {
+                for (var k in selectedPages) selectedPages[k] = true;
+                document.querySelectorAll('.page-card').forEach(function (c) { c.classList.add('selected'); });
+                updateExtractInfo();
+            }
+            function deselectAll() {
+                for (var k in selectedPages) selectedPages[k] = false;
+                document.querySelectorAll('.page-card').forEach(function (c) { c.classList.remove('selected'); });
+                updateExtractInfo();
+            }
+            function selectOdd() {
+                deselectAll();
+                for (var k in selectedPages) { if (parseInt(k) % 2 === 1) selectedPages[k] = true; }
+                document.querySelectorAll('.page-card').forEach(function (c) {
+                    if (parseInt(c.dataset.page) % 2 === 1) c.classList.add('selected');
+                });
+                updateExtractInfo();
+            }
+            function selectEven() {
+                deselectAll();
+                for (var k in selectedPages) { if (parseInt(k) % 2 === 0) selectedPages[k] = true; }
+                document.querySelectorAll('.page-card').forEach(function (c) {
+                    if (parseInt(c.dataset.page) % 2 === 0) c.classList.add('selected');
+                });
+                updateExtractInfo();
+            }
+
+            // ══════════════════════
+            //  PARSE RANGES
+            // ══════════════════════
             function parseRanges(input) {
                 var groups = [];
                 var parts = input.split(',');
@@ -579,34 +792,43 @@
                         if (isNaN(a) || isNaN(b) || a < 1 || b < 1 || a > totalPages || b > totalPages) {
                             toast('Geçersiz aralık: ' + part, 'error'); return null;
                         }
-                        var pages = [];
-                        var start = Math.min(a, b), end = Math.max(a, b);
-                        for (var p = start; p <= end; p++) pages.push(p - 1); // 0-indexed
-                        groups.push({ label: a + '-' + b, indices: pages });
+                        var indices = [];
+                        for (var p = Math.min(a, b); p <= Math.max(a, b); p++) indices.push(p - 1);
+                        groups.push({ label: a + '-' + b, indices: indices });
                     } else {
                         var num = parseInt(part);
-                        if (isNaN(num) || num < 1 || num > totalPages) {
-                            toast('Geçersiz sayfa: ' + part, 'error'); return null;
-                        }
+                        if (isNaN(num) || num < 1 || num > totalPages) { toast('Geçersiz sayfa: ' + part, 'error'); return null; }
                         groups.push({ label: String(num), indices: [num - 1] });
                     }
                 }
                 return groups;
             }
 
-            // ═══════════════════════════
-            //  REAL PDF SPLIT with pdf-lib
-            // ═══════════════════════════
+            // ═══════════════════════
+            //  REAL PDF SPLIT
+            // ═══════════════════════
             processBtn.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopImmediatePropagation();
-
                 if (!pdfBuffer) { toast('Önce PDF yükleyin.', 'error'); return; }
 
-                // Determine page groups based on mode
                 var groups = [];
 
-                if (currentMode === 'range') {
+                if (currentMode === 'visual') {
+                    // Build groups from split points
+                    var cuts = [0]; // start indices (0-based)
+                    for (var sp = 1; sp < totalPages; sp++) {
+                        if (splitPoints[sp]) cuts.push(sp);
+                    }
+                    cuts.push(totalPages);
+                    for (var c = 0; c < cuts.length - 1; c++) {
+                        var indices = [];
+                        for (var p = cuts[c]; p < cuts[c + 1]; p++) indices.push(p);
+                        groups.push({ label: (cuts[c] + 1) + '-' + cuts[c + 1], indices: indices });
+                    }
+                    if (groups.length < 2) { toast('En az 1 bölme noktası seçin (makasa tıklayın).', 'error'); return; }
+
+                } else if (currentMode === 'range') {
                     var val = document.getElementById('range-input').value.trim();
                     if (!val) { toast('Aralık girin (Örn: 1-3, 5, 7-10)', 'error'); return; }
                     groups = parseRanges(val);
@@ -614,31 +836,26 @@
 
                 } else if (currentMode === 'every') {
                     var n = parseInt(document.getElementById('every-n').value) || 1;
-                    for (var start = 0; start < totalPages; start += n) {
-                        var end = Math.min(start + n, totalPages);
-                        var indices = [];
-                        for (var p = start; p < end; p++) indices.push(p);
-                        groups.push({ label: (start + 1) + '-' + end, indices: indices });
+                    for (var s = 0; s < totalPages; s += n) {
+                        var end = Math.min(s + n, totalPages);
+                        var idx = [];
+                        for (var p = s; p < end; p++) idx.push(p);
+                        groups.push({ label: (s + 1) + '-' + end, indices: idx });
                     }
 
-                } else if (currentMode === 'select') {
-                    var selIndices = [];
-                    for (var k in selectedPages) {
-                        if (selectedPages[k]) selIndices.push(parseInt(k) - 1);
-                    }
-                    if (selIndices.length === 0) { toast('En az 1 sayfa seçin.', 'error'); return; }
-                    selIndices.sort(function (a, b) { return a - b; });
-                    groups.push({ label: 'secilen_sayfalar', indices: selIndices });
+                } else if (currentMode === 'extract') {
+                    var sel = [];
+                    for (var k in selectedPages) { if (selectedPages[k]) sel.push(parseInt(k) - 1); }
+                    if (sel.length === 0) { toast('En az 1 sayfa seçin.', 'error'); return; }
+                    sel.sort(function (a, b) { return a - b; });
+                    groups.push({ label: 'secilen', indices: sel });
                 }
 
-                if (groups.length === 0) { toast('Bölünecek sayfa bulunamadı.', 'error'); return; }
-
-                // Show progress
+                // Do the split
                 progressSec.style.display = 'block';
                 fileSection.style.display = 'none';
                 resultSec.style.display = 'none';
                 processBtn.disabled = true;
-                processBtn.textContent = '⏳ Bölünüyor...';
                 bar.style.width = '0%';
                 splitResults = [];
 
@@ -647,26 +864,22 @@
                         var srcDoc = await PDFLib.PDFDocument.load(pdfBuffer);
 
                         for (var g = 0; g < groups.length; g++) {
-                            var group = groups[g];
                             statusEl.textContent = 'Parça ' + (g + 1) + '/' + groups.length + ' oluşturuluyor...';
                             bar.style.width = ((g + 1) / groups.length * 85) + '%';
 
                             var newDoc = await PDFLib.PDFDocument.create();
-                            var copiedPages = await newDoc.copyPages(srcDoc, group.indices);
-                            for (var ci = 0; ci < copiedPages.length; ci++) {
-                                newDoc.addPage(copiedPages[ci]);
-                            }
+                            var pages = await newDoc.copyPages(srcDoc, groups[g].indices);
+                            for (var pi = 0; pi < pages.length; pi++) newDoc.addPage(pages[pi]);
 
                             var bytes = await newDoc.save();
                             var blob = new Blob([bytes], { type: 'application/pdf' });
                             var baseName = pdfFile.name.replace(/\.pdf$/i, '');
-                            var name = baseName + '_' + group.label + '.pdf';
 
                             splitResults.push({
-                                name: name,
+                                name: baseName + '_' + groups[g].label + '.pdf',
                                 blob: blob,
-                                pageCount: group.indices.length,
-                                label: group.label
+                                pageCount: groups[g].indices.length,
+                                label: groups[g].label
                             });
                         }
 
@@ -677,7 +890,7 @@
                             progressSec.style.display = 'none';
                             resultSec.style.display = 'block';
                             resultInfo.textContent = totalPages + ' sayfalık PDF, ' + splitResults.length + ' parçaya bölündü.';
-                            renderResultParts();
+                            renderResults();
                             toast(splitResults.length + ' parça oluşturuldu!', 'success');
                         }, 400);
 
@@ -687,15 +900,13 @@
                         progressSec.style.display = 'none';
                         fileSection.style.display = 'block';
                     }
-
-                    processBtn.textContent = '✂️ PDF\'i Böl';
                     processBtn.disabled = false;
                     processBtn.style.opacity = '1';
                 })();
             });
 
-            // ── Render Result Parts ──
-            function renderResultParts() {
+            // ── Render Results ──
+            function renderResults() {
                 resultParts.innerHTML = '';
                 for (var i = 0; i < splitResults.length; i++) {
                     var r = splitResults[i];
@@ -710,65 +921,66 @@
                         '<button type="button" class="part-item__dl" data-idx="' + i + '">⬇️ İndir</button>';
                     resultParts.appendChild(div);
                 }
-                // Individual download handlers
                 resultParts.querySelectorAll('.part-item__dl').forEach(function (btn) {
                     btn.addEventListener('click', function () {
                         var idx = parseInt(this.dataset.idx);
-                        downloadBlob(splitResults[idx].blob, splitResults[idx].name);
+                        dlBlob(splitResults[idx].blob, splitResults[idx].name);
                     });
                 });
             }
 
-            function downloadBlob(blob, name) {
+            function dlBlob(blob, name) {
                 var url = URL.createObjectURL(blob);
                 var a = document.createElement('a');
-                a.href = url;
-                a.download = name;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
+                a.href = url; a.download = name;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
                 setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
             }
 
-            // ── Download All as ZIP ──
+            // ── Download All ZIP ──
             document.getElementById('download-all-btn').addEventListener('click', function (e) {
                 e.preventDefault();
                 if (splitResults.length === 0) { toast('İndirilecek dosya yok!', 'error'); return; }
-
                 if (splitResults.length === 1) {
-                    downloadBlob(splitResults[0].blob, splitResults[0].name);
-                    toast('İndirme başladı!', 'success');
+                    dlBlob(splitResults[0].blob, splitResults[0].name);
                     return;
                 }
-
-                // Use JSZip
                 toast('ZIP oluşturuluyor...', 'info');
                 var zip = new JSZip();
-                for (var i = 0; i < splitResults.length; i++) {
-                    zip.file(splitResults[i].name, splitResults[i].blob);
-                }
+                for (var i = 0; i < splitResults.length; i++) zip.file(splitResults[i].name, splitResults[i].blob);
                 zip.generateAsync({ type: 'blob' }).then(function (content) {
-                    var baseName = pdfFile.name.replace(/\.pdf$/i, '');
-                    downloadBlob(content, baseName + '_parcalar.zip');
-                    toast('ZIP indiriliyor! (' + fmtSize(content.size) + ')', 'success');
+                    dlBlob(content, pdfFile.name.replace(/\.pdf$/i, '') + '_parcalar.zip');
+                    toast('ZIP indiriliyor!', 'success');
                 });
             });
 
             // ── Again ──
             document.getElementById('again-btn').addEventListener('click', function (e) {
                 e.preventDefault();
-                resultSec.style.display = 'none';
-                progressSec.style.display = 'none';
-                splitResults = [];
-                pdfFile = null; pdfBuffer = null; totalPages = 0;
-                fileListEl.innerHTML = '';
-                fileSection.style.display = 'none';
-                zoneContent.style.display = '';
-                pdfInfoEl.style.display = 'none';
-                processBtn.disabled = true;
-                processBtn.style.opacity = '0.5';
+                resetAll();
             });
 
+            function resetAll() {
+                resultSec.style.display = 'none';
+                progressSec.style.display = 'none';
+                fileSection.style.display = 'none';
+                zoneContent.style.display = '';
+                splitResults = [];
+                pdfFile = null; pdfBuffer = null; totalPages = 0; pdfJsDoc = null;
+                selectedPages = {}; splitPoints = {};
+                carousel.innerHTML = '';
+                processBtn.disabled = true;
+                processBtn.style.opacity = '0.5';
+            }
+
+            // ── Public API ──
+            return {
+                setMode: setMode,
+                selectAll: selectAll,
+                deselectAll: deselectAll,
+                selectOdd: selectOdd,
+                selectEven: selectEven
+            };
         })();
     </script>
 </body>
