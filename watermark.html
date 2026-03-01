@@ -4,101 +4,86 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PDF Filigran – PDFix</title>
-    <meta name="description" content="PDF'lere metin filigranı ekleyin. Ücretsiz online araç." />
+    <title>PDF Filigran Ekle – PDFix</title>
+    <meta name="description" content="PDF'lerinize metin filigranı ekleyin. Canlı önizleme ile kolay düzenleme." />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/animations.css" />
     <link rel="stylesheet" href="css/tool-page.css" />
     <style>
-        .wm-preview {
+        .wm-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--sp-xl);
+            margin-top: var(--sp-lg);
+            align-items: start;
+        }
+
+        @media(max-width:768px) {
+            .wm-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Settings panel */
+        .wm-settings {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            height: 240px;
+            padding: var(--sp-lg);
+        }
+
+        .wm-settings__title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: var(--sp-lg);
             display: flex;
             align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-            margin-top: var(--sp-md);
+            gap: 8px;
         }
 
-        .wm-page {
-            width: 140px;
-            height: 200px;
-            background: white;
-            border-radius: 6px;
-            box-shadow: var(--shadow-md);
-            position: relative;
-            overflow: hidden;
+        .setting-group {
+            margin-bottom: var(--sp-lg);
         }
 
-        .wm-page-lines {
-            position: absolute;
-            inset: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
+        .setting-group:last-child {
+            margin-bottom: 0;
         }
 
-        .wm-page-lines div {
-            height: 3px;
-            background: #e5e5e5;
-            border-radius: 2px;
-        }
-
-        .wm-text-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-        }
-
-        .wm-text-overlay span {
-            font-weight: 900;
-            white-space: nowrap;
-            transform: rotate(-35deg);
-        }
-
-        .config-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--sp-md);
-            margin-top: var(--sp-md);
-        }
-
-        .config-item {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .config-item label {
-            font-size: 12px;
-            font-weight: 600;
+        .setting-label {
+            font-size: 11px;
+            font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            margin-bottom: 6px;
+            display: block;
         }
 
-        .config-input {
+        .setting-input {
+            width: 100%;
             background: var(--bg-input);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
             border-radius: var(--radius-sm);
-            padding: 8px 12px;
+            padding: 10px 14px;
             font-size: 14px;
             font-family: inherit;
             outline: none;
             transition: border-color 0.2s;
+            box-sizing: border-box;
         }
 
-        .config-input:focus {
+        .setting-input:focus {
             border-color: var(--brand-primary);
         }
 
+        .setting-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--sp-sm);
+        }
+
+        /* Position grid */
         .pos-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -106,12 +91,13 @@
         }
 
         .pos-btn {
-            padding: 8px;
+            padding: 8px 4px;
             border: 1px solid var(--border-color);
-            border-radius: 4px;
+            border-radius: 6px;
             background: var(--bg-input);
             color: var(--text-secondary);
-            font-size: 11px;
+            font-size: 10px;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
             text-align: center;
@@ -122,122 +108,178 @@
         }
 
         .pos-btn.active {
-            background: rgba(255, 107, 53, 0.15);
+            background: rgba(255, 107, 53, 0.12);
             border-color: var(--brand-primary);
             color: var(--brand-primary);
             font-weight: 700;
         }
 
-        .page-carousel {
+        /* Scope chips */
+        .scope-chips {
             display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 8px 0 12px;
-            scroll-behavior: smooth;
+            gap: 4px;
+            flex-wrap: wrap;
         }
 
-        .page-carousel::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .page-carousel::-webkit-scrollbar-track {
-            background: var(--bg-input);
-            border-radius: 3px;
-        }
-
-        .page-carousel::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-
-        .page-card {
-            flex: 0 0 auto;
-            width: 100px;
+        .scope-chip {
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 600;
             cursor: pointer;
-            user-select: none;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-secondary);
             transition: all 0.2s;
         }
 
-        .page-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .page-card.selected .pcw {
+        .scope-chip:hover {
             border-color: var(--brand-primary);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
         }
 
-        .pcw {
-            border: 2px solid var(--border-color);
-            border-radius: 6px;
-            overflow: hidden;
-            background: white;
-            aspect-ratio: 210/297;
+        .scope-chip.active {
+            background: var(--brand-gradient);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Preview panel */
+        .wm-preview-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--sp-lg);
+            position: sticky;
+            top: 80px;
+        }
+
+        .wm-preview-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: var(--sp-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wm-preview-canvas-area {
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%),
+                linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 8px 8px;
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
-            position: relative;
+            padding: var(--sp-lg);
+            min-height: 400px;
         }
 
-        .pcw canvas {
+        .wm-page-mock {
+            width: 240px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 210/297;
+        }
+
+        .wm-page-mock canvas {
             width: 100%;
             height: 100%;
             display: block;
         }
 
-        .pc-lbl {
-            text-align: center;
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        .page-card.selected .pc-lbl {
-            color: var(--brand-primary);
-        }
-
-        .pc-check {
-            display: none;
+        .wm-mock-lines {
             position: absolute;
-            top: 3px;
-            right: 3px;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--brand-gradient);
-            color: white;
-            font-size: 9px;
-            font-weight: 900;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .page-card.selected .pc-check {
+            inset: 16px;
             display: flex;
+            flex-direction: column;
+            gap: 9px;
         }
 
-        .pcl {
+        .wm-mock-lines div {
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+        }
+
+        .wm-overlay {
             position: absolute;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: white;
-            font-size: 10px;
-            color: #999;
+            pointer-events: none;
+            padding: 12px;
         }
 
-        @media(max-width:600px) {
-            .config-grid {
-                grid-template-columns: 1fr;
-            }
+        .wm-overlay span {
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        /* Page preview bottom */
+        .wm-page-preview-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 6px 0;
+            margin-top: var(--sp-md);
+        }
+
+        .wm-page-preview-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .wm-page-preview-scroll::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .wm-mini-page {
+            width: 50px;
+            aspect-ratio: 210/297;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            background: white;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .wm-mini-page canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Range slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            margin-top: 6px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--brand-gradient);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
         }
     </style>
 </head>
 
 <body>
+
     <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
     <nav class="navbar" id="navbar">
         <div class="container navbar__inner">
@@ -245,7 +287,7 @@
                 <div class="logo-icon">⚡</div><span>PDFix</span>
             </a>
             <div class="navbar__nav"><a href="index.html">Ana Sayfa</a><a href="merge.html">Birleştir</a><a
-                    href="compress.html">Sıkıştır</a><a href="split.html">Böl</a></div>
+                    href="split.html">Böl</a><a href="rotate.html">Döndür</a></div>
             <div class="navbar__actions"><a href="index.html" class="btn btn-outline btn-sm">Tüm Araçlar</a></div>
         </div>
     </nav>
@@ -256,191 +298,182 @@
             </div>
             <div class="page-hero__icon" style="background:rgba(123,47,190,0.15);">🔖</div>
             <h1 class="page-hero__title">PDF'e Filigran Ekle</h1>
-            <p class="page-hero__sub">Metin filigranını özelleştirerek PDF sayfalarınıza ekleyin.</p>
+            <p class="page-hero__sub">Metin filigranını özelleştirerek sayfalarınıza ekleyin. Canlı önizleme ile anında
+                görün.</p>
         </div>
     </section>
 
     <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
         <div class="container">
-            <div class="tool-layout">
-                <div class="tool-main">
 
-                    <div id="upload-zone" class="upload-zone">
-                        <div id="zone-content">
-                            <div class="upload-zone__icon icon-bounce"
-                                style="background:rgba(123,47,190,0.15);color:var(--accent-purple);">🔖</div>
-                            <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
-                            <p class="upload-zone__sub">veya butona tıklayın · Maksimum 100 MB</p>
-                            <div style="margin-top:var(--sp-lg);position:relative;z-index:10;">
-                                <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">📂 PDF
-                                    Seç</button>
-                            </div>
-                        </div>
-                        <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+            <!-- Upload -->
+            <div id="upload-zone" class="upload-zone" style="max-width:700px;margin:0 auto;">
+                <div id="zone-content">
+                    <div class="upload-zone__icon icon-bounce"
+                        style="background:rgba(123,47,190,0.15);color:var(--accent-purple);">🔖</div>
+                    <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
+                    <p class="upload-zone__sub">veya butona tıklayın · Maksimum 100 MB</p>
+                    <div style="margin-top:var(--sp-lg);">
+                        <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">📂 PDF
+                            Seç</button>
                     </div>
+                </div>
+                <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+            </div>
 
-                    <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
-                        <!-- File bar -->
-                        <div
-                            style="display:flex;align-items:center;gap:var(--sp-md);padding:var(--sp-md);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
-                            <div style="font-size:28px;">📄</div>
-                            <div style="flex:1;">
-                                <div id="file-name" style="font-size:14px;font-weight:700;"></div>
-                                <div id="file-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px;">
-                                </div>
-                            </div>
-                            <button type="button" id="remove-file"
-                                style="cursor:pointer;font-size:18px;color:var(--text-muted);background:none;border:none;">✕</button>
+            <!-- Main Content -->
+            <div id="main-content" style="display:none;">
+
+                <!-- File bar -->
+                <div
+                    style="display:flex;align-items:center;gap:var(--sp-md);padding:var(--sp-md);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                    <div style="font-size:28px;">📄</div>
+                    <div style="flex:1;">
+                        <div id="file-name" style="font-size:14px;font-weight:700;"></div>
+                        <div id="file-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+                    </div>
+                    <button type="button" id="remove-file"
+                        style="cursor:pointer;font-size:13px;padding:6px 14px;border-radius:var(--radius-full);border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-secondary);">✕
+                        Kaldır</button>
+                </div>
+
+                <!-- Settings + Preview side by side -->
+                <div class="wm-layout">
+
+                    <!-- LEFT: Settings -->
+                    <div class="wm-settings">
+                        <div class="wm-settings__title">⚙️ Filigran Ayarları</div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Filigran Metni</label>
+                            <input type="text" id="wm-text" value="GİZLİ" class="setting-input"
+                                oninput="WM.preview()" />
                         </div>
 
-                        <!-- Watermark Config -->
-                        <div class="options-panel" style="margin-top:var(--sp-lg);">
-                            <div class="options-panel__title">🔖 Filigran Ayarları</div>
-                            <div class="config-grid">
-                                <div class="config-item" style="grid-column:1/3;">
-                                    <label>Filigran Metni</label>
-                                    <input type="text" id="wm-text" value="GİZLİ" class="config-input"
-                                        oninput="WMTool.updatePreview()" />
-                                </div>
-                                <div class="config-item">
-                                    <label>Yazı Boyutu</label>
-                                    <select id="wm-size" class="config-input" onchange="WMTool.updatePreview()">
-                                        <option value="24">Küçük (24pt)</option>
-                                        <option value="48" selected>Orta (48pt)</option>
-                                        <option value="72">Büyük (72pt)</option>
-                                        <option value="96">Çok Büyük (96pt)</option>
-                                    </select>
-                                </div>
-                                <div class="config-item">
-                                    <label>Renk</label>
-                                    <input type="color" id="wm-color" value="#FF6B35" class="config-input"
-                                        style="height:40px;padding:4px;cursor:pointer;"
-                                        oninput="WMTool.updatePreview()" />
-                                </div>
-                                <div class="config-item">
-                                    <label>Şeffaflık — <span id="opacity-val">25</span>%</label>
-                                    <input type="range" id="wm-opacity" min="5" max="80" value="25" class="range-slider"
-                                        oninput="document.getElementById('opacity-val').textContent=this.value;WMTool.updatePreview()" />
-                                </div>
-                                <div class="config-item">
-                                    <label>Açı</label>
-                                    <select id="wm-angle" class="config-input" onchange="WMTool.updatePreview()">
-                                        <option value="-45" selected>Çapraz (↘)</option>
-                                        <option value="-30">Hafif Çapraz</option>
-                                        <option value="0">Yatay</option>
-                                        <option value="90">Dikey</option>
-                                    </select>
-                                </div>
+                        <div class="setting-row setting-group">
+                            <div>
+                                <label class="setting-label">Yazı Boyutu</label>
+                                <select id="wm-size" class="setting-input" onchange="WM.preview()">
+                                    <option value="24">Küçük (24pt)</option>
+                                    <option value="48" selected>Orta (48pt)</option>
+                                    <option value="72">Büyük (72pt)</option>
+                                    <option value="96">Çok Büyük (96pt)</option>
+                                </select>
                             </div>
-
-                            <div style="margin-top:var(--sp-lg);">
-                                <label
-                                    style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Konum</label>
-                                <div class="pos-grid" style="margin-top:6px;">
-                                    <div class="pos-btn" data-pos="top-left">Sol Üst</div>
-                                    <div class="pos-btn" data-pos="top-center">Üst Orta</div>
-                                    <div class="pos-btn" data-pos="top-right">Sağ Üst</div>
-                                    <div class="pos-btn" data-pos="center-left">Sol Orta</div>
-                                    <div class="pos-btn active" data-pos="center">Merkez</div>
-                                    <div class="pos-btn" data-pos="center-right">Sağ Orta</div>
-                                    <div class="pos-btn" data-pos="bottom-left">Sol Alt</div>
-                                    <div class="pos-btn" data-pos="bottom-center">Alt Orta</div>
-                                    <div class="pos-btn" data-pos="bottom-right">Sağ Alt</div>
-                                </div>
-                            </div>
-
-                            <!-- Live preview -->
-                            <div style="margin-top:var(--sp-lg);">
-                                <label
-                                    style="font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Canlı
-                                    Önizleme</label>
-                                <div class="wm-preview" id="wm-preview">
-                                    <div class="wm-page">
-                                        <div class="wm-page-lines">
-                                            <div></div>
-                                            <div style="width:80%"></div>
-                                            <div></div>
-                                            <div style="width:70%"></div>
-                                            <div></div>
-                                            <div style="width:60%"></div>
-                                            <div></div>
-                                        </div>
-                                        <div class="wm-text-overlay"><span id="preview-text"
-                                                style="font-size:16px;color:rgba(255,107,53,0.25);">GİZLİ</span></div>
-                                    </div>
-                                </div>
+                            <div>
+                                <label class="setting-label">Renk</label>
+                                <input type="color" id="wm-color" value="#FF6B35" class="setting-input"
+                                    style="height:42px;padding:4px;cursor:pointer;" oninput="WM.preview()" />
                             </div>
                         </div>
 
-                        <!-- Page scope -->
-                        <div style="margin-top:var(--sp-lg);">
-                            <div style="font-size:14px;font-weight:700;margin-bottom:var(--sp-sm);">Hangi Sayfalara?
+                        <div class="setting-group">
+                            <label class="setting-label">Şeffaflık — <span id="opacity-val">25</span>%</label>
+                            <input type="range" id="wm-opacity" min="5" max="80" value="25"
+                                oninput="document.getElementById('opacity-val').textContent=this.value;WM.preview()" />
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Açı</label>
+                            <select id="wm-angle" class="setting-input" onchange="WM.preview()">
+                                <option value="-45" selected>Çapraz (↘)</option>
+                                <option value="-30">Hafif Çapraz</option>
+                                <option value="0">Yatay</option>
+                                <option value="90">Dikey</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Konum</label>
+                            <div class="pos-grid">
+                                <div class="pos-btn" data-pos="top-left">Sol Üst</div>
+                                <div class="pos-btn" data-pos="top-center">Üst Orta</div>
+                                <div class="pos-btn" data-pos="top-right">Sağ Üst</div>
+                                <div class="pos-btn" data-pos="center-left">Sol Orta</div>
+                                <div class="pos-btn active" data-pos="center">Merkez</div>
+                                <div class="pos-btn" data-pos="center-right">Sağ Orta</div>
+                                <div class="pos-btn" data-pos="bottom-left">Sol Alt</div>
+                                <div class="pos-btn" data-pos="bottom-center">Alt Orta</div>
+                                <div class="pos-btn" data-pos="bottom-right">Sağ Alt</div>
                             </div>
-                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                                <div class="pos-btn active" data-scope="all" onclick="WMTool.setScope('all',this)">Tüm
-                                    Sayfalar</div>
-                                <div class="pos-btn" data-scope="odd" onclick="WMTool.setScope('odd',this)">Tek Sayfalar
-                                </div>
-                                <div class="pos-btn" data-scope="even" onclick="WMTool.setScope('even',this)">Çift
-                                    Sayfalar</div>
-                                <div class="pos-btn" data-scope="first" onclick="WMTool.setScope('first',this)">Sadece
-                                    İlk</div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Hangi Sayfalara Uygulansın?</label>
+                            <div class="scope-chips">
+                                <div class="scope-chip active" data-scope="all">Tümü</div>
+                                <div class="scope-chip" data-scope="odd">Tek Sayfalar</div>
+                                <div class="scope-chip" data-scope="even">Çift Sayfalar</div>
+                                <div class="scope-chip" data-scope="first">Sadece İlk</div>
                             </div>
                         </div>
 
                         <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
-                            style="width:100%;margin-top:var(--sp-lg);" disabled>
-                            🔖 Filigran Ekle
+                            style="width:100%;margin-top:var(--sp-sm);" disabled>
+                            🔖 Filigran Ekle ve İndir
                         </button>
                     </div>
 
-                    <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
-                        <div class="progress-card">
-                            <div style="font-size:48px;margin-bottom:var(--sp-md);">🔖</div>
-                            <div class="progress-card__title">Filigran Ekleniyor...</div>
-                            <div id="progress-status">Sayfalar işleniyor...</div>
-                            <div id="progress-wrap" class="progress-bar-wrap">
-                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                    <!-- RIGHT: Preview -->
+                    <div class="wm-preview-panel">
+                        <div class="wm-preview-title">👁️ Canlı Önizleme</div>
+                        <div class="wm-preview-canvas-area">
+                            <div class="wm-page-mock" id="preview-page">
+                                <!-- Rendered first page or mock lines -->
+                                <canvas id="preview-canvas" style="display:none;"></canvas>
+                                <div class="wm-mock-lines" id="mock-lines">
+                                    <div></div>
+                                    <div style="width:80%"></div>
+                                    <div></div>
+                                    <div style="width:70%"></div>
+                                    <div></div>
+                                    <div style="width:85%"></div>
+                                    <div></div>
+                                    <div style="width:60%"></div>
+                                    <div></div>
+                                    <div style="width:75%"></div>
+                                    <div></div>
+                                </div>
+                                <div class="wm-overlay" id="wm-overlay">
+                                    <span id="preview-text"
+                                        style="font-size:20px;color:rgba(255,107,53,0.25);">GİZLİ</span>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Mini page thumbnails -->
+                        <div class="wm-page-preview-scroll" id="mini-pages"></div>
                     </div>
 
-                    <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
-                        <div class="result-card">
-                            <span class="result-card__icon">✅</span>
-                            <div class="result-card__title">Filigran Eklendi!</div>
-                            <div class="result-card__sub" id="result-info"></div>
-                            <div class="result-actions">
-                                <button type="button" id="download-btn"
-                                    class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ İndir</button>
-                                <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden
-                                    Başla</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </div><!-- /wm-layout -->
+            </div><!-- /main-content -->
 
-                <div class="tool-sidebar">
-                    <div class="info-card">
-                        <div class="info-card__title">Filigran Özellikleri</div>
-                        <ul>
-                            <li>Özel metin girişi</li>
-                            <li>Renk ve şeffaflık kontrolü</li>
-                            <li>4 farklı boyut seçeneği</li>
-                            <li>9 farklı konum</li>
-                            <li>Açı seçimi (çapraz, yatay, dikey)</li>
-                            <li>Sayfa filtresi (tümü, tek, çift, ilk)</li>
-                            <li>Canlı önizleme</li>
-                        </ul>
-                    </div>
-                    <div class="info-card"
-                        style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);">
-                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
-                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Tüm işlemler
-                            tarayıcınızda gerçekleşir.</p>
+            <!-- Progress -->
+            <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
+                <div class="progress-card" style="max-width:500px;margin:0 auto;">
+                    <div style="font-size:48px;margin-bottom:var(--sp-md);">🔖</div>
+                    <div class="progress-card__title">Filigran Ekleniyor...</div>
+                    <div id="progress-status">Sayfalar işleniyor...</div>
+                    <div class="progress-bar-wrap">
+                        <div id="progress-bar" class="progress-bar" style="width:0%"></div>
                     </div>
                 </div>
             </div>
+
+            <!-- Result -->
+            <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
+                <div class="result-card" style="max-width:500px;margin:0 auto;">
+                    <span class="result-card__icon">✅</span>
+                    <div class="result-card__title">Filigran Eklendi!</div>
+                    <div class="result-card__sub" id="result-info"></div>
+                    <div class="result-actions">
+                        <button type="button" id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️
+                            İndir</button>
+                        <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -452,17 +485,21 @@
     </footer>
 
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="js/main.js"></script>
 
     <script>
-        var WMTool = (function () {
-            var pdfFile = null, pdfBuffer = null, totalPages = 0, resultBlob = null;
+        var WM = (function () {
+            'use strict';
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            var pdfFile = null, pdfBuffer = null, totalPages = 0, pdfJsDoc = null, resultBlob = null;
             var wmPosition = 'center', wmScope = 'all';
 
             var zone = document.getElementById('upload-zone'),
                 zoneContent = document.getElementById('zone-content'),
                 fileInput = document.getElementById('file-input'),
-                fileSection = document.getElementById('file-section'),
+                mainContent = document.getElementById('main-content'),
                 processBtn = document.getElementById('process-btn'),
                 progressSec = document.getElementById('progress-section'),
                 resultSec = document.getElementById('result-section'),
@@ -472,9 +509,12 @@
             function fmtSize(b) { if (!b) return '0 B'; var k = 1024, s = ['B', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(b) / Math.log(k)); return (b / Math.pow(k, i)).toFixed(1) + ' ' + s[i]; }
             function toast(m, t) { if (window.Toast) window.Toast.show(m, t || 'info'); }
 
-            // File handling
-            document.getElementById('browse-btn').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); fileInput.click(); });
-            fileInput.addEventListener('change', function () { if (this.files.length > 0) loadPDF(this.files[0]); this.value = ''; });
+            // ── FILE ──
+            document.getElementById('browse-btn').addEventListener('click', function (e) {
+                e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+                fileInput.click();
+            });
+            fileInput.addEventListener('change', function () { if (this.files && this.files.length > 0) loadPDF(this.files[0]); this.value = ''; });
             zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
             zone.addEventListener('dragleave', function (e) { if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over'); });
             zone.addEventListener('drop', function (e) { e.preventDefault(); zone.classList.remove('drag-over'); if (e.dataTransfer.files.length > 0) loadPDF(e.dataTransfer.files[0]); });
@@ -483,32 +523,80 @@
             document.getElementById('remove-file').addEventListener('click', resetAll);
 
             async function loadPDF(file) {
-                if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') { toast('PDF dosyası seçin.', 'error'); return; }
+                if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') { toast('PDF seçin.', 'error'); return; }
+                if (file.size > 104857600) { toast('100MB limiti aşıyor.', 'error'); return; }
                 pdfFile = file; pdfBuffer = await file.arrayBuffer();
                 try { var doc = await PDFLib.PDFDocument.load(pdfBuffer); totalPages = doc.getPageCount(); } catch (e) { toast('PDF okunamadı.', 'error'); return; }
+                try { pdfJsDoc = await pdfjsLib.getDocument({ data: pdfBuffer.slice(0) }).promise; } catch (e) { toast('Render hatası.', 'error'); return; }
+
                 document.getElementById('file-name').textContent = file.name;
                 document.getElementById('file-meta').textContent = fmtSize(file.size) + ' · ' + totalPages + ' sayfa';
-                zoneContent.style.display = 'none'; fileSection.style.display = 'block';
+                zone.style.display = 'none'; mainContent.style.display = 'block';
                 processBtn.disabled = false; processBtn.style.opacity = '1';
+
+                // Render first page in preview
+                renderMainPreview(1);
+                renderMiniPages();
                 toast(file.name + ' yüklendi.', 'success');
             }
 
-            // Position selector
+            async function renderMainPreview(pageNum) {
+                try {
+                    var page = await pdfJsDoc.getPage(pageNum);
+                    var vp = page.getViewport({ scale: 0.8 });
+                    var canvas = document.getElementById('preview-canvas');
+                    canvas.width = vp.width; canvas.height = vp.height;
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                    canvas.style.display = 'block';
+                    document.getElementById('mock-lines').style.display = 'none';
+                } catch (e) { }
+            }
+
+            async function renderMiniPages() {
+                var container = document.getElementById('mini-pages');
+                container.innerHTML = '';
+                for (var p = 1; p <= Math.min(totalPages, 20); p++) {
+                    var div = document.createElement('div');
+                    div.className = 'wm-mini-page';
+                    var cv = document.createElement('canvas');
+                    cv.id = 'mini-' + p;
+                    div.appendChild(cv);
+                    div.style.cursor = 'pointer';
+                    (function (pg) { div.addEventListener('click', function () { renderMainPreview(pg); }); })(p);
+                    container.appendChild(div);
+                }
+                for (var i = 1; i <= Math.min(totalPages, 20); i++) renderMiniThumb(i);
+            }
+
+            async function renderMiniThumb(num) {
+                try {
+                    var page = await pdfJsDoc.getPage(num);
+                    var vp = page.getViewport({ scale: 0.15 });
+                    var cv = document.getElementById('mini-' + num);
+                    if (!cv) return;
+                    cv.width = vp.width; cv.height = vp.height;
+                    await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+                } catch (e) { }
+            }
+
+            // ── POSITION ──
             document.querySelectorAll('.pos-btn[data-pos]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     document.querySelectorAll('.pos-btn[data-pos]').forEach(function (b) { b.classList.remove('active'); });
-                    this.classList.add('active'); wmPosition = this.dataset.pos; updatePreview();
+                    this.classList.add('active'); wmPosition = this.dataset.pos; preview();
                 });
             });
 
-            function setScope(scope, el) {
-                wmScope = scope;
-                document.querySelectorAll('.pos-btn[data-scope]').forEach(function (b) { b.classList.remove('active'); });
-                el.classList.add('active');
-            }
+            // ── SCOPE ──
+            document.querySelectorAll('.scope-chip').forEach(function (chip) {
+                chip.addEventListener('click', function () {
+                    document.querySelectorAll('.scope-chip').forEach(function (c) { c.classList.remove('active'); });
+                    this.classList.add('active'); wmScope = this.dataset.scope;
+                });
+            });
 
-            // Live preview
-            function updatePreview() {
+            // ── PREVIEW ──
+            function preview() {
                 var text = document.getElementById('wm-text').value || 'GİZLİ';
                 var color = document.getElementById('wm-color').value || '#FF6B35';
                 var opacity = (parseInt(document.getElementById('wm-opacity').value) || 25) / 100;
@@ -516,34 +604,26 @@
                 var angle = parseInt(document.getElementById('wm-angle').value) || -45;
 
                 var el = document.getElementById('preview-text');
-                if (!el) return;
                 el.textContent = text;
-                // Convert hex to rgba
                 var r = parseInt(color.substr(1, 2), 16), g = parseInt(color.substr(3, 2), 16), b = parseInt(color.substr(5, 2), 16);
                 el.style.color = 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
-                el.style.fontSize = Math.max(10, size * 0.25) + 'px';
+                el.style.fontSize = Math.max(12, size * 0.33) + 'px';
                 el.style.transform = 'rotate(' + angle + 'deg)';
 
-                // Position the text
-                var overlay = el.parentElement;
-                var posMap = {
-                    'top-left': 'flex-start;align-items:flex-start', 'top-center': 'center;align-items:flex-start', 'top-right': 'flex-end;align-items:flex-start',
-                    'center-left': 'flex-start;align-items:center', 'center': 'center;align-items:center', 'center-right': 'flex-end;align-items:center',
-                    'bottom-left': 'flex-start;align-items:flex-end', 'bottom-center': 'center;align-items:flex-end', 'bottom-right': 'flex-end;align-items:flex-end'
-                };
-                var pos = (posMap[wmPosition] || posMap['center']).split(';');
-                overlay.style.justifyContent = pos[0]; overlay.style.cssText = 'position:absolute;inset:0;display:flex;pointer-events:none;padding:8px;justify-content:' + pos[0] + ';' + pos[1] + ';';
+                var overlay = document.getElementById('wm-overlay');
+                var jc = 'center', ai = 'center';
+                if (wmPosition.indexOf('left') !== -1) jc = 'flex-start';
+                if (wmPosition.indexOf('right') !== -1) jc = 'flex-end';
+                if (wmPosition.indexOf('top') !== -1) ai = 'flex-start';
+                if (wmPosition.indexOf('bottom') !== -1) ai = 'flex-end';
+                overlay.style.justifyContent = jc;
+                overlay.style.alignItems = ai;
             }
 
-            // Hex to RGB
             function hexToRgb(hex) {
-                var r = parseInt(hex.substr(1, 2), 16) / 255;
-                var g = parseInt(hex.substr(3, 2), 16) / 255;
-                var b = parseInt(hex.substr(5, 2), 16) / 255;
-                return { r: r, g: g, b: b };
+                return { r: parseInt(hex.substr(1, 2), 16) / 255, g: parseInt(hex.substr(3, 2), 16) / 255, b: parseInt(hex.substr(5, 2), 16) / 255 };
             }
 
-            // Get pages to apply
             function getPages() {
                 var pages = [];
                 for (var p = 0; p < totalPages; p++) {
@@ -555,10 +635,12 @@
                 return pages;
             }
 
-            // REAL WATERMARK with pdf-lib
+            // ═══════════════════
+            //  REAL WATERMARK
+            // ═══════════════════
             processBtn.addEventListener('click', function (e) {
                 e.preventDefault(); e.stopImmediatePropagation();
-                if (!pdfBuffer) { toast('PDF yükleyin.', 'error'); return; }
+                if (!pdfBuffer) return;
 
                 var text = document.getElementById('wm-text').value || 'GİZLİ';
                 var color = document.getElementById('wm-color').value || '#FF6B35';
@@ -568,9 +650,8 @@
                 var rgb = hexToRgb(color);
                 var pages = getPages();
 
-                progressSec.style.display = 'block'; fileSection.style.display = 'none';
-                resultSec.style.display = 'none'; processBtn.disabled = true;
-                bar.style.width = '0%';
+                mainContent.style.display = 'none'; progressSec.style.display = 'block';
+                resultSec.style.display = 'none'; bar.style.width = '0%';
 
                 (async function () {
                     try {
@@ -585,7 +666,6 @@
                             var page = doc.getPage(pages[i]);
                             var w = page.getWidth(), h = page.getHeight();
 
-                            // Calculate position
                             var x = w / 2 - textWidth / 2, y = h / 2;
                             if (wmPosition.indexOf('left') !== -1) x = 40;
                             if (wmPosition.indexOf('right') !== -1) x = w - textWidth - 40;
@@ -593,12 +673,9 @@
                             if (wmPosition.indexOf('bottom') !== -1) y = 40;
 
                             page.drawText(text, {
-                                x: x, y: y,
-                                size: fontSize,
-                                font: font,
-                                color: PDFLib.rgb(rgb.r, rgb.g, rgb.b),
-                                opacity: opacity,
-                                rotate: PDFLib.degrees(angle),
+                                x: x, y: y, size: fontSize, font: font,
+                                color: PDFLib.rgb(rgb.r, rgb.g, rgb.b), opacity: opacity,
+                                rotate: PDFLib.degrees(angle)
                             });
                         }
 
@@ -614,35 +691,33 @@
                         }, 400);
                     } catch (err) {
                         console.error(err); toast('Hata: ' + (err.message || err), 'error');
-                        progressSec.style.display = 'none'; fileSection.style.display = 'block';
+                        progressSec.style.display = 'none'; mainContent.style.display = 'block';
                     }
-                    processBtn.disabled = false; processBtn.style.opacity = '1';
                 })();
             });
 
-            // Download
             document.getElementById('download-btn').addEventListener('click', function (e) {
                 e.preventDefault();
-                if (!resultBlob || resultBlob.size < 500) { toast('Önce filigran ekleyin.', 'error'); return; }
-                var url = URL.createObjectURL(resultBlob); var a = document.createElement('a');
-                a.href = url; a.download = pdfFile.name.replace(/\.pdf$/i, '') + '_watermarked.pdf';
+                if (!resultBlob) return;
+                var url = URL.createObjectURL(resultBlob);
+                var a = document.createElement('a'); a.href = url;
+                a.download = pdfFile.name.replace(/\.pdf$/i, '') + '_watermarked.pdf';
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                setTimeout(function () { URL.revokeObjectURL(url); }, 10000); toast('İndirme başladı!', 'success');
+                setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+                toast('İndirme başladı!', 'success');
             });
 
             document.getElementById('again-btn').addEventListener('click', function (e) { e.preventDefault(); resetAll(); });
 
             function resetAll() {
                 resultSec.style.display = 'none'; progressSec.style.display = 'none';
-                fileSection.style.display = 'none'; zoneContent.style.display = '';
-                pdfFile = null; pdfBuffer = null; totalPages = 0; resultBlob = null;
+                mainContent.style.display = 'none'; zone.style.display = '';
+                pdfFile = null; pdfBuffer = null; totalPages = 0; pdfJsDoc = null; resultBlob = null;
                 processBtn.disabled = true; processBtn.style.opacity = '0.5';
             }
 
-            // Init preview
-            updatePreview();
-
-            return { updatePreview: updatePreview, setScope: setScope };
+            preview();
+            return { preview: preview };
         })();
     </script>
 </body>

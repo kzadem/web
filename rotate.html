@@ -5,188 +5,188 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PDF Döndür – PDFix</title>
-    <meta name="description" content="PDF sayfalarını 90°, 180° veya 270° döndürün. Ücretsiz online araç." />
+    <meta name="description" content="PDF sayfalarını tek tek döndürün. Görsel önizleme ile kolay düzenleme." />
     <link rel="stylesheet" href="css/main.css" />
     <link rel="stylesheet" href="css/animations.css" />
     <link rel="stylesheet" href="css/tool-page.css" />
     <style>
-        .rotate-controls {
-            display: flex;
-            gap: var(--sp-sm);
-            justify-content: center;
-            margin: var(--sp-lg) 0;
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+            margin-top: var(--sp-md);
         }
 
-        .rotate-btn {
-            width: 80px;
-            height: 80px;
+        .pg-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
             border-radius: var(--radius-lg);
-            border: 2px solid var(--border-color);
-            background: var(--bg-input);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            gap: 4px;
-        }
-
-        .rotate-btn:hover {
-            border-color: var(--brand-primary);
-            transform: scale(1.05);
-        }
-
-        .rotate-btn.active {
-            border-color: var(--brand-primary);
-            background: rgba(255, 107, 53, 0.1);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
-        }
-
-        .rotate-btn .rb-icon {
-            font-size: 28px;
-        }
-
-        .rotate-btn .rb-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-secondary);
-        }
-
-        .rotate-btn.active .rb-label {
-            color: var(--brand-primary);
-        }
-
-        .page-carousel {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 8px 0 12px;
-            scroll-behavior: smooth;
-        }
-
-        .page-carousel::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .page-carousel::-webkit-scrollbar-track {
-            background: var(--bg-input);
-            border-radius: 3px;
-        }
-
-        .page-carousel::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 3px;
-        }
-
-        .page-card {
-            flex: 0 0 auto;
-            width: 120px;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.2s;
-        }
-
-        .page-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .page-card.selected .pc-wrap {
-            border-color: var(--brand-primary);
-            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
-        }
-
-        .pc-wrap {
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-            background: white;
-            aspect-ratio: 210/297;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .pc-wrap canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        .pc-label {
+            padding: 10px;
             text-align: center;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-top: 4px;
+            transition: all 0.25s;
         }
 
-        .page-card.selected .pc-label {
-            color: var(--brand-primary);
+        .pg-card:hover {
+            border-color: rgba(255, 107, 53, 0.3);
+            transform: translateY(-2px);
         }
 
-        .pc-badge {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--brand-gradient);
-            color: white;
-            font-size: 10px;
-            font-weight: 900;
-            display: none;
+        .pg-card.rotated {
+            border-color: var(--brand-primary);
+            background: rgba(255, 107, 53, 0.04);
+        }
+
+        .pg-canvas-wrap {
+            aspect-ratio: 210/297;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
             align-items: center;
             justify-content: center;
+            margin-bottom: 8px;
         }
 
-        .page-card.selected .pc-badge {
-            display: flex;
+        .pg-canvas-wrap canvas {
+            max-width: 100%;
+            max-height: 100%;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .pc-loader {
+        .pg-loader {
             position: absolute;
             inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             background: white;
-            font-size: 11px;
-            color: #999;
+            font-size: 20px;
         }
 
-        .pc-rotation-badge {
-            position: absolute;
-            bottom: 4px;
-            left: 4px;
-            padding: 2px 6px;
-            font-size: 9px;
+        .pg-label {
+            font-size: 12px;
             font-weight: 700;
-            border-radius: 4px;
-            background: rgba(0, 0, 0, 0.7);
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .pg-rotation-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: 10px;
+            background: var(--bg-input);
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            transition: all 0.2s;
+        }
+
+        .pg-card.rotated .pg-rotation-badge {
+            background: var(--brand-gradient);
             color: white;
-            display: none;
         }
 
-        .page-select-bar {
+        .pg-rotate-btns {
             display: flex;
-            flex-wrap: wrap;
-            gap: var(--sp-xs);
-            margin-bottom: var(--sp-sm);
+            gap: 4px;
+            justify-content: center;
         }
 
-        .apply-scope {
+        .pg-rot-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .pg-rot-btn:hover {
+            border-color: var(--brand-primary);
+            color: var(--brand-primary);
+            transform: scale(1.1);
+        }
+
+        .pg-rot-btn:active {
+            transform: scale(0.95);
+        }
+
+        .help-banner {
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.08), rgba(255, 107, 53, 0.08));
+            border: 1px solid rgba(67, 97, 238, 0.15);
+            border-radius: var(--radius-lg);
+            padding: var(--sp-lg);
+            margin-top: var(--sp-lg);
+            display: flex;
+            gap: var(--sp-md);
+            align-items: flex-start;
+        }
+
+        .help-banner__icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .help-banner__title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .help-banner__text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .help-steps {
+            display: flex;
+            gap: var(--sp-lg);
+            margin-top: var(--sp-sm);
+            flex-wrap: wrap;
+        }
+
+        .help-step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .help-step__num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--brand-gradient);
+            color: white;
+            font-size: 11px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .global-controls {
             display: flex;
             gap: var(--sp-sm);
-            margin: var(--sp-md) 0;
             flex-wrap: wrap;
-            align-items: center;
+            margin-top: var(--sp-md);
+            padding: var(--sp-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
         }
 
-        .scope-chip {
+        .gc-btn {
             padding: 6px 14px;
             border-radius: var(--radius-full);
             font-size: 12px;
@@ -198,29 +198,34 @@
             transition: all 0.2s;
         }
 
-        .scope-chip:hover {
+        .gc-btn:hover {
             border-color: var(--brand-primary);
+            color: var(--brand-primary);
         }
 
-        .scope-chip.active {
-            background: var(--brand-gradient);
-            color: white;
-            border-color: transparent;
+        @media (max-width: 480px) {
+            .pages-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 10px;
+            }
+
+            .help-steps {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 
 <body>
+
     <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
     <nav class="navbar" id="navbar">
         <div class="container navbar__inner">
             <a href="index.html" class="navbar__logo">
                 <div class="logo-icon">⚡</div><span>PDFix</span>
             </a>
-            <div class="navbar__nav">
-                <a href="index.html">Ana Sayfa</a><a href="merge.html">Birleştir</a>
-                <a href="compress.html">Sıkıştır</a><a href="split.html">Böl</a>
-            </div>
+            <div class="navbar__nav"><a href="index.html">Ana Sayfa</a><a href="merge.html">Birleştir</a><a
+                    href="split.html">Böl</a><a href="compress.html">Sıkıştır</a></div>
             <div class="navbar__actions"><a href="index.html" class="btn btn-outline btn-sm">Tüm Araçlar</a></div>
         </div>
     </nav>
@@ -231,143 +236,114 @@
             </div>
             <div class="page-hero__icon" style="background:rgba(6,214,160,0.15);">🔄</div>
             <h1 class="page-hero__title">PDF Döndür</h1>
-            <p class="page-hero__sub">Sayfaları görsel olarak seçin ve istediğiniz açıda döndürün.</p>
+            <p class="page-hero__sub">Sayfalarınızı görsel olarak önizleyin, tek tek veya toplu döndürün.</p>
         </div>
     </section>
 
     <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
         <div class="container">
-            <div class="tool-layout">
-                <div class="tool-main">
 
-                    <div id="upload-zone" class="upload-zone">
-                        <div id="zone-content">
-                            <div class="upload-zone__icon icon-bounce"
-                                style="background:rgba(6,214,160,0.15);color:var(--accent-green);">🔄</div>
-                            <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
-                            <p class="upload-zone__sub">veya butona tıklayın · Maksimum 100 MB</p>
-                            <div style="margin-top:var(--sp-lg);position:relative;z-index:10;">
-                                <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">📂 PDF
-                                    Seç</button>
-                            </div>
-                        </div>
-                        <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+            <!-- Upload Zone -->
+            <div id="upload-zone" class="upload-zone" style="max-width:700px;margin:0 auto;">
+                <div id="zone-content">
+                    <div class="upload-zone__icon icon-bounce"
+                        style="background:rgba(6,214,160,0.15);color:var(--accent-green);">🔄</div>
+                    <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
+                    <p class="upload-zone__sub">veya butona tıklayın · Maksimum 100 MB</p>
+                    <div style="margin-top:var(--sp-lg);">
+                        <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">📂 PDF
+                            Seç</button>
                     </div>
+                </div>
+                <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+            </div>
 
-                    <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
-                        <!-- File info -->
-                        <div
-                            style="display:flex;align-items:center;gap:var(--sp-md);padding:var(--sp-md);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
-                            <div style="font-size:28px;">📄</div>
-                            <div style="flex:1;">
-                                <div id="file-name" style="font-size:14px;font-weight:700;"></div>
-                                <div id="file-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px;">
-                                </div>
-                            </div>
-                            <button type="button" id="remove-file"
-                                style="cursor:pointer;font-size:18px;color:var(--text-muted);background:none;border:none;">✕</button>
-                        </div>
+            <!-- Main Content (after file loaded) -->
+            <div id="main-content" style="display:none;">
 
-                        <!-- Rotation angle selector -->
-                        <div style="margin-top:var(--sp-lg);text-align:center;">
-                            <div style="font-size:14px;font-weight:700;margin-bottom:var(--sp-sm);">Döndürme Açısı</div>
-                            <div class="rotate-controls">
-                                <div class="rotate-btn active" data-angle="90">
-                                    <div class="rb-icon">↻</div>
-                                    <div class="rb-label">90°</div>
-                                </div>
-                                <div class="rotate-btn" data-angle="180">
-                                    <div class="rb-icon">⟳</div>
-                                    <div class="rb-label">180°</div>
-                                </div>
-                                <div class="rotate-btn" data-angle="270">
-                                    <div class="rb-icon">↺</div>
-                                    <div class="rb-label">270°</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Apply scope -->
-                        <div style="margin-top:var(--sp-lg);">
-                            <div style="font-size:14px;font-weight:700;margin-bottom:var(--sp-sm);">Hangi Sayfalara
-                                Uygulansın?</div>
-                            <div class="apply-scope">
-                                <div class="scope-chip active" data-scope="all">Tümü</div>
-                                <div class="scope-chip" data-scope="selected">Seçilen Sayfalar</div>
-                                <div class="scope-chip" data-scope="odd">Tek Sayfalar</div>
-                                <div class="scope-chip" data-scope="even">Çift Sayfalar</div>
-                            </div>
-                        </div>
-
-                        <!-- Page preview carousel -->
-                        <div
-                            style="margin-top:var(--sp-lg);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:var(--sp-md);">
-                            <div
-                                style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-sm);">
-                                <h3 style="font-size:14px;font-weight:700;">📑 Sayfalar <span id="page-count-label"
-                                        style="color:var(--text-muted);font-weight:400;"></span></h3>
-                                <div class="page-select-bar">
-                                    <button type="button" class="btn btn-ghost btn-sm"
-                                        onclick="RotateTool.selAll()">Tümü Seç</button>
-                                    <button type="button" class="btn btn-ghost btn-sm"
-                                        onclick="RotateTool.selNone()">Temizle</button>
-                                </div>
-                            </div>
-                            <div class="page-carousel" id="page-carousel"></div>
-                            <div id="select-info"
-                                style="font-size:12px;color:var(--text-muted);margin-top:var(--sp-sm);"></div>
-                        </div>
-
-                        <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
-                            style="width:100%;margin-top:var(--sp-lg);" disabled>
-                            🔄 Döndür ve İndir
-                        </button>
+                <!-- File bar -->
+                <div
+                    style="display:flex;align-items:center;gap:var(--sp-md);padding:var(--sp-md);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                    <div style="font-size:28px;">📄</div>
+                    <div style="flex:1;">
+                        <div id="file-name" style="font-size:14px;font-weight:700;"></div>
+                        <div id="file-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
                     </div>
+                    <button type="button" id="remove-file" class="gc-btn">✕ Kaldır</button>
+                </div>
 
-                    <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
-                        <div class="progress-card">
-                            <div style="font-size:48px;margin-bottom:var(--sp-md);">🔄</div>
-                            <div class="progress-card__title">Sayfalar Döndürülüyor...</div>
-                            <div id="progress-status">İşlem başlıyor...</div>
-                            <div id="progress-wrap" class="progress-bar-wrap">
-                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                <!-- Help Banner -->
+                <div class="help-banner">
+                    <div class="help-banner__icon">💡</div>
+                    <div>
+                        <div class="help-banner__title">Nasıl Kullanılır?</div>
+                        <div class="help-banner__text">Her sayfanın altındaki ok butonlarına tıklayarak o sayfayı
+                            döndürün. Döndürme işlemi anında önizlemede görünür.</div>
+                        <div class="help-steps">
+                            <div class="help-step">
+                                <div class="help-step__num">1</div> Sayfayı bulun
                             </div>
-                        </div>
-                    </div>
-
-                    <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
-                        <div class="result-card">
-                            <span class="result-card__icon">✅</span>
-                            <div class="result-card__title">Sayfalar Döndürüldü!</div>
-                            <div class="result-card__sub" id="result-info"></div>
-                            <div class="result-actions">
-                                <button type="button" id="download-btn"
-                                    class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ İndir</button>
-                                <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden
-                                    Başla</button>
+                            <div class="help-step">
+                                <div class="help-step__num">2</div> ↻ veya ↺ butonuna tıklayın
+                            </div>
+                            <div class="help-step">
+                                <div class="help-step__num">3</div> "Kaydet ve İndir" butonuna basın
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="tool-sidebar">
-                    <div class="info-card">
-                        <div class="info-card__title">Kullanım</div>
-                        <ul>
-                            <li>PDF yükleyin ve sayfaları önizleyin</li>
-                            <li>Döndürme açısını seçin</li>
-                            <li>Tüm veya belirli sayfaları döndürün</li>
-                            <li>Döndürülmüş PDF'i indirin</li>
-                        </ul>
-                    </div>
-                    <div class="info-card"
-                        style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);">
-                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
-                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Tüm işlemler
-                            tarayıcınızda gerçekleşir.</p>
+                <!-- Global controls -->
+                <div class="global-controls">
+                    <span
+                        style="font-size:13px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;">Toplu
+                        İşlem:</span>
+                    <button type="button" class="gc-btn" onclick="RT.rotateAll(90)">↻ Tümünü 90°</button>
+                    <button type="button" class="gc-btn" onclick="RT.rotateAll(180)">⟳ Tümünü 180°</button>
+                    <button type="button" class="gc-btn" onclick="RT.rotateAll(270)">↺ Tümünü 270°</button>
+                    <button type="button" class="gc-btn" onclick="RT.rotateAll(0)">⟲ Tümünü Sıfırla</button>
+                </div>
+
+                <!-- Pages Grid -->
+                <div id="pages-grid" class="pages-grid"></div>
+
+                <!-- Save Button -->
+                <div style="margin-top:var(--sp-2xl);text-align:center;">
+                    <button type="button" id="save-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                        style="min-width:300px;" disabled>
+                        🔄 Kaydet ve İndir
+                    </button>
+                    <div id="change-info" style="font-size:12px;color:var(--text-muted);margin-top:var(--sp-sm);">Henüz
+                        değişiklik yapılmadı</div>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
+                <div class="progress-card" style="max-width:500px;margin:0 auto;">
+                    <div style="font-size:48px;margin-bottom:var(--sp-md);">🔄</div>
+                    <div class="progress-card__title">Sayfalar Döndürülüyor...</div>
+                    <div id="progress-status">İşlem başlıyor...</div>
+                    <div class="progress-bar-wrap">
+                        <div id="progress-bar" class="progress-bar" style="width:0%"></div>
                     </div>
                 </div>
             </div>
+
+            <!-- Result -->
+            <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
+                <div class="result-card" style="max-width:500px;margin:0 auto;">
+                    <span class="result-card__icon">✅</span>
+                    <div class="result-card__title">Sayfalar Döndürüldü!</div>
+                    <div class="result-card__sub" id="result-info"></div>
+                    <div class="result-actions">
+                        <button type="button" id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️
+                            İndir</button>
+                        <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -383,29 +359,41 @@
     <script src="js/main.js"></script>
 
     <script>
-        var RotateTool = (function () {
+        var RT = (function () {
+            'use strict';
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-            var pdfFile = null, pdfBuffer = null, totalPages = 0, pdfJsDoc = null;
-            var rotateAngle = 90, applyScope = 'all', selectedPages = {}, resultBlob = null;
+            var pdfFile = null, pdfBuffer = null, totalPages = 0, pdfJsDoc = null, resultBlob = null;
+            var rotations = []; // per-page rotation: [0, 90, 180, 270, ...]
 
-            var zone = document.getElementById('upload-zone'),
-                zoneContent = document.getElementById('zone-content'),
-                fileInput = document.getElementById('file-input'),
-                fileSection = document.getElementById('file-section'),
-                processBtn = document.getElementById('process-btn'),
-                progressSec = document.getElementById('progress-section'),
-                resultSec = document.getElementById('result-section'),
-                bar = document.getElementById('progress-bar'),
-                statusEl = document.getElementById('progress-status'),
-                carousel = document.getElementById('page-carousel');
+            var zone = document.getElementById('upload-zone');
+            var zoneContent = document.getElementById('zone-content');
+            var fileInput = document.getElementById('file-input');
+            var mainContent = document.getElementById('main-content');
+            var pagesGrid = document.getElementById('pages-grid');
+            var saveBtn = document.getElementById('save-btn');
+            var progressSec = document.getElementById('progress-section');
+            var resultSec = document.getElementById('result-section');
+            var bar = document.getElementById('progress-bar');
+            var statusEl = document.getElementById('progress-status');
 
             function fmtSize(b) { if (!b) return '0 B'; var k = 1024, s = ['B', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(b) / Math.log(k)); return (b / Math.pow(k, i)).toFixed(1) + ' ' + s[i]; }
             function toast(m, t) { if (window.Toast) window.Toast.show(m, t || 'info'); }
 
-            // File handling
-            document.getElementById('browse-btn').addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); fileInput.click(); });
-            fileInput.addEventListener('change', function () { if (this.files.length > 0) loadPDF(this.files[0]); this.value = ''; });
+            // ── FILE INPUT ──
+            // Only button triggers file dialog
+            document.getElementById('browse-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function () {
+                if (this.files && this.files.length > 0) loadPDF(this.files[0]);
+                this.value = '';
+            });
+
             zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
             zone.addEventListener('dragleave', function (e) { if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over'); });
             zone.addEventListener('drop', function (e) { e.preventDefault(); zone.classList.remove('drag-over'); if (e.dataTransfer.files.length > 0) loadPDF(e.dataTransfer.files[0]); });
@@ -415,140 +403,218 @@
             document.getElementById('remove-file').addEventListener('click', resetAll);
 
             async function loadPDF(file) {
-                if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') { toast('PDF dosyası seçin.', 'error'); return; }
-                if (file.size > 104857600) { toast('100MB limitini aşıyor.', 'error'); return; }
-                pdfFile = file; pdfBuffer = await file.arrayBuffer();
-                try { var doc = await PDFLib.PDFDocument.load(pdfBuffer); totalPages = doc.getPageCount(); } catch (e) { toast('PDF okunamadı.', 'error'); return; }
-                try { pdfJsDoc = await pdfjsLib.getDocument({ data: pdfBuffer.slice(0) }).promise; } catch (e) { toast('Render hatası.', 'error'); return; }
+                if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+                    toast('PDF dosyası seçin.', 'error'); return;
+                }
+                if (file.size > 104857600) { toast('100MB limiti aşıyor.', 'error'); return; }
+
+                pdfFile = file;
+                pdfBuffer = await file.arrayBuffer();
+
+                try {
+                    var doc = await PDFLib.PDFDocument.load(pdfBuffer);
+                    totalPages = doc.getPageCount();
+                } catch (e) { toast('PDF okunamadı: ' + e.message, 'error'); return; }
+
+                try {
+                    pdfJsDoc = await pdfjsLib.getDocument({ data: pdfBuffer.slice(0) }).promise;
+                } catch (e) { toast('Render hatası.', 'error'); return; }
 
                 document.getElementById('file-name').textContent = file.name;
                 document.getElementById('file-meta').textContent = fmtSize(file.size) + ' · ' + totalPages + ' sayfa';
-                document.getElementById('page-count-label').textContent = '(' + totalPages + ' sayfa)';
-                zoneContent.style.display = 'none'; fileSection.style.display = 'block';
-                processBtn.disabled = false; processBtn.style.opacity = '1';
-                selectedPages = {}; for (var p = 1; p <= totalPages; p++)selectedPages[p] = false;
-                renderCarousel();
-                toast(file.name + ' — ' + totalPages + ' sayfa', 'success');
+
+                zone.style.display = 'none';
+                mainContent.style.display = 'block';
+
+                // Init rotation state
+                rotations = [];
+                for (var i = 0; i < totalPages; i++) rotations.push(0);
+
+                renderPages();
+                updateChangeInfo();
+                toast(file.name + ' — ' + totalPages + ' sayfa yüklendi', 'success');
             }
 
-            async function renderCarousel() {
-                carousel.innerHTML = '';
+            // ── RENDER PAGE CARDS ──
+            async function renderPages() {
+                pagesGrid.innerHTML = '';
+
                 for (var p = 1; p <= totalPages; p++) {
-                    var card = document.createElement('div'); card.className = 'page-card'; card.dataset.page = p;
-                    var wrap = document.createElement('div'); wrap.className = 'pc-wrap';
-                    var canvas = document.createElement('canvas'); canvas.id = 'pc-' + p; wrap.appendChild(canvas);
-                    var badge = document.createElement('div'); badge.className = 'pc-badge'; badge.textContent = '✓'; wrap.appendChild(badge);
-                    var loader = document.createElement('div'); loader.className = 'pc-loader'; loader.id = 'pl-' + p; loader.textContent = '⏳'; wrap.appendChild(loader);
-                    var rotBadge = document.createElement('div'); rotBadge.className = 'pc-rotation-badge'; rotBadge.id = 'rb-' + p; wrap.appendChild(rotBadge);
-                    card.appendChild(wrap);
-                    var label = document.createElement('div'); label.className = 'pc-label'; label.textContent = 'Sayfa ' + p; card.appendChild(label);
-                    (function (pg) {
-                        card.addEventListener('click', function () {
-                            if (applyScope === 'selected') { selectedPages[pg] = !selectedPages[pg]; this.classList.toggle('selected', selectedPages[pg]); updateInfo(); }
-                        });
-                    })(p);
-                    carousel.appendChild(card);
+                    var card = document.createElement('div');
+                    card.className = 'pg-card';
+                    card.id = 'pg-' + p;
+
+                    var label = document.createElement('div');
+                    label.className = 'pg-label';
+                    label.textContent = 'Sayfa ' + p;
+                    card.appendChild(label);
+
+                    var badge = document.createElement('div');
+                    badge.className = 'pg-rotation-badge';
+                    badge.id = 'badge-' + p;
+                    badge.textContent = '0°';
+                    card.appendChild(badge);
+
+                    var cwrap = document.createElement('div');
+                    cwrap.className = 'pg-canvas-wrap';
+
+                    var canvas = document.createElement('canvas');
+                    canvas.id = 'cv-' + p;
+                    cwrap.appendChild(canvas);
+
+                    var loader = document.createElement('div');
+                    loader.className = 'pg-loader';
+                    loader.id = 'ld-' + p;
+                    loader.textContent = '⏳';
+                    cwrap.appendChild(loader);
+
+                    card.appendChild(cwrap);
+
+                    // Rotate buttons
+                    var btns = document.createElement('div');
+                    btns.className = 'pg-rotate-btns';
+                    btns.innerHTML =
+                        '<button type="button" class="pg-rot-btn" data-page="' + p + '" data-dir="-90" title="Sola 90°">↺</button>' +
+                        '<button type="button" class="pg-rot-btn" data-page="' + p + '" data-dir="90" title="Sağa 90°">↻</button>' +
+                        '<button type="button" class="pg-rot-btn" data-page="' + p + '" data-dir="180" title="180°">⟳</button>';
+                    card.appendChild(btns);
+
+                    pagesGrid.appendChild(card);
                 }
-                for (var i = 1; i <= totalPages; i++)renderThumb(i);
-                updateInfo();
+
+                // Attach click handlers
+                pagesGrid.querySelectorAll('.pg-rot-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var pg = parseInt(this.dataset.page);
+                        var dir = parseInt(this.dataset.dir);
+                        rotatePage(pg, dir);
+                    });
+                });
+
+                // Render thumbnails
+                for (var i = 1; i <= totalPages; i++) renderThumb(i);
             }
 
             async function renderThumb(num) {
                 try {
-                    var page = await pdfJsDoc.getPage(num); var vp = page.getViewport({ scale: 0.35 });
-                    var c = document.getElementById('pc-' + num); if (!c) return; c.width = vp.width; c.height = vp.height;
-                    await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
-                    var l = document.getElementById('pl-' + num); if (l) l.style.display = 'none';
-                } catch (e) { }
-            }
-
-            // Rotation angle selector
-            document.querySelectorAll('.rotate-btn').forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    document.querySelectorAll('.rotate-btn').forEach(function (b) { b.classList.remove('active'); });
-                    this.classList.add('active'); rotateAngle = parseInt(this.dataset.angle);
-                });
-            });
-
-            // Scope selector
-            document.querySelectorAll('.scope-chip').forEach(function (chip) {
-                chip.addEventListener('click', function () {
-                    document.querySelectorAll('.scope-chip').forEach(function (c) { c.classList.remove('active'); });
-                    this.classList.add('active'); applyScope = this.dataset.scope; updateInfo();
-                });
-            });
-
-            function updateInfo() {
-                var info = '', affected = getAffectedPages();
-                info = affected.length + '/' + totalPages + ' sayfa ' + rotateAngle + '° döndürülecek';
-                document.getElementById('select-info').textContent = info;
-                // Highlight affected pages
-                document.querySelectorAll('.page-card').forEach(function (c) {
-                    var pg = parseInt(c.dataset.page);
-                    var isAffected = affected.indexOf(pg) !== -1;
-                    if (applyScope === 'selected') c.classList.toggle('selected', !!selectedPages[pg]);
-                    else { c.classList.toggle('selected', isAffected); }
-                });
-            }
-
-            function getAffectedPages() {
-                var pages = [];
-                for (var p = 1; p <= totalPages; p++) {
-                    if (applyScope === 'all') pages.push(p);
-                    else if (applyScope === 'odd' && p % 2 === 1) pages.push(p);
-                    else if (applyScope === 'even' && p % 2 === 0) pages.push(p);
-                    else if (applyScope === 'selected' && selectedPages[p]) pages.push(p);
+                    var page = await pdfJsDoc.getPage(num);
+                    var vp = page.getViewport({ scale: 0.5 });
+                    var canvas = document.getElementById('cv-' + num);
+                    if (!canvas) return;
+                    canvas.width = vp.width;
+                    canvas.height = vp.height;
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                    var ld = document.getElementById('ld-' + num);
+                    if (ld) ld.style.display = 'none';
+                } catch (e) {
+                    console.warn('Page ' + num + ' render failed:', e);
                 }
-                return pages;
             }
 
-            function selAll() { for (var k in selectedPages) selectedPages[k] = true; updateInfo(); }
-            function selNone() { for (var k in selectedPages) selectedPages[k] = false; updateInfo(); }
+            // ── ROTATE A PAGE ──
+            function rotatePage(pageNum, degrees) {
+                var idx = pageNum - 1;
+                rotations[idx] = (rotations[idx] + degrees + 360) % 360;
 
-            // REAL ROTATION
-            processBtn.addEventListener('click', function (e) {
-                e.preventDefault(); e.stopImmediatePropagation();
-                if (!pdfBuffer) { toast('PDF yükleyin.', 'error'); return; }
-                var affected = getAffectedPages();
-                if (affected.length === 0) { toast('En az 1 sayfa seçin.', 'error'); return; }
+                // Visually rotate canvas
+                var canvas = document.getElementById('cv-' + pageNum);
+                if (canvas) canvas.style.transform = 'rotate(' + rotations[idx] + 'deg)';
 
-                progressSec.style.display = 'block'; fileSection.style.display = 'none';
-                resultSec.style.display = 'none'; processBtn.disabled = true;
+                // Update badge
+                var badge = document.getElementById('badge-' + pageNum);
+                if (badge) badge.textContent = rotations[idx] + '°';
+
+                // Mark card
+                var card = document.getElementById('pg-' + pageNum);
+                if (card) card.classList.toggle('rotated', rotations[idx] !== 0);
+
+                updateChangeInfo();
+            }
+
+            // ── ROTATE ALL ──
+            function rotateAll(angle) {
+                for (var p = 1; p <= totalPages; p++) {
+                    rotations[p - 1] = angle;
+                    var canvas = document.getElementById('cv-' + p);
+                    if (canvas) canvas.style.transform = 'rotate(' + angle + 'deg)';
+                    var badge = document.getElementById('badge-' + p);
+                    if (badge) badge.textContent = angle + '°';
+                    var card = document.getElementById('pg-' + p);
+                    if (card) card.classList.toggle('rotated', angle !== 0);
+                }
+                updateChangeInfo();
+            }
+
+            function updateChangeInfo() {
+                var changed = 0;
+                for (var i = 0; i < rotations.length; i++) if (rotations[i] !== 0) changed++;
+                var infoEl = document.getElementById('change-info');
+                if (changed === 0) {
+                    infoEl.textContent = 'Henüz değişiklik yapılmadı';
+                    saveBtn.disabled = true; saveBtn.style.opacity = '0.5';
+                } else {
+                    infoEl.textContent = changed + '/' + totalPages + ' sayfa döndürüldü';
+                    saveBtn.disabled = false; saveBtn.style.opacity = '1';
+                }
+            }
+
+            // ═══════════════════
+            //  SAVE WITH PDF-LIB
+            // ═══════════════════
+            saveBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                if (!pdfBuffer) return;
+
+                mainContent.style.display = 'none';
+                progressSec.style.display = 'block';
+                resultSec.style.display = 'none';
                 bar.style.width = '0%';
 
                 (async function () {
                     try {
                         var doc = await PDFLib.PDFDocument.load(pdfBuffer);
-                        for (var i = 0; i < affected.length; i++) {
-                            statusEl.textContent = 'Sayfa ' + affected[i] + ' döndürülüyor...';
-                            bar.style.width = ((i + 1) / affected.length * 85) + '%';
-                            var page = doc.getPage(affected[i] - 1);
-                            var cur = page.getRotation().angle;
-                            page.setRotation(PDFLib.degrees(cur + rotateAngle));
+                        var changed = 0;
+
+                        for (var i = 0; i < totalPages; i++) {
+                            if (rotations[i] !== 0) {
+                                statusEl.textContent = 'Sayfa ' + (i + 1) + ' döndürülüyor (' + rotations[i] + '°)...';
+                                bar.style.width = ((i + 1) / totalPages * 85) + '%';
+                                var page = doc.getPage(i);
+                                var cur = page.getRotation().angle;
+                                page.setRotation(PDFLib.degrees(cur + rotations[i]));
+                                changed++;
+                            }
                         }
-                        statusEl.textContent = 'Kaydediliyor...'; bar.style.width = '90%';
+
+                        statusEl.textContent = 'Kaydediliyor...';
+                        bar.style.width = '90%';
                         var bytes = await doc.save();
                         resultBlob = new Blob([bytes], { type: 'application/pdf' });
-                        bar.style.width = '100%'; statusEl.textContent = 'Tamamlandı!';
+                        bar.style.width = '100%';
+                        statusEl.textContent = 'Tamamlandı!';
 
                         setTimeout(function () {
-                            progressSec.style.display = 'none'; resultSec.style.display = 'block';
-                            document.getElementById('result-info').textContent = affected.length + ' sayfa ' + rotateAngle + '° döndürüldü (' + fmtSize(resultBlob.size) + ').';
+                            progressSec.style.display = 'none';
+                            resultSec.style.display = 'block';
+                            document.getElementById('result-info').textContent = changed + ' sayfa döndürüldü (' + fmtSize(resultBlob.size) + ').';
                             toast('Döndürme tamamlandı!', 'success');
                         }, 400);
                     } catch (err) {
-                        console.error(err); toast('Hata: ' + (err.message || err), 'error');
-                        progressSec.style.display = 'none'; fileSection.style.display = 'block';
+                        console.error(err);
+                        toast('Hata: ' + (err.message || err), 'error');
+                        progressSec.style.display = 'none';
+                        mainContent.style.display = 'block';
                     }
-                    processBtn.disabled = false; processBtn.style.opacity = '1';
                 })();
             });
 
             // Download
             document.getElementById('download-btn').addEventListener('click', function (e) {
                 e.preventDefault();
-                if (!resultBlob || resultBlob.size < 500) { toast('Önce döndürme yapın.', 'error'); return; }
-                var url = URL.createObjectURL(resultBlob); var a = document.createElement('a');
+                if (!resultBlob) return;
+                var url = URL.createObjectURL(resultBlob);
+                var a = document.createElement('a');
                 a.href = url; a.download = pdfFile.name.replace(/\.pdf$/i, '') + '_rotated.pdf';
                 document.body.appendChild(a); a.click(); document.body.removeChild(a);
                 setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
@@ -559,13 +625,13 @@
 
             function resetAll() {
                 resultSec.style.display = 'none'; progressSec.style.display = 'none';
-                fileSection.style.display = 'none'; zoneContent.style.display = '';
+                mainContent.style.display = 'none'; zone.style.display = '';
                 pdfFile = null; pdfBuffer = null; totalPages = 0; pdfJsDoc = null; resultBlob = null;
-                selectedPages = {}; carousel.innerHTML = '';
-                processBtn.disabled = true; processBtn.style.opacity = '0.5';
+                rotations = []; pagesGrid.innerHTML = '';
+                saveBtn.disabled = true; saveBtn.style.opacity = '0.5';
             }
 
-            return { selAll: selAll, selNone: selNone };
+            return { rotateAll: rotateAll };
         })();
     </script>
 </body>
