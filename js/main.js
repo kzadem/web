@@ -12,39 +12,6 @@
   }, { passive: true });
 })();
 
-// ── Mega Menu Dropdown ────────────────────────────────────────────────
-(function initMegaMenu() {
-  const dropdown = document.getElementById('nav-tools-dropdown');
-  if (!dropdown) return;
-  const trigger = dropdown.querySelector('.nav-dropdown__trigger');
-  if (!trigger) return;
-
-  trigger.addEventListener('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    dropdown.classList.toggle('open');
-  });
-
-  // Close on outside click
-  document.addEventListener('click', function (e) {
-    if (!dropdown.contains(e.target)) {
-      dropdown.classList.remove('open');
-    }
-  });
-
-  // Close on Escape
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') dropdown.classList.remove('open');
-  });
-
-  // Close when clicking a menu item
-  dropdown.querySelectorAll('.mega-menu__item, .mega-menu__all-link').forEach(function (link) {
-    link.addEventListener('click', function () {
-      dropdown.classList.remove('open');
-    });
-  });
-})();
-
 // ── Scroll Reveal ─────────────────────────────────────────────────────
 (function initReveal() {
   const revealEls = document.querySelectorAll('.reveal');
