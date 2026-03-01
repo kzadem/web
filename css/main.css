@@ -305,7 +305,7 @@ body::before {
   top: calc(100% + 12px);
   left: 50%;
   transform: translateX(-50%);
-  min-width: 680px;
+  min-width: 820px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -374,6 +374,7 @@ body::before {
   color: var(--text-secondary);
   transition: all var(--transition-fast);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .mega-menu__item:hover {
