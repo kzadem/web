@@ -222,16 +222,14 @@
                     el.querySelector('div:nth-child(2)').style.color = o === level ? 'var(--brand-primary)' : '';
                 }
             });
+            // Also update the hidden radio
+            const radio = document.getElementById('c-' + (level === 'recommended' ? 'rec' : level));
+            if (radio) radio.checked = true;
         }
     </script>
-    <script src="js/tool-page.js"></script>
-    <script>
-        document.getElementById('result-section') && document.addEventListener('DOMContentLoaded', () => {
-            const origComplete = window.simulateProgress;
-            // Show file sizes in result
-            const dz = { getFiles: () => [] };
-        });
-    </script>
+    <script src="js/lib/pdf.min.js"></script>
+    <script src="js/lib/jspdf.umd.min.js"></script>
+    <script src="js/compress.js"></script>
 </body>
 
 </html>
