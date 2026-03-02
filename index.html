@@ -81,7 +81,7 @@
   </section>
 
   <!-- ══════════════════════════════════════════
-     ALL TOOLS – iLovePDF Style Flat Grid
+     ALL TOOLS – Grouped by Category
 ══════════════════════════════════════════ -->
   <section class="tools-section" id="tools">
     <div class="container">
@@ -93,130 +93,158 @@
           yapın.</p>
       </div>
 
-      <div class="tools-grid">
-
-        <a href="merge.html" class="tool-card">
-          <div class="tool-card__icon icon-orange">🔗</div>
-          <div class="tool-card__name">PDF Birleştir</div>
-          <div class="tool-card__desc">Birden fazla PDF'i istediğiniz sırayla tek dosyada birleştirin.</div>
-        </a>
-
-        <a href="split.html" class="tool-card">
-          <div class="tool-card__icon icon-blue">✂️</div>
-          <div class="tool-card__name">PDF Böl</div>
-          <div class="tool-card__desc">Bir sayfayı veya tüm seti ayırıp bağımsız PDF dosyalarına dönüştürün.</div>
-        </a>
-
-        <a href="compress.html" class="tool-card">
-          <div class="tool-card__icon icon-green">⚡</div>
-          <div class="tool-card__name">PDF Sıkıştır</div>
-          <div class="tool-card__desc">Maksimum kaliteyi koruyarak dosya boyutunu küçültün.</div>
-        </a>
-
-        <a href="pdf-to-word.html" class="tool-card">
-          <div class="tool-card__icon icon-blue">�</div>
-          <div class="tool-card__name">PDF → Word</div>
-          <div class="tool-card__desc">PDF'lerinizi kolayca düzenlenebilir DOC ve DOCX dosyalarına dönüştürün.</div>
-        </a>
-
-        <a href="pdf-to-pptx.html" class="tool-card">
-          <div class="tool-card__icon icon-pink">�</div>
-          <div class="tool-card__name">PDF → PPT</div>
-          <div class="tool-card__desc">PDF dosyalarınızı düzenlenebilir PowerPoint sunumlarına çevirin.</div>
-        </a>
-
-        <a href="pdf-to-excel.html" class="tool-card">
-          <div class="tool-card__icon icon-green">📊</div>
-          <div class="tool-card__name">PDF → Excel</div>
-          <div class="tool-card__desc">PDF'lerden verileri doğrudan Excel tablolarına birkaç saniyede aktarın.</div>
-        </a>
-
-        <a href="word-to-pdf.html" class="tool-card">
-          <div class="tool-card__icon icon-orange">�</div>
-          <div class="tool-card__name">Word → PDF</div>
-          <div class="tool-card__desc">DOC ve DOCX dosyalarını PDF'e dönüştürerek kolay okunabilir hale getirin.</div>
-        </a>
-
-        <a href="excel-to-pdf.html" class="tool-card">
-          <div class="tool-card__icon icon-teal">�</div>
-          <div class="tool-card__name">Excel → PDF</div>
-          <div class="tool-card__desc">Elektronik tablolarınızı PDF formatına dönüştürün.</div>
-        </a>
-
-        <a href="pdf-to-jpg.html" class="tool-card">
-          <div class="tool-card__icon icon-yellow">🖼️</div>
-          <div class="tool-card__name">PDF → JPG</div>
-          <div class="tool-card__desc">Her sayfayı JPG'ye dönüştürün veya PDF'teki tüm görselleri çıkarın.</div>
-        </a>
-
-        <a href="jpg-to-pdf.html" class="tool-card">
-          <div class="tool-card__icon icon-green">�️</div>
-          <div class="tool-card__name">JPG → PDF</div>
-          <div class="tool-card__desc">JPG görsellerini saniyeler içinde PDF'e dönüştürün.</div>
-        </a>
-
-        <a href="sign.html" class="tool-card">
-          <div class="tool-card__icon icon-teal">✍️</div>
-          <div class="tool-card__name">PDF İmzala</div>
-          <div class="tool-card__desc">Kendiniz imzalayın veya başkalarından elektronik imza talep edin.</div>
-        </a>
-
-        <a href="watermark.html" class="tool-card">
-          <div class="tool-card__icon icon-purple">�</div>
-          <div class="tool-card__name">Filigran Ekle</div>
-          <div class="tool-card__desc">PDF'inize saniyeler içinde metin filigranı ekleyin. Konum ve şeffaflık ayarlayın.
+      <!-- ── Grup 1: PDF Düzenle ── -->
+      <div class="tool-group reveal" style="--group-color: #FF6B35;">
+        <div class="tool-group__header">
+          <div class="tool-group__icon icon-orange">✏️</div>
+          <div>
+            <div class="tool-group__title">PDF Düzenle</div>
+            <p class="tool-group__desc">PDF dosyalarınızı birleştirin, bölün, döndürün ve düzenleyin</p>
           </div>
-        </a>
+        </div>
+        <div class="tools-grid">
+          <a href="merge.html" class="tool-card">
+            <div class="tool-card__icon icon-orange">🔗</div>
+            <div class="tool-card__name">PDF Birleştir</div>
+            <div class="tool-card__desc">Birden fazla PDF'i istediğiniz sırayla tek dosyada birleştirin.</div>
+          </a>
+          <a href="split.html" class="tool-card">
+            <div class="tool-card__icon icon-blue">✂️</div>
+            <div class="tool-card__name">PDF Böl</div>
+            <div class="tool-card__desc">Bir sayfayı veya tüm seti ayırıp bağımsız PDF dosyalarına dönüştürün.</div>
+          </a>
+          <a href="compress.html" class="tool-card">
+            <div class="tool-card__icon icon-green">⚡</div>
+            <div class="tool-card__name">PDF Sıkıştır</div>
+            <div class="tool-card__desc">Maksimum kaliteyi koruyarak dosya boyutunu küçültün.</div>
+          </a>
+          <a href="rotate.html" class="tool-card">
+            <div class="tool-card__icon icon-teal">🔄</div>
+            <div class="tool-card__name">PDF Döndür</div>
+            <div class="tool-card__desc">PDF'lerinizi istediğiniz gibi döndürün. Tek veya toplu sayfa döndürme!</div>
+          </a>
+          <a href="watermark.html" class="tool-card">
+            <div class="tool-card__icon icon-purple">🔖</div>
+            <div class="tool-card__name">Filigran Ekle</div>
+            <div class="tool-card__desc">PDF'inize saniyeler içinde metin filigranı ekleyin.</div>
+          </a>
+          <a href="pagenumber.html" class="tool-card">
+            <div class="tool-card__icon icon-orange">🔢</div>
+            <div class="tool-card__name">Sayfa Numarası</div>
+            <div class="tool-card__desc">PDF sayfalarınıza otomatik sayfa numarası ekleyin.</div>
+          </a>
+        </div>
+      </div>
 
-        <a href="rotate.html" class="tool-card">
-          <div class="tool-card__icon icon-teal">�</div>
-          <div class="tool-card__name">PDF Döndür</div>
-          <div class="tool-card__desc">PDF'lerinizi istediğiniz gibi döndürün. Tek veya toplu sayfa döndürme!</div>
-        </a>
+      <!-- ── Grup 2: PDF'den Dönüştür ── -->
+      <div class="tool-group reveal" style="--group-color: #4361EE;">
+        <div class="tool-group__header">
+          <div class="tool-group__icon icon-blue">📤</div>
+          <div>
+            <div class="tool-group__title">PDF'den Dönüştür</div>
+            <p class="tool-group__desc">PDF dosyalarınızı Word, Excel, PPT ve JPG formatlarına çevirin</p>
+          </div>
+        </div>
+        <div class="tools-grid">
+          <a href="pdf-to-word.html" class="tool-card">
+            <div class="tool-card__icon icon-blue">📝</div>
+            <div class="tool-card__name">PDF → Word</div>
+            <div class="tool-card__desc">PDF'lerinizi kolayca düzenlenebilir DOC ve DOCX dosyalarına dönüştürün.</div>
+          </a>
+          <a href="pdf-to-excel.html" class="tool-card">
+            <div class="tool-card__icon icon-green">📊</div>
+            <div class="tool-card__name">PDF → Excel</div>
+            <div class="tool-card__desc">PDF'lerden verileri doğrudan Excel tablolarına birkaç saniyede aktarın.</div>
+          </a>
+          <a href="pdf-to-pptx.html" class="tool-card">
+            <div class="tool-card__icon icon-pink">📊</div>
+            <div class="tool-card__name">PDF → PPT</div>
+            <div class="tool-card__desc">PDF dosyalarınızı düzenlenebilir PowerPoint sunumlarına çevirin.</div>
+          </a>
+          <a href="pdf-to-jpg.html" class="tool-card">
+            <div class="tool-card__icon icon-yellow">🖼️</div>
+            <div class="tool-card__name">PDF → JPG</div>
+            <div class="tool-card__desc">Her sayfayı JPG'ye dönüştürün veya PDF'teki tüm görselleri çıkarın.</div>
+          </a>
+        </div>
+      </div>
 
-        <a href="html-to-pdf.html" class="tool-card">
-          <div class="tool-card__icon icon-purple">🌐</div>
-          <div class="tool-card__name">HTML → PDF</div>
-          <div class="tool-card__desc">Web sayfalarını PDF'e dönüştürün. URL'yi yapıştırın ve tek tıkla çevirin.</div>
-        </a>
+      <!-- ── Grup 3: PDF'e Dönüştür ── -->
+      <div class="tool-group reveal" style="--group-color: #06D6A0;">
+        <div class="tool-group__header">
+          <div class="tool-group__icon icon-green">📥</div>
+          <div>
+            <div class="tool-group__title">PDF'e Dönüştür</div>
+            <p class="tool-group__desc">Word, Excel, JPG ve HTML dosyalarını PDF formatına çevirin</p>
+          </div>
+        </div>
+        <div class="tools-grid">
+          <a href="word-to-pdf.html" class="tool-card">
+            <div class="tool-card__icon icon-orange">📄</div>
+            <div class="tool-card__name">Word → PDF</div>
+            <div class="tool-card__desc">DOC ve DOCX dosyalarını PDF'e dönüştürerek kolay okunabilir hale getirin.</div>
+          </a>
+          <a href="excel-to-pdf.html" class="tool-card">
+            <div class="tool-card__icon icon-teal">📈</div>
+            <div class="tool-card__name">Excel → PDF</div>
+            <div class="tool-card__desc">Elektronik tablolarınızı PDF formatına dönüştürün.</div>
+          </a>
+          <a href="jpg-to-pdf.html" class="tool-card">
+            <div class="tool-card__icon icon-green">🗂️</div>
+            <div class="tool-card__name">JPG → PDF</div>
+            <div class="tool-card__desc">JPG görsellerini saniyeler içinde PDF'e dönüştürün.</div>
+          </a>
+          <a href="html-to-pdf.html" class="tool-card">
+            <div class="tool-card__icon icon-purple">🌐</div>
+            <div class="tool-card__name">HTML → PDF</div>
+            <div class="tool-card__desc">Web sayfalarını PDF'e dönüştürün. URL'yi yapıştırın ve tek tıkla çevirin.</div>
+          </a>
+        </div>
+      </div>
 
-        <a href="unlock.html" class="tool-card">
-          <div class="tool-card__icon icon-yellow">�</div>
-          <div class="tool-card__name">PDF Kilidi Aç</div>
-          <div class="tool-card__desc">PDF şifre güvenliğini kaldırarak dosyanızı özgürce kullanın.</div>
-        </a>
+      <!-- ── Grup 4: Güvenlik & Diğer ── -->
+      <div class="tool-group reveal" style="--group-color: #F72585;">
+        <div class="tool-group__header">
+          <div class="tool-group__icon icon-pink">🛡️</div>
+          <div>
+            <div class="tool-group__title">Güvenlik &amp; Diğer</div>
+            <p class="tool-group__desc">PDF'lerinizi koruyun, imzalayın, onarın ve daha fazlası</p>
+          </div>
+        </div>
+        <div class="tools-grid">
+          <a href="protect.html" class="tool-card">
+            <div class="tool-card__icon icon-red">🔐</div>
+            <div class="tool-card__name">PDF Koru</div>
+            <div class="tool-card__desc">PDF dosyalarınızı şifre ile koruyun ve yetkisiz erişimi engelleyin.</div>
+          </a>
+          <a href="unlock.html" class="tool-card">
+            <div class="tool-card__icon icon-yellow">🔓</div>
+            <div class="tool-card__name">PDF Kilidi Aç</div>
+            <div class="tool-card__desc">PDF şifre güvenliğini kaldırarak dosyanızı özgürce kullanın.</div>
+          </a>
+          <a href="sign.html" class="tool-card">
+            <div class="tool-card__icon icon-teal">✍️</div>
+            <div class="tool-card__name">PDF İmzala</div>
+            <div class="tool-card__desc">Kendiniz imzalayın veya başkalarından elektronik imza talep edin.</div>
+          </a>
+          <a href="redact.html" class="tool-card">
+            <div class="tool-card__icon icon-red">🚫</div>
+            <div class="tool-card__name">Sansürle</div>
+            <div class="tool-card__desc">Hassas bilgileri kalıcı olarak karartın ve gizlilik sağlayın.</div>
+          </a>
+          <a href="repair.html" class="tool-card">
+            <div class="tool-card__icon icon-yellow">🔧</div>
+            <div class="tool-card__name">PDF Onar</div>
+            <div class="tool-card__desc">Bozuk PDF dosyalarınızı kurtarın ve tekrar kullanılabilir hale getirin.</div>
+          </a>
+          <a href="ocr.html" class="tool-card">
+            <div class="tool-card__icon icon-purple">🔍</div>
+            <div class="tool-card__name">OCR – Metin Tanı</div>
+            <div class="tool-card__desc">Taranmış belgelerden metin çıkararak düzenlenebilir hale getirin.</div>
+          </a>
+        </div>
+      </div>
 
-        <a href="protect.html" class="tool-card">
-          <div class="tool-card__icon icon-red">�</div>
-          <div class="tool-card__name">PDF Koru</div>
-          <div class="tool-card__desc">PDF dosyalarınızı şifre ile koruyun ve yetkisiz erişimi engelleyin.</div>
-        </a>
-
-        <a href="pagenumber.html" class="tool-card">
-          <div class="tool-card__icon icon-orange">🔢</div>
-          <div class="tool-card__name">Sayfa Numarası</div>
-          <div class="tool-card__desc">PDF sayfalarınıza otomatik sayfa numarası ekleyin.</div>
-        </a>
-
-        <a href="repair.html" class="tool-card">
-          <div class="tool-card__icon icon-yellow">�</div>
-          <div class="tool-card__name">PDF Onar</div>
-          <div class="tool-card__desc">Bozuk PDF dosyalarınızı kurtarın ve tekrar kullanılabilir hale getirin.</div>
-        </a>
-
-        <a href="ocr.html" class="tool-card">
-          <div class="tool-card__icon icon-purple">�</div>
-          <div class="tool-card__name">OCR – Metin Tanı</div>
-          <div class="tool-card__desc">Taranmış belgelerden metin çıkararak düzenlenebilir hale getirin.</div>
-        </a>
-
-        <a href="redact.html" class="tool-card">
-          <div class="tool-card__icon icon-red">�</div>
-          <div class="tool-card__name">Sansürle</div>
-          <div class="tool-card__desc">Hassas bilgileri kalıcı olarak karartın ve gizlilik sağlayın.</div>
-        </a>
-
-      </div><!-- /tools-grid -->
     </div>
   </section>
 
