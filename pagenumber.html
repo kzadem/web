@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sayfa Numarası Ekle – PDFix</title>
+    <meta name="description"
+        content="PDF sayfalarınıza otomatik sayfa numarası ekleyin. Konum, format ve stil özelleştirmeleri." />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/tool-page.css" />
+    <style>
+        .pn-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--sp-xl);
+            margin-top: var(--sp-lg);
+            align-items: start;
+        }
+
+        @media(max-width:768px) {
+            .pn-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pn-settings {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--sp-lg);
+        }
+
+        .pn-settings__title {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: var(--sp-lg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .setting-group {
+            margin-bottom: var(--sp-lg);
+        }
+
+        .setting-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .setting-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+        }
+
+        .setting-input:focus {
+            border-color: var(--brand-primary);
+        }
+
+        .setting-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--sp-sm);
+        }
+
+        .setting-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: var(--sp-sm);
+        }
+
+        /* Position grid */
+        .pos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .pos-btn {
+            padding: 8px 4px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .pos-btn:hover {
+            border-color: var(--brand-primary);
+        }
+
+        .pos-btn.active {
+            background: rgba(255, 107, 53, 0.12);
+            border-color: var(--brand-primary);
+            color: var(--brand-primary);
+            font-weight: 700;
+        }
+
+        /* Scope chips */
+        .scope-chips {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .scope-chip {
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .scope-chip:hover {
+            border-color: var(--brand-primary);
+        }
+
+        .scope-chip.active {
+            background: var(--brand-gradient);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Format chips */
+        .format-chips {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .format-chip {
+            padding: 8px 14px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .format-chip:hover {
+            border-color: var(--brand-primary);
+        }
+
+        .format-chip.active {
+            background: rgba(255, 107, 53, 0.12);
+            border-color: var(--brand-primary);
+            color: var(--brand-primary);
+            font-weight: 700;
+        }
+
+        /* Preview panel */
+        .pn-preview-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--sp-lg);
+            position: sticky;
+            top: 80px;
+        }
+
+        .pn-preview-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: var(--sp-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pn-preview-canvas-area {
+            background: linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%),
+                linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 8px 8px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--sp-lg);
+            min-height: 400px;
+        }
+
+        .pn-page-mock {
+            width: 240px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 210/297;
+        }
+
+        .pn-page-mock canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .pn-mock-lines {
+            position: absolute;
+            inset: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+
+        .pn-mock-lines div {
+            height: 4px;
+            background: #eee;
+            border-radius: 2px;
+        }
+
+        .pn-number-overlay {
+            position: absolute;
+            font-weight: 700;
+            pointer-events: none;
+            padding: 4px 8px;
+        }
+
+        /* Mini page preview */
+        .pn-page-preview-scroll {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 6px 0;
+            margin-top: var(--sp-md);
+        }
+
+        .pn-page-preview-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .pn-page-preview-scroll::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .pn-mini-page {
+            width: 50px;
+            aspect-ratio: 210/297;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            background: white;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .pn-mini-page canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .pn-mini-num {
+            position: absolute;
+            font-size: 6px;
+            font-weight: 700;
+            color: rgba(255, 107, 53, 0.8);
+        }
+
+        .pn-mini-page.excluded {
+            opacity: 0.35;
+        }
+
+        /* Range slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            margin-top: 6px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--brand-gradient);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+    <nav class="navbar" id="navbar"></nav>
+    <script src="js/navbar.js"></script>
+
+    <section class="page-hero" style="background:linear-gradient(180deg,rgba(255,183,3,0.05) 0%,transparent 100%);">
+        <div class="container">
+            <div class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="sep">›</span><span>Sayfa
+                    Numarası</span>
+            </div>
+            <div class="page-hero__icon" style="background:rgba(255,183,3,0.15);">🔢</div>
+            <h1 class="page-hero__title">Sayfa Numarası Ekle</h1>
+            <p class="page-hero__sub">PDF sayfalarına otomatik numara ekleyin. Konum, format ve stili tamamen
+                özelleştirin.</p>
+        </div>
+    </section>
+
+    <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
+        <div class="container">
+
+            <!-- Upload -->
+            <div id="upload-zone" class="upload-zone" style="max-width:700px;margin:0 auto;">
+                <div id="zone-content">
+                    <div class="upload-zone__icon icon-bounce"
+                        style="background:rgba(255,183,3,0.15);color:var(--accent-yellow);">🔢</div>
+                    <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
+                    <p class="upload-zone__sub">veya butona tıklayın · Maksimum 100 MB</p>
+                    <div style="margin-top:var(--sp-lg);">
+                        <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">📂 PDF
+                            Seç</button>
+                    </div>
+                </div>
+                <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+            </div>
+
+            <!-- Main Content -->
+            <div id="main-content" style="display:none;">
+
+                <!-- File bar -->
+                <div
+                    style="display:flex;align-items:center;gap:var(--sp-md);padding:var(--sp-md);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                    <div style="font-size:28px;">📄</div>
+                    <div style="flex:1;">
+                        <div id="file-name" style="font-size:14px;font-weight:700;"></div>
+                        <div id="file-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px;"></div>
+                    </div>
+                    <button type="button" id="remove-file"
+                        style="cursor:pointer;font-size:13px;padding:6px 14px;border-radius:var(--radius-full);border:1px solid var(--border-color);background:var(--bg-input);color:var(--text-secondary);">✕
+                        Kaldır</button>
+                </div>
+
+                <!-- Settings + Preview side by side -->
+                <div class="pn-layout">
+
+                    <!-- LEFT: Settings -->
+                    <div class="pn-settings">
+                        <div class="pn-settings__title">⚙️ Numaralandırma Ayarları</div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Numara Formatı</label>
+                            <div class="format-chips">
+                                <div class="format-chip active" data-format="number"
+                                    onclick="PN.setFormat('number',this)">1, 2, 3</div>
+                                <div class="format-chip" data-format="roman" onclick="PN.setFormat('roman',this)">i, ii,
+                                    iii</div>
+                                <div class="format-chip" data-format="pageOfN" onclick="PN.setFormat('pageOfN',this)">
+                                    Sayfa 1 / N</div>
+                                <div class="format-chip" data-format="dash" onclick="PN.setFormat('dash',this)">- 1 -
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Önek / Sonek</label>
+                            <div class="setting-row">
+                                <div>
+                                    <input type="text" id="pn-prefix" value="" placeholder="Örn: Sayfa "
+                                        class="setting-input" oninput="PN.preview()" />
+                                </div>
+                                <div>
+                                    <input type="text" id="pn-suffix" value="" placeholder="Örn:  / toplam"
+                                        class="setting-input" oninput="PN.preview()" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Konum</label>
+                            <div class="pos-grid">
+                                <div class="pos-btn" data-pos="top-left" onclick="PN.setPos('top-left',this)">Sol Üst
+                                </div>
+                                <div class="pos-btn" data-pos="top-center" onclick="PN.setPos('top-center',this)">Üst
+                                    Orta</div>
+                                <div class="pos-btn" data-pos="top-right" onclick="PN.setPos('top-right',this)">Sağ Üst
+                                </div>
+                                <div class="pos-btn" data-pos="bottom-left" onclick="PN.setPos('bottom-left',this)">Sol
+                                    Alt</div>
+                                <div class="pos-btn active" data-pos="bottom-center"
+                                    onclick="PN.setPos('bottom-center',this)">Alt Orta</div>
+                                <div class="pos-btn" data-pos="bottom-right" onclick="PN.setPos('bottom-right',this)">
+                                    Sağ Alt</div>
+                            </div>
+                        </div>
+
+                        <div class="setting-row setting-group">
+                            <div>
+                                <label class="setting-label">Yazı Boyutu</label>
+                                <select id="pn-size" class="setting-input" onchange="PN.preview()">
+                                    <option value="8">Çok Küçük (8pt)</option>
+                                    <option value="10">Küçük (10pt)</option>
+                                    <option value="12" selected>Normal (12pt)</option>
+                                    <option value="14">Orta (14pt)</option>
+                                    <option value="18">Büyük (18pt)</option>
+                                    <option value="24">Çok Büyük (24pt)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="setting-label">Renk</label>
+                                <input type="color" id="pn-color" value="#333333" class="setting-input"
+                                    style="height:42px;padding:4px;cursor:pointer;" oninput="PN.preview()" />
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Şeffaflık — <span id="opacity-val">100</span>%</label>
+                            <input type="range" id="pn-opacity" min="10" max="100" value="100"
+                                oninput="document.getElementById('opacity-val').textContent=this.value;PN.preview()" />
+                        </div>
+
+                        <div class="setting-row setting-group">
+                            <div>
+                                <label class="setting-label">Başlangıç Numarası</label>
+                                <input type="number" id="pn-start" value="1" min="1" class="setting-input"
+                                    oninput="PN.preview()" />
+                            </div>
+                            <div>
+                                <label class="setting-label">Kenar Boşluğu (px)</label>
+                                <input type="number" id="pn-margin" value="30" min="5" max="100" class="setting-input"
+                                    oninput="PN.preview()" />
+                            </div>
+                        </div>
+
+                        <div class="setting-group">
+                            <label class="setting-label">Hangi Sayfalara Uygulansın?</label>
+                            <div class="scope-chips">
+                                <div class="scope-chip active" data-scope="all" onclick="PN.setScope('all',this)">Tümü
+                                </div>
+                                <div class="scope-chip" data-scope="odd" onclick="PN.setScope('odd',this)">Tek Sayfalar
+                                </div>
+                                <div class="scope-chip" data-scope="even" onclick="PN.setScope('even',this)">Çift
+                                    Sayfalar</div>
+                                <div class="scope-chip" data-scope="skipFirst" onclick="PN.setScope('skipFirst',this)">
+                                    İlk Sayfa Hariç</div>
+                                <div class="scope-chip" data-scope="custom" onclick="PN.setScope('custom',this)">Özel
+                                    Aralık</div>
+                            </div>
+                            <div id="custom-range-wrap" style="display:none;margin-top:8px;">
+                                <input type="text" id="pn-custom-range" placeholder="Örn: 1-5, 8, 10-15"
+                                    class="setting-input" oninput="PN.preview()" />
+                            </div>
+                            <div id="scope-info" style="font-size:11px;color:var(--text-muted);margin-top:6px;"></div>
+                        </div>
+
+                        <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                            style="width:100%;margin-top:var(--sp-sm);" disabled>
+                            🔢 Sayfa Numarası Ekle ve İndir
+                        </button>
+                    </div>
+
+                    <!-- RIGHT: Preview -->
+                    <div class="pn-preview-panel">
+                        <div class="pn-preview-title">👁️ Canlı Önizleme</div>
+                        <div class="pn-preview-canvas-area">
+                            <div class="pn-page-mock" id="preview-page">
+                                <canvas id="preview-canvas" style="display:none;"></canvas>
+                                <div class="pn-mock-lines" id="mock-lines">
+                                    <div></div>
+                                    <div style="width:80%"></div>
+                                    <div></div>
+                                    <div style="width:70%"></div>
+                                    <div></div>
+                                    <div style="width:85%"></div>
+                                    <div></div>
+                                    <div style="width:60%"></div>
+                                    <div></div>
+                                    <div style="width:75%"></div>
+                                    <div></div>
+                                </div>
+                                <div class="pn-number-overlay" id="pn-overlay"
+                                    style="bottom:12px;left:50%;transform:translateX(-50%);font-size:12px;color:#333;">1
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mini page thumbnails -->
+                        <div class="pn-page-preview-scroll" id="mini-pages"></div>
+                    </div>
+
+                </div><!-- /pn-layout -->
+            </div><!-- /main-content -->
+
+            <!-- Progress -->
+            <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
+                <div class="progress-card" style="max-width:500px;margin:0 auto;">
+                    <div style="font-size:48px;margin-bottom:var(--sp-md);">🔢</div>
+                    <div class="progress-card__title">Sayfa Numaraları Ekleniyor...</div>
+                    <div id="progress-status">Sayfalar işleniyor...</div>
+                    <div class="progress-bar-wrap">
+                        <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
+                <div class="result-card" style="max-width:500px;margin:0 auto;">
+                    <span class="result-card__icon">✅</span>
+                    <div class="result-card__title">Sayfa Numaraları Eklendi!</div>
+                    <div class="result-card__sub" id="result-info"></div>
+                    <div class="result-actions">
+                        <button type="button" id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️
+                            İndir</button>
+                        <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer__bottom"><span>© 2025 PDFix.</span><a href="index.html"
+                    style="color:var(--brand-primary);">← Tüm Araçlar</a></div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        var PN = (function () {
+            'use strict';
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+            var pdfFile = null, pdfBuffer = null, totalPages = 0, pdfJsDoc = null, resultBlob = null;
+            var currentFormat = 'number';
+            var currentPos = 'bottom-center';
+            var currentScope = 'all';
+
+            var zone = document.getElementById('upload-zone');
+            var zoneContent = document.getElementById('zone-content');
+            var fileInput = document.getElementById('file-input');
+            var mainContent = document.getElementById('main-content');
+            var processBtn = document.getElementById('process-btn');
+            var progressSec = document.getElementById('progress-section');
+            var resultSec = document.getElementById('result-section');
+            var bar = document.getElementById('progress-bar');
+            var statusEl = document.getElementById('progress-status');
+
+            function fmtSize(b) { if (!b) return '0 B'; var k = 1024, s = ['B', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(b) / Math.log(k)); return (b / Math.pow(k, i)).toFixed(1) + ' ' + s[i]; }
+            function toast(m, t) { if (window.Toast) window.Toast.show(m, t || 'info'); }
+
+            // ── Roman Numerals ──
+            function toRoman(n) {
+                var r = '', vals = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+                var syms = ['m', 'cm', 'd', 'cd', 'c', 'xc', 'l', 'xl', 'x', 'ix', 'v', 'iv', 'i'];
+                for (var i = 0; i < vals.length; i++) {
+                    while (n >= vals[i]) { r += syms[i]; n -= vals[i]; }
+                }
+                return r;
+            }
+
+            // ── Format Page Number ──
+            function formatPageNum(pageIndex, total) {
+                var startNum = parseInt(document.getElementById('pn-start').value) || 1;
+                var num = startNum + pageIndex;
+                var prefix = document.getElementById('pn-prefix').value;
+                var suffix = document.getElementById('pn-suffix').value;
+
+                var formatted;
+                switch (currentFormat) {
+                    case 'roman':
+                        formatted = toRoman(num);
+                        break;
+                    case 'pageOfN':
+                        formatted = 'Sayfa ' + num + ' / ' + (startNum + total - 1);
+                        break;
+                    case 'dash':
+                        formatted = '- ' + num + ' -';
+                        break;
+                    default:
+                        formatted = '' + num;
+                }
+
+                return prefix + formatted + suffix;
+            }
+
+            // ── Get Pages to Number ──
+            function getPages() {
+                var pages = [];
+                if (currentScope === 'all') {
+                    for (var i = 0; i < totalPages; i++) pages.push(i);
+                } else if (currentScope === 'odd') {
+                    for (var i = 0; i < totalPages; i++) if (i % 2 === 0) pages.push(i);
+                } else if (currentScope === 'even') {
+                    for (var i = 0; i < totalPages; i++) if (i % 2 === 1) pages.push(i);
+                } else if (currentScope === 'skipFirst') {
+                    for (var i = 1; i < totalPages; i++) pages.push(i);
+                } else if (currentScope === 'custom') {
+                    var input = document.getElementById('pn-custom-range').value.trim();
+                    if (!input) return [];
+                    var parts = input.split(',');
+                    for (var p = 0; p < parts.length; p++) {
+                        var part = parts[p].trim();
+                        if (part.indexOf('-') !== -1) {
+                            var ab = part.split('-');
+                            var a = parseInt(ab[0]), b = parseInt(ab[1]);
+                            if (!isNaN(a) && !isNaN(b)) {
+                                for (var j = Math.min(a, b); j <= Math.max(a, b); j++) {
+                                    if (j >= 1 && j <= totalPages) pages.push(j - 1);
+                                }
+                            }
+                        } else {
+                            var n = parseInt(part);
+                            if (!isNaN(n) && n >= 1 && n <= totalPages) pages.push(n - 1);
+                        }
+                    }
+                }
+                return pages;
+            }
+
+            // ── FILE HANDLING ──
+            document.getElementById('browse-btn').addEventListener('click', function (e) {
+                e.preventDefault(); e.stopPropagation(); fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function () {
+                if (this.files && this.files.length > 0) loadPDF(this.files[0]);
+                this.value = '';
+            });
+
+            zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('drag-over'); });
+            zone.addEventListener('dragleave', function (e) { if (!zone.contains(e.relatedTarget)) zone.classList.remove('drag-over'); });
+            zone.addEventListener('drop', function (e) {
+                e.preventDefault(); zone.classList.remove('drag-over');
+                if (e.dataTransfer.files.length > 0) loadPDF(e.dataTransfer.files[0]);
+            });
+            document.body.addEventListener('dragover', function (e) { e.preventDefault(); });
+            document.body.addEventListener('drop', function (e) { e.preventDefault(); });
+
+            document.getElementById('remove-file').addEventListener('click', resetAll);
+
+            async function loadPDF(file) {
+                if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
+                    toast('PDF dosyası seçin.', 'error'); return;
+                }
+                if (file.size > 104857600) { toast('100MB limiti aşıyor.', 'error'); return; }
+
+                pdfFile = file;
+                pdfBuffer = await file.arrayBuffer();
+
+                try {
+                    var doc = await PDFLib.PDFDocument.load(pdfBuffer);
+                    totalPages = doc.getPageCount();
+                } catch (e) { toast('PDF okunamadı: ' + e.message, 'error'); return; }
+
+                try {
+                    pdfJsDoc = await pdfjsLib.getDocument({ data: pdfBuffer.slice(0) }).promise;
+                } catch (e) { toast('Render hatası.', 'error'); return; }
+
+                document.getElementById('file-name').textContent = file.name;
+                document.getElementById('file-meta').textContent = fmtSize(file.size) + ' · ' + totalPages + ' sayfa';
+
+                zone.style.display = 'none';
+                mainContent.style.display = 'block';
+                processBtn.disabled = false;
+                processBtn.style.opacity = '1';
+
+                renderPreview();
+                renderMiniPages();
+                preview();
+                toast(file.name + ' — ' + totalPages + ' sayfa yüklendi', 'success');
+            }
+
+            // ── RENDER PREVIEW ──
+            async function renderPreview() {
+                try {
+                    var page = await pdfJsDoc.getPage(1);
+                    var vp = page.getViewport({ scale: 0.6 });
+                    var canvas = document.getElementById('preview-canvas');
+                    canvas.width = vp.width;
+                    canvas.height = vp.height;
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                    canvas.style.display = 'block';
+                    document.getElementById('mock-lines').style.display = 'none';
+                } catch (e) { console.warn('Preview render failed:', e); }
+            }
+
+            // ── RENDER MINI PAGES ──
+            async function renderMiniPages() {
+                var container = document.getElementById('mini-pages');
+                container.innerHTML = '';
+                for (var p = 1; p <= totalPages; p++) {
+                    var mini = document.createElement('div');
+                    mini.className = 'pn-mini-page';
+                    mini.id = 'mini-' + p;
+                    var c = document.createElement('canvas');
+                    c.id = 'mini-cv-' + p;
+                    mini.appendChild(c);
+                    var numEl = document.createElement('div');
+                    numEl.className = 'pn-mini-num';
+                    numEl.id = 'mini-num-' + p;
+                    mini.appendChild(numEl);
+                    container.appendChild(mini);
+                    renderMiniThumb(p);
+                }
+            }
+
+            async function renderMiniThumb(num) {
+                try {
+                    var page = await pdfJsDoc.getPage(num);
+                    var vp = page.getViewport({ scale: 0.15 });
+                    var canvas = document.getElementById('mini-cv-' + num);
+                    if (!canvas) return;
+                    canvas.width = vp.width;
+                    canvas.height = vp.height;
+                    await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+                } catch (e) { }
+            }
+
+            // ── LIVE PREVIEW ──
+            function preview() {
+                var overlay = document.getElementById('pn-overlay');
+                var text = formatPageNum(0, totalPages);
+                var fontSize = parseInt(document.getElementById('pn-size').value) || 12;
+                var color = document.getElementById('pn-color').value;
+                var opacity = parseInt(document.getElementById('pn-opacity').value) / 100;
+                var margin = parseInt(document.getElementById('pn-margin').value) || 30;
+
+                // Scale for preview
+                var previewFontSize = Math.max(8, Math.round(fontSize * 240 / 595));
+                var previewMargin = Math.round(margin * 240 / 595);
+
+                overlay.textContent = text;
+                overlay.style.fontSize = previewFontSize + 'px';
+                overlay.style.color = color;
+                overlay.style.opacity = opacity;
+
+                // Reset position styles
+                overlay.style.top = ''; overlay.style.bottom = '';
+                overlay.style.left = ''; overlay.style.right = '';
+                overlay.style.transform = '';
+
+                switch (currentPos) {
+                    case 'top-left':
+                        overlay.style.top = previewMargin + 'px'; overlay.style.left = previewMargin + 'px';
+                        break;
+                    case 'top-center':
+                        overlay.style.top = previewMargin + 'px'; overlay.style.left = '50%'; overlay.style.transform = 'translateX(-50%)';
+                        break;
+                    case 'top-right':
+                        overlay.style.top = previewMargin + 'px'; overlay.style.right = previewMargin + 'px';
+                        break;
+                    case 'bottom-left':
+                        overlay.style.bottom = previewMargin + 'px'; overlay.style.left = previewMargin + 'px';
+                        break;
+                    case 'bottom-center':
+                        overlay.style.bottom = previewMargin + 'px'; overlay.style.left = '50%'; overlay.style.transform = 'translateX(-50%)';
+                        break;
+                    case 'bottom-right':
+                        overlay.style.bottom = previewMargin + 'px'; overlay.style.right = previewMargin + 'px';
+                        break;
+                }
+
+                // Update mini page numbers
+                updateMiniNumbers();
+                updateScopeInfo();
+            }
+
+            function updateMiniNumbers() {
+                var pages = getPages();
+                var pagesSet = {};
+                for (var i = 0; i < pages.length; i++) pagesSet[pages[i]] = true;
+
+                for (var p = 0; p < totalPages; p++) {
+                    var numEl = document.getElementById('mini-num-' + (p + 1));
+                    var mini = document.getElementById('mini-' + (p + 1));
+                    if (!numEl || !mini) continue;
+
+                    if (pagesSet[p]) {
+                        numEl.textContent = formatPageNum(pages.indexOf(p), totalPages);
+                        mini.classList.remove('excluded');
+                        // Position mini number
+                        numEl.style.top = ''; numEl.style.bottom = '';
+                        numEl.style.left = ''; numEl.style.right = '';
+                        numEl.style.transform = '';
+                        numEl.style.textAlign = '';
+                        numEl.style.width = '';
+
+                        if (currentPos.indexOf('top') !== -1) numEl.style.top = '2px';
+                        else numEl.style.bottom = '2px';
+
+                        if (currentPos.indexOf('left') !== -1) { numEl.style.left = '2px'; }
+                        else if (currentPos.indexOf('right') !== -1) { numEl.style.right = '2px'; }
+                        else { numEl.style.left = '0'; numEl.style.width = '100%'; numEl.style.textAlign = 'center'; }
+                    } else {
+                        numEl.textContent = '';
+                        mini.classList.add('excluded');
+                    }
+                }
+            }
+
+            function updateScopeInfo() {
+                var pages = getPages();
+                var info = document.getElementById('scope-info');
+                info.textContent = totalPages > 0 ? (pages.length + ' / ' + totalPages + ' sayfaya numara eklenecek') : '';
+            }
+
+            // ── SETTERS ──
+            function setFormat(f, el) {
+                currentFormat = f;
+                document.querySelectorAll('.format-chip').forEach(function (c) { c.classList.remove('active'); });
+                el.classList.add('active');
+
+                // Set default prefix/suffix for format
+                var pfx = document.getElementById('pn-prefix');
+                var sfx = document.getElementById('pn-suffix');
+                if (f === 'pageOfN' || f === 'dash') { pfx.value = ''; sfx.value = ''; }
+                preview();
+            }
+
+            function setPos(pos, el) {
+                currentPos = pos;
+                document.querySelectorAll('.pos-btn').forEach(function (b) { b.classList.remove('active'); });
+                el.classList.add('active');
+                preview();
+            }
+
+            function setScope(scope, el) {
+                currentScope = scope;
+                document.querySelectorAll('.scope-chip').forEach(function (c) { c.classList.remove('active'); });
+                el.classList.add('active');
+                document.getElementById('custom-range-wrap').style.display = scope === 'custom' ? 'block' : 'none';
+                preview();
+            }
+
+            // ── HEX TO RGB ──
+            function hexToRgb(hex) {
+                var r = parseInt(hex.slice(1, 3), 16) / 255;
+                var g = parseInt(hex.slice(3, 5), 16) / 255;
+                var b = parseInt(hex.slice(5, 7), 16) / 255;
+                return { r: r, g: g, b: b };
+            }
+
+            // ═══════════════════
+            //  PROCESS & SAVE
+            // ═══════════════════
+            processBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (!pdfBuffer) return;
+
+                var fontSize = parseInt(document.getElementById('pn-size').value) || 12;
+                var color = document.getElementById('pn-color').value;
+                var opacity = parseInt(document.getElementById('pn-opacity').value) / 100;
+                var margin = parseInt(document.getElementById('pn-margin').value) || 30;
+                var pages = getPages();
+                var rgb = hexToRgb(color);
+
+                if (pages.length === 0) { toast('Numara eklenecek sayfa yok.', 'error'); return; }
+
+                mainContent.style.display = 'none';
+                progressSec.style.display = 'block';
+                resultSec.style.display = 'none';
+                bar.style.width = '0%';
+
+                (async function () {
+                    try {
+                        var doc = await PDFLib.PDFDocument.load(pdfBuffer);
+
+                        // Load Unicode font for Turkish characters
+                        var fontBytes;
+                        try {
+                            var resp = await fetch('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf');
+                            fontBytes = await resp.arrayBuffer();
+                        } catch (e) { fontBytes = null; }
+
+                        var font;
+                        if (fontBytes) {
+                            font = await doc.embedFont(fontBytes, { subset: true });
+                        } else {
+                            font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+                        }
+
+                        for (var i = 0; i < pages.length; i++) {
+                            var pageIdx = pages[i];
+                            statusEl.textContent = 'Sayfa ' + (pageIdx + 1) + ' işleniyor...';
+                            bar.style.width = ((i + 1) / pages.length * 85) + '%';
+
+                            var page = doc.getPage(pageIdx);
+                            var w = page.getWidth(), h = page.getHeight();
+                            var text = formatPageNum(i, totalPages);
+                            var textWidth = font.widthOfTextAtSize(text, fontSize);
+
+                            var x, y;
+
+                            // Calculate Y
+                            if (currentPos.indexOf('top') !== -1) {
+                                y = h - margin - fontSize;
+                            } else {
+                                y = margin;
+                            }
+
+                            // Calculate X
+                            if (currentPos.indexOf('left') !== -1) {
+                                x = margin;
+                            } else if (currentPos.indexOf('right') !== -1) {
+                                x = w - margin - textWidth;
+                            } else {
+                                x = (w - textWidth) / 2;
+                            }
+
+                            page.drawText(text, {
+                                x: x, y: y, size: fontSize, font: font,
+                                color: PDFLib.rgb(rgb.r, rgb.g, rgb.b),
+                                opacity: opacity
+                            });
+                        }
+
+                        statusEl.textContent = 'Kaydediliyor...';
+                        bar.style.width = '90%';
+                        var bytes = await doc.save();
+                        resultBlob = new Blob([bytes], { type: 'application/pdf' });
+                        bar.style.width = '100%';
+                        statusEl.textContent = 'Tamamlandı!';
+
+                        setTimeout(function () {
+                            progressSec.style.display = 'none';
+                            resultSec.style.display = 'block';
+                            document.getElementById('result-info').textContent =
+                                pages.length + ' sayfaya numara eklendi (' + fmtSize(resultBlob.size) + ').';
+                            toast('Sayfa numaraları eklendi!', 'success');
+                        }, 400);
+                    } catch (err) {
+                        console.error(err);
+                        toast('Hata: ' + (err.message || err), 'error');
+                        progressSec.style.display = 'none';
+                        mainContent.style.display = 'block';
+                    }
+                })();
+            });
+
+            // Download
+            document.getElementById('download-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                if (!resultBlob) return;
+                var url = URL.createObjectURL(resultBlob);
+                var a = document.createElement('a');
+                a.href = url; a.download = pdfFile.name.replace(/\.pdf$/i, '') + '_numbered.pdf';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
+                toast('İndirme başladı!', 'success');
+            });
+
+            document.getElementById('again-btn').addEventListener('click', function (e) { e.preventDefault(); resetAll(); });
+
+            function resetAll() {
+                resultSec.style.display = 'none'; progressSec.style.display = 'none';
+                mainContent.style.display = 'none'; zone.style.display = '';
+                pdfFile = null; pdfBuffer = null; totalPages = 0; pdfJsDoc = null; resultBlob = null;
+                processBtn.disabled = true; processBtn.style.opacity = '0.5';
+                document.getElementById('mini-pages').innerHTML = '';
+            }
+
+            return { preview: preview, setFormat: setFormat, setPos: setPos, setScope: setScope };
+        })();
+    </script>
+</body>
+
+</html>
