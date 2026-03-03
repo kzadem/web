@@ -19,7 +19,8 @@
 
     <section class="page-hero" style="background:linear-gradient(180deg,rgba(67,97,238,0.05) 0%,transparent 100%);">
         <div class="container">
-            <div class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="sep">›</span><span>PDF → Word</span>
+            <div class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="sep">›</span><span>PDF →
+                    Word</span>
             </div>
             <!-- Conversion Arrow Banner -->
             <div
@@ -42,20 +43,21 @@
 
     <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
         <div class="container">
-            <div class="tool-layout">
+            <div class="tool-layout" style="grid-template-columns:1fr;">
                 <div class="tool-main">
                     <div id="upload-zone" class="upload-zone">
                         <div class="upload-zone__content">
                             <div class="upload-zone__icon icon-bounce"
                                 style="background:rgba(67,97,238,0.15);color:var(--accent-blue);">📝</div>
-                            <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
-                            <p class="upload-zone__sub">Maksimum 100 MB · PDF formatı</p>
+                            <div class="upload-zone__title">PDF Dosyalarını Sürükleyin</div>
+                            <p class="upload-zone__sub">Maksimum 100 MB · PDF formatı · Birden fazla dosya
+                                seçebilirsiniz</p>
                             <div class="upload-zone__btn">
                                 <button class="btn btn-primary btn-lg ripple-btn"
                                     onclick="document.getElementById('file-input').click()">📂 PDF Seç</button>
                             </div>
                         </div>
-                        <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+                        <input type="file" id="file-input" accept=".pdf,application/pdf" multiple hidden />
                     </div>
 
                     <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
@@ -84,10 +86,41 @@
                             <div class="options-row">
                                 <div>
                                     <div>Sayfa Düzenini Koru</div>
-                                    <div class="hint">Sayfa boyutları ve marjları koru</div>
+                                    <div class="hint">Sayfa boyutları, kenar boşlukları ve yön</div>
                                 </div>
                                 <label class="toggle"><input type="checkbox" id="keep-layout" checked /><span
                                         class="toggle__slider"></span></label>
+                            </div>
+
+                            <div class="options-row">
+                                <div>
+                                    <div>OCR (Metin Tanıma)</div>
+                                    <div class="hint">Taranmış / görüntü tabanlı PDF'ler için</div>
+                                </div>
+                                <label class="toggle"><input type="checkbox" id="ocr-toggle" /><span
+                                        class="toggle__slider"></span></label>
+                            </div>
+
+                            <div id="ocr-options" style="display:none;">
+                                <div class="options-row">
+                                    <div>
+                                        <div>OCR Dili</div>
+                                        <div class="hint">Belgedeki metnin dili</div>
+                                    </div>
+                                    <select class="select" id="ocr-lang">
+                                        <option value="tur+eng">🇹🇷 Türkçe + İngilizce</option>
+                                        <option value="tur">🇹🇷 Sadece Türkçe</option>
+                                        <option value="eng">🇬🇧 Sadece İngilizce</option>
+                                        <option value="deu">🇩🇪 Almanca</option>
+                                        <option value="fra">🇫🇷 Fransızca</option>
+                                        <option value="spa">🇪🇸 İspanyolca</option>
+                                        <option value="ara">🇸🇦 Arapça</option>
+                                        <option value="chi_sim">🇨🇳 Çince (Basit)</option>
+                                        <option value="jpn">🇯🇵 Japonca</option>
+                                        <option value="kor">🇰🇷 Korece</option>
+                                        <option value="rus">🇷🇺 Rusça</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
@@ -121,38 +154,56 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="tool-sidebar">
-                    <div class="info-card">
-                        <div class="info-card__title">Korunan Özellikler</div>
-                        <ul>
-                            <li>📝 Metin formatı (font, punto, renk)</li>
-                            <li>🔤 Kalın / İtalik yazı stilleri</li>
-                            <li>📊 Tablo yapıları ve boyutları</li>
-                            <li>🖼️ Görseller ve boyutları</li>
-                            <li>📐 Sayfa düzeni ve boyutları</li>
-                            <li>📑 Başlık hiyerarşisi</li>
-                        </ul>
-                    </div>
-                    <div class="info-card" style="border-color:rgba(67,97,238,0.2);background:rgba(67,97,238,0.05);">
-                        <div class="info-card__title" style="color:var(--accent-blue);">Diğer Dönüşümler</div>
-                        <div style="display:flex;flex-direction:column;gap:var(--sp-sm);">
-                            <a href="pdf-to-jpg.html"
-                                style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:6px;border-radius:var(--radius-sm);transition:background 0.2s;"
-                                onmouseover="this.style.background='rgba(255,255,255,0.04)'"
-                                onmouseout="this.style.background=''">🖼️ PDF → JPG</a>
-                            <a href="compress.html"
-                                style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:6px;border-radius:var(--radius-sm);transition:background 0.2s;"
-                                onmouseover="this.style.background='rgba(255,255,255,0.04)'"
-                                onmouseout="this.style.background=''">⚡ PDF Sıkıştır</a>
-                            <a href="merge.html"
-                                style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:6px;border-radius:var(--radius-sm);transition:background 0.2s;"
-                                onmouseover="this.style.background='rgba(255,255,255,0.04)'"
-                                onmouseout="this.style.background=''">🔗 PDF Birleştir</a>
-                        </div>
+            <!-- Features & Related Tools — Side by Side -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg);margin-top:var(--sp-2xl);">
+                <div class="info-card" style="margin-bottom:0;">
+                    <div class="info-card__title">Korunan Özellikler</div>
+                    <ul>
+                        <li>📝 Metin formatı (font, punto, renk)</li>
+                        <li>🔤 Kalın / İtalik / Altçizgi stilleri</li>
+                        <li>📊 Tablo yapıları ve boyutları</li>
+                        <li>🖼️ Görseller ve boyutları</li>
+                        <li>📐 Sayfa düzeni ve boyutları</li>
+                        <li>📑 Başlık hiyerarşisi (H1, H2, H3)</li>
+                        <li>📋 Madde işaretleri ve numaralı listeler</li>
+                        <li>📄 Çoklu sayfa desteği</li>
+                    </ul>
+                </div>
+                <div class="info-card"
+                    style="border-color:rgba(67,97,238,0.2);background:rgba(67,97,238,0.05);margin-bottom:0;">
+                    <div class="info-card__title" style="color:var(--accent-blue);">Diğer Dönüşümler</div>
+                    <div style="display:flex;flex-direction:column;gap:var(--sp-sm);">
+                        <a href="pdf-to-jpg.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)';this.style.borderColor='rgba(255,255,255,0.15)'"
+                            onmouseout="this.style.background='var(--bg-card)';this.style.borderColor='var(--border-color)'">🖼️
+                            PDF → JPG</a>
+                        <a href="compress.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)';this.style.borderColor='rgba(255,255,255,0.15)'"
+                            onmouseout="this.style.background='var(--bg-card)';this.style.borderColor='var(--border-color)'">⚡
+                            PDF Sıkıştır</a>
+                        <a href="merge.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)';this.style.borderColor='rgba(255,255,255,0.15)'"
+                            onmouseout="this.style.background='var(--bg-card)';this.style.borderColor='var(--border-color)'">🔗
+                            PDF Birleştir</a>
+                        <a href="split.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)';this.style.borderColor='rgba(255,255,255,0.15)'"
+                            onmouseout="this.style.background='var(--bg-card)';this.style.borderColor='var(--border-color)'">✂️
+                            PDF Böl</a>
+                        <a href="protect.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)';this.style.borderColor='rgba(255,255,255,0.15)'"
+                            onmouseout="this.style.background='var(--bg-card)';this.style.borderColor='var(--border-color)'">🔐
+                            PDF Koru</a>
                     </div>
                 </div>
             </div>
+
         </div>
     </section>
 
@@ -166,8 +217,29 @@
     <!-- Core JS -->
     <script src="js/main.js"></script>
 
-    <!-- Libraries for PDF → Word conversion (local) -->
-    <script>window.TOOL_CONFIG = { multiple: false, btnLabel: "📝 Word'e Dönüştür" };</script>
+    <!-- OCR toggle show/hide -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ocrToggle = document.getElementById('ocr-toggle');
+            const ocrOptions = document.getElementById('ocr-options');
+            if (ocrToggle && ocrOptions) {
+                ocrToggle.addEventListener('change', () => {
+                    ocrOptions.style.display = ocrToggle.checked ? 'block' : 'none';
+                    // Load Tesseract.js dynamically when OCR is enabled
+                    if (ocrToggle.checked && !window.Tesseract) {
+                        const script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+                        script.onload = () => window.Toast && window.Toast.show('OCR motoru yüklendi ✓', 'success');
+                        script.onerror = () => window.Toast && window.Toast.show('OCR motoru yüklenemedi', 'error');
+                        document.head.appendChild(script);
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Libraries for PDF → Word conversion -->
+    <script>window.TOOL_CONFIG = { multiple: true, btnLabel: "📝 Word'e Dönüştür" };</script>
     <script src="js/lib/pdf.min.js"></script>
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/lib/pdf.worker.min.js';</script>
     <script src="js/lib/docx.umd.js"></script>

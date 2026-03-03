@@ -1,12 +1,15 @@
 /**
- * PDFix - PDF to Word Conversion (v2)
+ * PDFix - PDF to Word Conversion (v3 - Complete Rewrite)
  * Real client-side PDF → DOCX conversion using pdf.js + docx library
  * 
- * Improvements v2:
- * - Better table detection using PDF line/rect drawing ops + text grid analysis
- * - Full image extraction (all image types, shapes, barcodes via page render)
- * - Single-click file selection
- * - Proper row/column counting for tables
+ * Features:
+ * - High-quality text extraction with style preservation
+ * - Table detection (drawing-based + text-based)
+ * - Image extraction (individual objects, NOT full-page render)
+ * - OCR support via Tesseract.js for scanned PDFs
+ * - Batch conversion (multiple PDFs)
+ * - Page layout preservation (size, margins, orientation)
+ * - Unicode / Turkish character support
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,24 +24,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    /* ── Fix: single-click file selection on the entire upload zone ── */
+    /* ── Click-to-select on upload zone ──────────────────────────────── */
     const uploadZone = document.getElementById('upload-zone');
     const fileInput = document.getElementById('file-input');
     if (uploadZone && fileInput) {
         uploadZone.style.cursor = 'pointer';
         uploadZone.addEventListener('click', (e) => {
-            // Don't re-trigger if clicking the remove button inside file list
             if (e.target.closest('.file-item__remove')) return;
             fileInput.click();
         });
     }
 
     /* ── Drop zone setup ────────────────────────────────────────────── */
+    const isMultiple = toolConfig.multiple !== false;
     const dropZone = window.createDropZone({
         zoneSelector: '#upload-zone',
         inputId: 'file-input',
         fileListSelector: '#file-list',
-        multiple: false,
+        multiple: isMultiple,
         onFilesAdded: (files) => updateUI(files)
     });
 
@@ -56,9 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const keepImagesToggle = document.getElementById('keep-images');
     const keepTablesToggle = document.getElementById('keep-tables');
     const keepLayoutToggle = document.getElementById('keep-layout');
+    const ocrToggle = document.getElementById('ocr-toggle');
+    const ocrLangSelect = document.getElementById('ocr-lang');
 
-    let generatedBlob = null;
-    let originalFileName = '';
+    let generatedBlobs = []; // array for batch
+    let originalFileNames = [];
 
     /* ── UI state ───────────────────────────────────────────────────── */
     function updateUI(files) {
@@ -92,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            originalFileName = files[0].name.replace(/\.pdf$/i, '');
+            generatedBlobs = [];
+            originalFileNames = files.map(f => f.name.replace(/\.pdf$/i, ''));
 
             if (progressSection) progressSection.style.display = 'block';
             if (fileSection) fileSection.style.display = 'none';
@@ -100,38 +106,72 @@ document.addEventListener('DOMContentLoaded', () => {
             processBtn.innerHTML = '<span class="loading-dots"><span></span><span></span><span></span></span> Dönüştürülüyor...';
 
             try {
-                setProgress(5, 'PDF okunuyor...');
-
-                const arrayBuffer = await files[0].arrayBuffer();
-                const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-                const totalPages = pdfDoc.numPages;
-
-                setProgress(10, `PDF yüklendi — ${totalPages} sayfa bulundu`);
-
                 const keepImages = keepImagesToggle ? keepImagesToggle.checked : true;
                 const keepTables = keepTablesToggle ? keepTablesToggle.checked : true;
                 const keepLayout = keepLayoutToggle ? keepLayoutToggle.checked : true;
+                const useOCR = ocrToggle ? ocrToggle.checked : false;
+                const ocrLang = ocrLangSelect ? ocrLangSelect.value : 'tur+eng';
 
-                /* ── Extract all pages ─────────────────────────────── */
-                const pagesData = [];
-                for (let i = 1; i <= totalPages; i++) {
-                    const pct = 10 + Math.round((i / totalPages) * 55);
-                    setProgress(pct, `Sayfa ${i}/${totalPages} analiz ediliyor...`);
-                    const pageData = await extractPageData(pdfDoc, i, keepImages, keepTables);
-                    pagesData.push(pageData);
+                // Load Tesseract if OCR is enabled
+                let tesseractWorker = null;
+                if (useOCR && window.Tesseract) {
+                    setProgress(2, 'OCR motoru yükleniyor...');
+                    try {
+                        tesseractWorker = await window.Tesseract.createWorker(ocrLang);
+                    } catch (e) {
+                        console.warn('Tesseract init failed:', e);
+                        window.Toast.show('OCR yüklenemedi, normal modda devam ediliyor.', 'info');
+                    }
                 }
 
-                setProgress(70, 'Word belgesi oluşturuluyor...');
+                for (let fi = 0; fi < files.length; fi++) {
+                    const filePrefix = files.length > 1 ? `[${fi + 1}/${files.length}] ` : '';
+                    setProgress(5, filePrefix + 'PDF okunuyor...');
 
-                /* ── Build DOCX ────────────────────────────────────── */
-                const blob = await buildDocx(pagesData, keepTables, keepLayout);
-                generatedBlob = blob;
+                    const arrayBuffer = await files[fi].arrayBuffer();
+                    const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    const totalPages = pdfDoc.numPages;
+
+                    setProgress(10, filePrefix + `PDF yüklendi — ${totalPages} sayfa bulundu`);
+
+                    /* ── Extract all pages ─────────────────────────────── */
+                    const pagesData = [];
+                    for (let i = 1; i <= totalPages; i++) {
+                        const pct = 10 + Math.round((i / totalPages) * 55);
+                        setProgress(pct, filePrefix + `Sayfa ${i}/${totalPages} analiz ediliyor...`);
+                        const pageData = await extractPageData(pdfDoc, i, keepImages, keepTables, tesseractWorker);
+                        pagesData.push(pageData);
+                    }
+
+                    setProgress(70, filePrefix + 'Word belgesi oluşturuluyor...');
+
+                    /* ── Build DOCX ────────────────────────────────────── */
+                    const blob = await buildDocx(pagesData, keepTables, keepLayout, originalFileNames[fi]);
+                    generatedBlobs.push(blob);
+                }
+
+                // Cleanup Tesseract worker
+                if (tesseractWorker) {
+                    try { await tesseractWorker.terminate(); } catch (e) { /* ignore */ }
+                }
 
                 setProgress(100, 'Tamamlandı!');
 
                 setTimeout(() => {
                     if (progressSection) progressSection.style.display = 'none';
                     if (resultSection) resultSection.style.display = 'block';
+                    
+                    // Update result text for batch
+                    const resultTitle = document.querySelector('.result-card__title');
+                    const resultSub = document.querySelector('.result-card__sub');
+                    if (files.length > 1) {
+                        if (resultTitle) resultTitle.textContent = `${files.length} Word Dosyası Hazır!`;
+                        if (resultSub) resultSub.textContent = `${files.length} PDF başarıyla .docx olarak dönüştürüldü.`;
+                    } else {
+                        if (resultTitle) resultTitle.textContent = 'Word Dosyası Hazır!';
+                        if (resultSub) resultSub.textContent = 'PDF başarıyla .docx olarak dönüştürüldü. Metin, tablo ve görseller korundu.';
+                    }
+
                     window.Toast.show('PDF başarıyla Word\'e dönüştürüldü! ✨', 'success');
                     processBtn.innerHTML = toolConfig.btnLabel || "📝 Word'e Dönüştür";
                     processBtn.disabled = false;
@@ -151,13 +191,19 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ── Download ────────────────────────────────────────────────────── */
     if (downloadBtn) {
         downloadBtn.addEventListener('click', () => {
-            if (!generatedBlob) { window.Toast.show('İndirilecek dosya bulunamadı.', 'error'); return; }
-            const url = URL.createObjectURL(generatedBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = originalFileName + '.docx';
-            a.click();
-            URL.revokeObjectURL(url);
+            if (!generatedBlobs.length) {
+                window.Toast.show('İndirilecek dosya bulunamadı.', 'error');
+                return;
+            }
+
+            for (let i = 0; i < generatedBlobs.length; i++) {
+                const url = URL.createObjectURL(generatedBlobs[i]);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = (originalFileNames[i] || 'document') + '.docx';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
             window.Toast.show('İndirme başladı!', 'success');
         });
     }
@@ -167,8 +213,8 @@ document.addEventListener('DOMContentLoaded', () => {
         againBtn.addEventListener('click', () => {
             if (resultSection) resultSection.style.display = 'none';
             if (dropZone) dropZone.clearFiles();
-            generatedBlob = null;
-            originalFileName = '';
+            generatedBlobs = [];
+            originalFileNames = [];
             updateUI([]);
         });
     }
@@ -177,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
      *  PAGE DATA EXTRACTION
      * ================================================================ */
 
-    async function extractPageData(pdfDoc, pageNum, keepImages, keepTables) {
+    async function extractPageData(pdfDoc, pageNum, keepImages, keepTables, tesseractWorker) {
         const page = await pdfDoc.getPage(pageNum);
         const viewport = page.getViewport({ scale: 1.0 });
         const pageWidth = viewport.width;
@@ -200,6 +246,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isBold = /bold|black|heavy/i.test(item.fontName) || /bold/i.test(fontFamily);
                 const isItalic = /italic|oblique/i.test(item.fontName) || /italic/i.test(fontFamily);
 
+                // Try to extract color from style
+                let color = '000000';
+                if (style.color) {
+                    color = rgbToHex(style.color);
+                }
+
                 return {
                     text: item.str,
                     x, y,
@@ -209,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     fontFamily,
                     fontName: item.fontName || '',
                     isBold, isItalic,
-                    color: '000000',
+                    color,
                     hasEOL: item.hasEOL || false
                 };
             });
@@ -223,13 +275,27 @@ document.addEventListener('DOMContentLoaded', () => {
             drawingRects = result.rects;
         }
 
-        /* ── Images: render entire page as image to capture everything ── */
+        /* ── Images: extract individual image objects ─────────────── */
         let images = [];
         if (keepImages) {
             try {
-                images = await extractAllVisuals(page, viewport, textItems);
+                images = await extractImageObjects(page, viewport);
             } catch (e) {
                 console.warn('Image extraction warning (page ' + pageNum + '):', e);
+            }
+        }
+
+        /* ── OCR for scanned PDFs ─────────────────────────────────── */
+        let ocrText = null;
+        if (tesseractWorker && textItems.length < 5) {
+            // This page has very little text — likely a scanned image
+            try {
+                const ocrResult = await performOCR(page, viewport, tesseractWorker);
+                if (ocrResult && ocrResult.length > 0) {
+                    ocrText = ocrResult;
+                }
+            } catch (e) {
+                console.warn('OCR failed for page ' + pageNum + ':', e);
             }
         }
 
@@ -237,11 +303,55 @@ document.addEventListener('DOMContentLoaded', () => {
             pageNum,
             width: pageWidth,
             height: pageHeight,
-            textItems,
+            textItems: ocrText && ocrText.length > textItems.length ? ocrText : textItems,
             images,
             drawingLines,
-            drawingRects
+            drawingRects,
+            isOCR: ocrText && ocrText.length > textItems.length
         };
+    }
+
+    /* ================================================================
+     *  OCR (Tesseract.js)
+     * ================================================================ */
+
+    async function performOCR(page, viewport, worker) {
+        const scale = 2.0;
+        const scaledViewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.width = scaledViewport.width;
+        canvas.height = scaledViewport.height;
+        const ctx = canvas.getContext('2d');
+
+        await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
+
+        const { data } = await worker.recognize(canvas);
+
+        if (!data || !data.words || data.words.length === 0) return [];
+
+        // Convert Tesseract words to our textItem format
+        const pageHeight = viewport.height;
+        const items = [];
+
+        for (const word of data.words) {
+            const bbox = word.bbox;
+            items.push({
+                text: word.text,
+                x: bbox.x0 / scale,
+                y: bbox.y0 / scale,
+                width: (bbox.x1 - bbox.x0) / scale,
+                height: (bbox.y1 - bbox.y0) / scale,
+                fontSize: Math.max(10, (bbox.y1 - bbox.y0) / scale * 0.8),
+                fontFamily: 'Helvetica',
+                fontName: '',
+                isBold: false,
+                isItalic: false,
+                color: '000000',
+                hasEOL: false
+            });
+        }
+
+        return items;
     }
 
     /* ================================================================
@@ -254,7 +364,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const lines = [];
         const rects = [];
 
-        // Track current transform matrix
         let ctm = [1, 0, 0, 1, 0, 0];
         const ctmStack = [];
 
@@ -273,7 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     ctm = multiplyMatrices(ctm, args);
                     break;
                 case OPS.constructPath: {
-                    // args[0] = ops array, args[1] = coords array
                     const pathOps = args[0];
                     const coords = args[1];
                     let ci = 0;
@@ -287,13 +395,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             startX = curX; startY = curY;
                         } else if (pop === OPS.lineTo) {
                             const lx = coords[ci++], ly = coords[ci++];
-                            // Transform coordinates
                             const p1 = transformPoint(curX, curY, ctm, pageHeight);
                             const p2 = transformPoint(lx, ly, ctm, pageHeight);
                             lines.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y });
                             curX = lx; curY = ly;
                         } else if (pop === OPS.curveTo || pop === OPS.curveTo2 || pop === OPS.curveTo3) {
-                            // Skip curves, advance coordinate index
                             ci += (pop === OPS.curveTo) ? 6 : 4;
                         } else if (pop === OPS.closePath) {
                             if (curX !== startX || curY !== startY) {
@@ -311,15 +417,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const p = transformPoint(rx, ry, ctm, pageHeight);
                     const absW = Math.abs(rw * ctm[0]);
                     const absH = Math.abs(rh * ctm[3]);
-                    if (absW > 2 && absH > 2) { // filter out tiny rects (hairlines)
+                    if (absW > 2 && absH > 2) {
                         rects.push({
                             x: p.x,
-                            y: p.y - absH, // adjust because PDF y is bottom-up
+                            y: p.y - absH,
                             width: absW,
                             height: absH
                         });
                     }
-                    // Also add the rect edges as lines for table detection
                     const corners = [
                         transformPoint(rx, ry, ctm, pageHeight),
                         transformPoint(rx + rw, ry, ctm, pageHeight),
@@ -356,25 +461,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ================================================================
-     *  IMAGE EXTRACTION (comprehensive)
+     *  IMAGE EXTRACTION — Individual objects only (NOT full-page render)
      * ================================================================ */
 
-    /**
-     * Extract all visual elements from a page:
-     * 1. Try individual image objects from operator list
-     * 2. Fall back to full-page render for shapes, barcodes, vector graphics
-     */
-    async function extractAllVisuals(page, viewport, textItems) {
+    async function extractImageObjects(page, viewport) {
         const images = [];
         const ops = await page.getOperatorList();
         const OPS = pdfjsLib.OPS;
 
-        // Track transform for positioning
         let ctm = [1, 0, 0, 1, 0, 0];
         const ctmStack = [];
-        let hasNonImageVisuals = false;
 
-        // Collect all image-related operations
         const imageOps = [
             OPS.paintImageXObject,
             OPS.paintJpegXObject,
@@ -391,19 +488,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (fn === OPS.restore) { if (ctmStack.length) ctm = ctmStack.pop(); continue; }
             if (fn === OPS.transform) { ctm = multiplyMatrices(ctm, args); continue; }
 
-            // Check for vector drawing operations (shapes, paths that might be barcodes etc.)
-            if (fn === OPS.constructPath || fn === OPS.fill || fn === OPS.stroke ||
-                fn === OPS.eoFill || fn === OPS.fillStroke) {
-                hasNonImageVisuals = true;
-            }
-
             if (!imageOps.includes(fn)) continue;
 
-            // Extract the image
             try {
                 let imgData = null;
                 if (fn === OPS.paintInlineImageXObject || fn === OPS.paintInlineImageXObjectGroup) {
-                    imgData = args[0]; // inline image data is directly in args
+                    imgData = args[0];
                 } else {
                     const imgName = args[0];
                     imgData = await new Promise((resolve) => {
@@ -419,19 +509,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (e) {
                 console.warn('Could not extract image at op', i, e);
-            }
-        }
-
-        // If there are vector drawings (shapes/barcodes) but no extracted images,
-        // or if we want to capture everything, render the full page
-        if (hasNonImageVisuals && images.length === 0) {
-            try {
-                const fullPageImg = await renderPageAsImage(page, viewport);
-                if (fullPageImg) {
-                    images.push(fullPageImg);
-                }
-            } catch (e) {
-                console.warn('Full page render failed:', e);
             }
         }
 
@@ -486,8 +563,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
 
-        // Skip tiny images (likely artifacts)
-        if (w < 5 || h < 5) return null;
+        // Skip tiny images (likely artifacts like 1px lines)
+        if (w < 8 || h < 8) return null;
 
         const base64 = canvas.toDataURL('image/png').split(',')[1];
 
@@ -515,70 +592,31 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    /**
-     * Render entire PDF page as a PNG image (captures everything: shapes, barcodes, vector art)
-     */
-    async function renderPageAsImage(page, viewport) {
-        const scale = 2.0; // 2x for quality
-        const scaledViewport = page.getViewport({ scale });
-        const canvas = document.createElement('canvas');
-        canvas.width = scaledViewport.width;
-        canvas.height = scaledViewport.height;
-        const ctx = canvas.getContext('2d');
-
-        await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
-
-        const base64 = canvas.toDataURL('image/png').split(',')[1];
-
-        return {
-            data: base64,
-            width: scaledViewport.width,
-            height: scaledViewport.height,
-            displayWidth: Math.round(viewport.width * 0.95),
-            displayHeight: Math.round(viewport.height * 0.95),
-            type: 'png',
-            isFullPage: true
-        };
-    }
-
     /* ================================================================
-     *  TABLE DETECTION v2 — using drawing lines + text grid
+     *  TABLE DETECTION v2 — drawing lines + text grid
      * ================================================================ */
 
-    /**
-     * Improved table detection:
-     * 1. First try to detect tables from drawn lines/rectangles (most reliable)
-     * 2. Fall back to text-based column alignment detection
-     */
     function detectTablesV2(lines, textItems, drawingLines, drawingRects, pageWidth) {
-        // Strategy 1: Detect tables from drawing operations (borders)
         let tables = detectTablesFromDrawings(drawingLines, drawingRects, lines, pageWidth);
-
-        // Strategy 2: If no tables found from drawings, try text-based detection
         if (tables.length === 0) {
             tables = detectTablesFromText(lines, pageWidth);
         }
-
         return tables;
     }
 
-    /**
-     * Detect tables from horizontal/vertical lines drawn in the PDF
-     */
     function detectTablesFromDrawings(drawingLines, drawingRects, textLines, pageWidth) {
         const tables = [];
         if (!drawingLines.length && !drawingRects.length) return tables;
 
-        // Separate horizontal and vertical lines
-        const hLines = []; // horizontal
-        const vLines = []; // vertical
-        const ANGLE_TOLERANCE = 3; // pixels
+        const hLines = [];
+        const vLines = [];
+        const ANGLE_TOLERANCE = 3;
 
         for (const line of drawingLines) {
             const dx = Math.abs(line.x2 - line.x1);
             const dy = Math.abs(line.y2 - line.y1);
             const len = Math.sqrt(dx * dx + dy * dy);
-            if (len < 10) continue; // skip very short lines
+            if (len < 10) continue;
 
             if (dy < ANGLE_TOLERANCE && dx > 15) {
                 hLines.push({ y: (line.y1 + line.y2) / 2, x1: Math.min(line.x1, line.x2), x2: Math.max(line.x1, line.x2) });
@@ -589,24 +627,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (hLines.length < 2 || vLines.length < 2) return tables;
 
-        // Cluster horizontal lines by Y position
         const hClusters = clusterValues(hLines.map(l => l.y), 5);
-        // Cluster vertical lines by X position
         const vClusters = clusterValues(vLines.map(l => l.x), 5);
 
         if (hClusters.length < 2 || vClusters.length < 2) return tables;
 
-        // Sort clusters
         hClusters.sort((a, b) => a - b);
         vClusters.sort((a, b) => a - b);
 
-        // Build a table grid from the intersections
         const numRows = hClusters.length - 1;
         const numCols = vClusters.length - 1;
 
         if (numRows < 1 || numCols < 1) return tables;
 
-        // Map text items to cells
         const grid = [];
         for (let r = 0; r < numRows; r++) {
             const row = [];
@@ -616,9 +649,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const xLeft = vClusters[c];
                 const xRight = vClusters[c + 1];
 
-                // Find text items that fall within this cell
                 const cellItems = [];
-                for (const item of (textLines.flatMap ? textLines.flatMap(l => l.items) : flattenLines(textLines))) {
+                const allItems = textLines.flatMap ? textLines.flatMap(l => l.items) : flattenLines(textLines);
+                for (const item of allItems) {
                     if (item.x >= xLeft - 5 && item.x <= xRight + 5 &&
                         item.y >= yTop - 5 && item.y <= yBot + 5) {
                         cellItems.push(item);
@@ -634,12 +667,10 @@ document.addEventListener('DOMContentLoaded', () => {
             grid.push(row);
         }
 
-        // Only register as table if it has meaningful content
         const totalCells = numRows * numCols;
         const filledCells = grid.flat().filter(c => c.text.trim().length > 0).length;
-        if (filledCells < totalCells * 0.1) return tables; // too sparse
+        if (filledCells < totalCells * 0.1) return tables;
 
-        // Find which text lines belong to this table grid
         const tableYTop = hClusters[0];
         const tableYBot = hClusters[hClusters.length - 1];
         let startLine = -1, endLine = -1;
@@ -666,9 +697,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return tables;
     }
 
-    /**
-     * Detect tables from text alignment (fallback when no drawing ops)
-     */
     function detectTablesFromText(lines, pageWidth) {
         const tables = [];
         const MIN_COLS = 2;
@@ -679,29 +707,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const line = lines[i];
             if (line.items.length < MIN_COLS) { i++; continue; }
 
-            // Get well-separated column positions for this line
             const colPositions = getColumnPositions(line.items);
             if (colPositions.length < MIN_COLS) { i++; continue; }
 
-            // Look ahead for lines with matching column structure
             let endLine = i;
             const allColPositions = [...colPositions];
 
             for (let j = i + 1; j < lines.length; j++) {
                 const nextLine = lines[j];
-                if (nextLine.items.length < MIN_COLS) break; // break on single-item line
+                if (nextLine.items.length < MIN_COLS) break;
 
                 const nextCols = getColumnPositions(nextLine.items);
                 if (nextCols.length < MIN_COLS) break;
 
-                // Check column alignment: each next col should be near an existing col
                 const matchCount = nextCols.filter(nc =>
                     allColPositions.some(ac => Math.abs(nc - ac) < 25)
                 ).length;
 
                 if (matchCount >= Math.min(colPositions.length, nextCols.length) * 0.4) {
                     endLine = j;
-                    // Add new column positions we haven't seen
                     nextCols.forEach(nc => {
                         if (!allColPositions.some(ac => Math.abs(nc - ac) < 25)) {
                             allColPositions.push(nc);
@@ -716,7 +740,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (rowCount >= MIN_ROWS) {
                 allColPositions.sort((a, b) => a - b);
 
-                // Merge close columns
                 const mergedCols = [allColPositions[0]];
                 for (let c = 1; c < allColPositions.length; c++) {
                     if (allColPositions[c] - mergedCols[mergedCols.length - 1] > 25) {
@@ -725,7 +748,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (mergedCols.length >= MIN_COLS) {
-                    // Build grid
                     const grid = [];
                     for (let r = i; r <= endLine; r++) {
                         const row = [];
@@ -764,9 +786,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return tables;
     }
 
-    /**
-     * Get distinct column X positions from items, with minimum gap between columns
-     */
     function getColumnPositions(items) {
         if (!items.length) return [];
         const sorted = [...items].sort((a, b) => a.x - b.x);
@@ -779,9 +798,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return cols;
     }
 
-    /**
-     * Cluster array of numeric values with given tolerance
-     */
     function clusterValues(values, tolerance) {
         if (!values.length) return [];
         const sorted = [...values].sort((a, b) => a - b);
@@ -790,7 +806,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sorted[i] - clusters[clusters.length - 1] > tolerance) {
                 clusters.push(sorted[i]);
             } else {
-                // Average the cluster
                 clusters[clusters.length - 1] = (clusters[clusters.length - 1] + sorted[i]) / 2;
             }
         }
@@ -809,7 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
      *  DOCX BUILDING
      * ================================================================ */
 
-    async function buildDocx(pagesData, keepTables, keepLayout) {
+    async function buildDocx(pagesData, keepTables, keepLayout, fileName) {
         const {
             Document, Packer, Paragraph, TextRun, ImageRun,
             Table, TableRow, TableCell,
@@ -845,7 +860,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // ── Build content ───────────────────────────────────────
+            // ── Interleave images with text by Y position ───────────
+            // Sort images by estimated Y position for better placement
+            const sortedImages = (pd.images || []).map((img, idx) => ({
+                ...img,
+                insertAfterY: img.displayHeight ? img.displayHeight * 0.5 : 0,
+                index: idx
+            }));
+
+            // ── Build text content ──────────────────────────────────
             let tableIdx = 0;
             for (let li = 0; li < lines.length; li++) {
                 // Insert table at its start line
@@ -863,13 +886,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 children.push(buildParagraph(lines[li], Paragraph, TextRun, HeadingLevel, AlignmentType));
             }
 
-            // ── Images ──────────────────────────────────────────────
+            // ── Add images at the end of page content ────────────────
             if (pd.images && pd.images.length > 0) {
                 for (const img of pd.images) {
                     try {
-                        // Skip full-page renders if we have text content
-                        if (img.isFullPage && lines.length > 3) continue;
-
                         const imgBuf = base64ToArrayBuffer(img.data);
                         const maxW = 570;
                         let w = img.displayWidth || img.width;
@@ -879,7 +899,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             w = maxW;
                             h = Math.round(h * ratio);
                         }
-                        // ensure minimum dimensions
                         w = Math.max(w, 10);
                         h = Math.max(h, 10);
 
@@ -897,6 +916,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         console.warn('Could not add image to DOCX:', e);
                     }
                 }
+            }
+
+            // If nothing extracted at all, add placeholder
+            if (children.length === 0) {
+                children.push(new Paragraph({
+                    children: [new TextRun({ text: ' ', size: 22 })]
+                }));
             }
 
             // ── Section ─────────────────────────────────────────────
@@ -927,7 +953,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const doc = new Document({
             creator: 'PDFix',
-            title: originalFileName || 'Converted Document',
+            title: fileName || 'Converted Document',
             description: 'PDF to Word conversion by PDFix',
             sections
         });
@@ -969,7 +995,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ================================================================
-     *  DOCX BUILDERS
+     *  DOCX PARAGRAPH BUILDER
      * ================================================================ */
 
     function buildParagraph(line, Paragraph, TextRun, HeadingLevel, AlignmentType) {
@@ -978,12 +1004,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const avgFontSize = items.reduce((s, it) => s + it.fontSize, 0) / items.length;
         const totalText = items.map(it => it.text).join(' ');
-        const isHeading = avgFontSize >= 18 && totalText.length < 200;
-        const isSubheading = avgFontSize >= 14 && avgFontSize < 18 && totalText.length < 200;
+        const allBold = items.every(it => it.isBold);
+
+        // Heading detection based on font size
+        const isHeading = avgFontSize >= 20 && totalText.length < 200;
+        const isSubheading = avgFontSize >= 16 && avgFontSize < 20 && totalText.length < 200;
+        const isSubSubheading = avgFontSize >= 13 && avgFontSize < 16 && allBold && totalText.length < 200;
+
+        // Bullet point detection
+        const firstText = items[0].text.trim();
+        const isBullet = /^[•●○▪▸►➤\-–—]/.test(firstText) || /^\d+[\.\)]/.test(firstText);
 
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
             let text = item.text;
+
+            // Add space between items with gap
             if (i > 0) {
                 const prev = items[i - 1];
                 const gap = item.x - (prev.x + prev.width);
@@ -1002,9 +1038,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const paraOptions = { children: runs };
 
+        // Heading levels
         if (isHeading) paraOptions.heading = HeadingLevel.HEADING_1;
         else if (isSubheading) paraOptions.heading = HeadingLevel.HEADING_2;
+        else if (isSubSubheading) paraOptions.heading = HeadingLevel.HEADING_3;
 
+        // Bullet detection
+        if (isBullet && !isHeading && !isSubheading) {
+            paraOptions.bullet = { level: 0 };
+        }
+
+        // Spacing
         paraOptions.spacing = {
             before: Math.round(avgFontSize * 4),
             after: Math.round(avgFontSize * 2),
@@ -1014,9 +1058,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Paragraph(paraOptions);
     }
 
-    /**
-     * Build table from grid (works with both drawing-based and text-based detection)
-     */
+    /* ================================================================
+     *  TABLE BUILDER
+     * ================================================================ */
+
     function buildTableFromGrid(tableRegion, Table, TableRow, TableCell, Paragraph, TextRun, WidthType, BorderStyle) {
         const { grid, numRows, numCols } = tableRegion;
 
@@ -1061,7 +1106,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }));
             }
 
-            // Ensure all rows have the same number of cells
             while (cells.length < numCols) {
                 cells.push(new TableCell({
                     children: [new Paragraph({ children: [] })],
@@ -1102,7 +1146,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (/palatino/i.test(name)) return 'Palatino Linotype';
         if (/garamond/i.test(name)) return 'Garamond';
         if (/mono/i.test(name)) return 'Courier New';
+        if (/segoe/i.test(name)) return 'Segoe UI';
+        if (/roboto/i.test(name)) return 'Roboto';
+        if (/inter/i.test(name)) return 'Inter';
+        if (/lato/i.test(name)) return 'Lato';
+        if (/open.?sans/i.test(name)) return 'Open Sans';
+        if (/noto/i.test(name)) return 'Noto Sans';
         return 'Calibri';
+    }
+
+    function rgbToHex(color) {
+        if (typeof color === 'string') return color.replace('#', '');
+        if (Array.isArray(color)) {
+            const r = Math.round(color[0] * 255);
+            const g = Math.round(color[1] * 255);
+            const b = Math.round(color[2] * 255);
+            return ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+        }
+        return '000000';
     }
 
     function base64ToArrayBuffer(base64) {

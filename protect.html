@@ -28,7 +28,7 @@
 
     <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
         <div class="container">
-            <div class="tool-layout">
+            <div class="tool-layout" style="grid-template-columns:1fr;">
                 <div class="tool-main">
                     <div id="upload-zone" class="upload-zone">
                         <div class="upload-zone__content">
@@ -132,24 +132,38 @@
                     </div>
 
                 </div>
-                <div class="tool-sidebar">
-                    <div class="info-card">
-                        <div class="info-card__title">Güvenlik Seviyeleri</div>
-                        <ul>
-                            <li>AES 256-bit: En güçlü şifreleme</li>
-                            <li>İzin yönetimi ile erişim kontrolü</li>
-                            <li>Açma ve düzenleme şifreleri</li>
-                            <li>Kullanıcı/sahip şifre ayrımı</li>
-                        </ul>
-                    </div>
-                    <div class="info-card"
-                        style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);">
-                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
-                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Şifreler yalnızca
-                            tarayıcınızda işlenir, sunucuya gönderilmez.</p>
+            </div>
+
+            <!-- Features Side by Side -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg);margin-top:var(--sp-2xl);">
+                <div class="info-card" style="margin-bottom:0;">
+                    <div class="info-card__title">Güvenlik Seviyeleri</div>
+                    <ul>
+                        <li>AES 256-bit: En güçlü şifreleme</li>
+                        <li>İzin yönetimi ile erişim kontrolü</li>
+                        <li>Açma ve düzenleme şifreleri</li>
+                        <li>Kullanıcı/sahip şifre ayrımı</li>
+                    </ul>
+                </div>
+                <div class="info-card"
+                    style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);margin-bottom:0;">
+                    <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Şifreler yalnızca
+                        tarayıcınızda işlenir, sunucuya gönderilmez. Tüm işlemler tamamen istemci tarafında gerçekleşir.
+                    </p>
+                    <div style="margin-top:var(--sp-md);display:flex;flex-direction:column;gap:var(--sp-sm);">
+                        <a href="unlock.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+                            onmouseout="this.style.background='var(--bg-card)'">🔓 PDF Kilit Aç</a>
+                        <a href="watermark.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+                            onmouseout="this.style.background='var(--bg-card)'">💧 PDF Filigran</a>
                     </div>
                 </div>
             </div>
+
         </div>
     </section>
 
