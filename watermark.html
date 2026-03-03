@@ -687,7 +687,28 @@
                 (async function () {
                     try {
                         var doc = await PDFLib.PDFDocument.load(pdfBuffer);
-                        var font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+                        // Use a Unicode-compatible font for Turkish chars (İ, ş, ğ, ü, ö, ç)
+                        var fontUrl = 'https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-ext-400-normal.woff';
+                        var fontBytes;
+                        try {
+                            var resp = await fetch(fontUrl);
+                            fontBytes = await resp.arrayBuffer();
+                        } catch (e) {
+                            // Fallback: try alternate URL
+                            try {
+                                var resp2 = await fetch('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf');
+                                fontBytes = await resp2.arrayBuffer();
+                            } catch (e2) {
+                                // Last fallback: use Helvetica but strip non-WinAnsi chars
+                                fontBytes = null;
+                            }
+                        }
+                        var font;
+                        if (fontBytes) {
+                            font = await doc.embedFont(fontBytes, { subset: true });
+                        } else {
+                            font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+                        }
                         var textWidth = font.widthOfTextAtSize(text, fontSize);
 
                         for (var i = 0; i < pages.length; i++) {
