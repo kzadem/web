@@ -24,16 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    /* ── Click-to-select on upload zone ──────────────────────────────── */
-    const uploadZone = document.getElementById('upload-zone');
-    const fileInput = document.getElementById('file-input');
-    if (uploadZone && fileInput) {
-        uploadZone.style.cursor = 'pointer';
-        uploadZone.addEventListener('click', (e) => {
-            if (e.target.closest('.file-item__remove')) return;
-            fileInput.click();
-        });
-    }
+    /* ── References (createDropZone in main.js handles click-to-select) ── */
 
     /* ── Drop zone setup ────────────────────────────────────────────── */
     const isMultiple = toolConfig.multiple !== false;
@@ -160,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     if (progressSection) progressSection.style.display = 'none';
                     if (resultSection) resultSection.style.display = 'block';
-                    
+
                     // Update result text for batch
                     const resultTitle = document.querySelector('.result-card__title');
                     const resultSub = document.querySelector('.result-card__sub');
