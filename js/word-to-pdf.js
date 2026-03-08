@@ -1,6 +1,6 @@
 /**
  * PDFix – Word → PDF Converter
- * Uses mammoth.js to parse DOCX → HTML, then jsPDF to render HTML content to PDF.
+ * Uses mammoth.js to parse DOCX → HTML, then html2canvas + jsPDF to render to PDF.
  */
 document.addEventListener('DOMContentLoaded', () => {
     const { jsPDF } = window.jspdf;
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Step 2: Convert to HTML via mammoth
             progressStatus.textContent = 'Word içeriği çözümleniyor...';
-            progressBar.style.width = '30%';
+            progressBar.style.width = '25%';
 
             const result = await mammoth.convertToHtml(
                 { arrayBuffer },
@@ -90,16 +90,108 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log('Mammoth warnings:', result.messages);
             }
 
-            // Step 3: Create PDF
+            // Step 3: Page dimensions
             progressStatus.textContent = 'PDF oluşturuluyor...';
-            progressBar.style.width = '50%';
+            progressBar.style.width = '40%';
 
             const pageSizes = {
                 a4: [210, 297],
                 letter: [215.9, 279.4],
                 legal: [215.9, 355.6]
             };
-            const [pageW, pageH] = pageSizes[pageSize] || pageSizes.a4;
+            const [rawW, rawH] = pageSizes[pageSize] || pageSizes.a4;
+            const pageW = orientation === 'landscape' ? rawH : rawW;
+            const pageH = orientation === 'landscape' ? rawW : rawH;
+            const contentW = pageW - margin * 2;
+            const contentH = pageH - margin * 2;
+
+            // Render HTML into a visible (but offscreen) container
+            const containerWidthPx = contentW * 3.78; // mm to px approx
+
+            const container = document.createElement('div');
+            container.style.cssText = `
+                position: fixed;
+                left: 0; top: 0;
+                width: ${containerWidthPx}px;
+                background: #ffffff;
+                z-index: -9999;
+                opacity: 0;
+                pointer-events: none;
+                font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+                font-size: 11pt;
+                line-height: 1.6;
+                color: #222;
+                padding: 20px;
+                box-sizing: border-box;
+            `;
+            container.innerHTML = `
+                <style>
+                    * { box-sizing: border-box; }
+                    h1 { font-size: 22pt; font-weight: 800; margin: 0 0 10px; color: #111; }
+                    h2 { font-size: 17pt; font-weight: 700; margin: 18px 0 8px; color: #222; }
+                    h3 { font-size: 14pt; font-weight: 700; margin: 14px 0 6px; color: #333; }
+                    h4 { font-size: 12pt; font-weight: 600; margin: 12px 0 5px; color: #444; }
+                    p { margin: 0 0 8px; }
+                    table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+                    th, td { border: 1px solid #bbb; padding: 5px 10px; font-size: 10pt; }
+                    th { background: #f0f0f0; font-weight: 700; }
+                    ul, ol { margin: 6px 0 10px 24px; }
+                    li { margin-bottom: 3px; }
+                    img { max-width: 100%; height: auto; margin: 8px 0; }
+                    strong, b { font-weight: 700; }
+                    em, i { font-style: italic; }
+                    u { text-decoration: underline; }
+                    a { color: #0066cc; text-decoration: underline; }
+                    blockquote { border-left: 4px solid #ddd; margin: 8px 0; padding: 8px 16px; color: #555; }
+                    pre, code { background: #f5f5f5; padding: 2px 6px; border-radius: 3px; font-family: monospace; font-size: 10pt; }
+                    pre { padding: 12px; overflow-x: auto; }
+                </style>
+                ${html}
+            `;
+            document.body.appendChild(container);
+
+            // Wait for images to load
+            progressStatus.textContent = 'Görseller yükleniyor...';
+            progressBar.style.width = '50%';
+
+            const imgs = container.querySelectorAll('img');
+            if (imgs.length > 0) {
+                await Promise.allSettled(
+                    Array.from(imgs).map(img => new Promise((resolve) => {
+                        if (img.complete) return resolve();
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                        setTimeout(resolve, 5000);
+                    }))
+                );
+            }
+
+            // Small delay to ensure rendering is complete
+            await new Promise(r => setTimeout(r, 300));
+
+            // Step 4: Capture with html2canvas
+            progressStatus.textContent = 'Sayfa render ediliyor...';
+            progressBar.style.width = '60%';
+
+            // Make container visible for html2canvas
+            container.style.opacity = '1';
+            container.style.zIndex = '99999';
+
+            const canvas = await html2canvas(container, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                width: containerWidthPx,
+                windowWidth: containerWidthPx
+            });
+
+            // Hide and remove container
+            document.body.removeChild(container);
+
+            // Step 5: Create PDF from canvas with multi-page splitting
+            progressStatus.textContent = 'PDF sayfaları oluşturuluyor...';
+            progressBar.style.width = '75%';
 
             const doc = new jsPDF({
                 orientation: orientation,
@@ -107,69 +199,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 format: [pageW, pageH]
             });
 
-            const effectiveW = (orientation === 'landscape' ? pageH : pageW) - margin * 2;
-            const effectiveH = (orientation === 'landscape' ? pageW : pageH) - margin * 2;
+            // Scale canvas to fit page content width
+            const imgWidth = contentW;
+            const imgHeight = (canvas.height * contentW) / canvas.width;
 
-            // Render HTML into a hidden container for measuring
-            progressStatus.textContent = 'İçerik render ediliyor...';
-            progressBar.style.width = '60%';
+            // Split into pages
+            const totalPages = Math.ceil(imgHeight / contentH);
 
-            const container = document.createElement('div');
-            container.style.cssText = `
-                position: absolute; left: -9999px; top: 0;
-                width: ${effectiveW * 3.78}px;
-                font-family: 'Segoe UI', Arial, sans-serif;
-                font-size: 11pt; line-height: 1.5; color: #222;
-            `;
-            container.innerHTML = `
-                <style>
-                    h1 { font-size: 22pt; font-weight: 800; margin: 0 0 8px; color: #111; }
-                    h2 { font-size: 17pt; font-weight: 700; margin: 16px 0 6px; color: #222; }
-                    h3 { font-size: 14pt; font-weight: 700; margin: 12px 0 4px; color: #333; }
-                    h4 { font-size: 12pt; font-weight: 600; margin: 10px 0 4px; color: #444; }
-                    p { margin: 0 0 6px; }
-                    table { border-collapse: collapse; width: 100%; margin: 8px 0; }
-                    th, td { border: 1px solid #ccc; padding: 4px 8px; font-size: 10pt; }
-                    th { background: #f0f0f0; font-weight: 700; }
-                    ul, ol { margin: 4px 0 8px 20px; }
-                    li { margin-bottom: 2px; }
-                    img { max-width: 100%; height: auto; margin: 6px 0; }
-                    strong, b { font-weight: 700; }
-                    em, i { font-style: italic; }
-                    u { text-decoration: underline; }
-                </style>
-                ${html}
-            `;
-            document.body.appendChild(container);
+            for (let page = 0; page < totalPages; page++) {
+                if (page > 0) doc.addPage();
 
-            // Use jsPDF html method
-            progressStatus.textContent = 'PDF sayfaları oluşturuluyor...';
-            progressBar.style.width = '75%';
+                // Calculate source region from the canvas for this page
+                const srcY = Math.round(page * (canvas.width * contentH / contentW));
+                const srcH = Math.min(
+                    Math.round(canvas.width * contentH / contentW),
+                    canvas.height - srcY
+                );
 
-            await doc.html(container, {
-                callback: function () { },
-                x: margin,
-                y: margin,
-                width: effectiveW,
-                windowWidth: effectiveW * 3.78,
-                margin: [margin, margin, margin, margin],
-                autoPaging: 'text',
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false
-                }
-            });
+                if (srcH <= 0) break;
 
-            document.body.removeChild(container);
+                // Create a sub-canvas for this page
+                const pageCanvas = document.createElement('canvas');
+                pageCanvas.width = canvas.width;
+                pageCanvas.height = srcH;
+                const ctx = pageCanvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+                ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
 
-            // Step 4: Generate blob
+                const pageDataUrl = pageCanvas.toDataURL('image/jpeg', 0.92);
+                const pageImgH = (srcH * contentW) / canvas.width;
+
+                doc.addImage(pageDataUrl, 'JPEG', margin, margin, contentW, pageImgH);
+
+                const pct = Math.round(75 + ((page + 1) / totalPages) * 20);
+                progressBar.style.width = pct + '%';
+                progressStatus.textContent = `Sayfa ${page + 1}/${totalPages} oluşturuluyor...`;
+            }
+
+            // Step 6: Generate blob
             progressStatus.textContent = 'PDF dosyası hazırlanıyor...';
-            progressBar.style.width = '95%';
+            progressBar.style.width = '98%';
 
             pdfBlob = doc.output('blob');
 
-            // Complete
             progressBar.style.width = '100%';
             progressStatus.textContent = 'Tamamlandı!';
 
@@ -178,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('result-section').style.display = 'block';
                 const sizeStr = window.formatFileSize(pdfBlob.size);
                 document.getElementById('result-info').textContent =
-                    `${originalFileName}.docx → ${originalFileName}.pdf (${sizeStr})`;
+                    `${originalFileName}.docx → ${originalFileName}.pdf (${totalPages} sayfa, ${sizeStr})`;
                 window.Toast.show('Word dosyanız PDF\'e dönüştürüldü! ✨', 'success');
             }, 400);
 
