@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Word → PDF – PDFix</title>
+    <meta name="description"
+        content="DOC ve DOCX dosyalarını ücretsiz olarak PDF'e dönüştürün. Tamamen tarayıcıda çalışır." />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/tool-page.css" />
+</head>
+
+<body>
+    <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+    <nav class="navbar" id="navbar"></nav>
+    <script src="js/navbar.js"></script>
+
+    <section class="page-hero" style="background:linear-gradient(180deg,rgba(255,107,53,0.06) 0%,transparent 100%);">
+        <div class="container">
+            <div class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="sep">›</span><span>Word → PDF</span>
+            </div>
+            <div class="page-hero__icon" style="background:rgba(255,107,53,0.15);">📄</div>
+            <h1 class="page-hero__title">Word'den <span class="text-gradient">PDF'e</span> Dönüştür</h1>
+            <p class="page-hero__sub">DOC ve DOCX dosyalarınızı saniyeler içinde yüksek kaliteli PDF'e çevirin.</p>
+        </div>
+    </section>
+
+    <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
+        <div class="container">
+            <div class="tool-layout" style="grid-template-columns:1fr;">
+                <div class="tool-main">
+                    <!-- Upload Zone -->
+                    <div id="upload-zone" class="upload-zone">
+                        <div class="upload-zone__content">
+                            <div class="upload-zone__icon icon-bounce"
+                                style="background:rgba(255,107,53,0.15);color:var(--brand-primary);">📄</div>
+                            <div class="upload-zone__title">Word Dosyanızı Sürükleyin</div>
+                            <p class="upload-zone__sub">.doc, .docx – Maksimum 50 MB</p>
+                            <div class="upload-zone__btn">
+                                <button class="btn btn-primary btn-lg ripple-btn"
+                                    onclick="document.getElementById('file-input').click()">📂 Word Dosyası Seç</button>
+                            </div>
+                        </div>
+                        <input type="file" id="file-input"
+                            accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            hidden />
+                    </div>
+
+                    <!-- File Section -->
+                    <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div id="file-list" class="file-list"></div>
+
+                        <!-- Options -->
+                        <div class="options-panel" style="margin-top:var(--sp-lg);">
+                            <div class="options-panel__title">⚙️ Dönüşüm Ayarları</div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Sayfa Boyutu</div>
+                                    <div class="hint">Çıktı PDF'in sayfa boyutunu seçin</div>
+                                </div>
+                                <select id="page-size" class="select">
+                                    <option value="a4" selected>A4</option>
+                                    <option value="letter">Letter</option>
+                                    <option value="legal">Legal</option>
+                                </select>
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Sayfa Yönü</div>
+                                </div>
+                                <select id="orientation" class="select">
+                                    <option value="portrait" selected>Dikey (Portrait)</option>
+                                    <option value="landscape">Yatay (Landscape)</option>
+                                </select>
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Kenar Boşluğu</div>
+                                </div>
+                                <select id="margin" class="select">
+                                    <option value="normal" selected>Normal (20mm)</option>
+                                    <option value="narrow">Dar (10mm)</option>
+                                    <option value="wide">Geniş (30mm)</option>
+                                    <option value="none">Yok</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                            style="width:100%;margin-top:var(--sp-lg);" disabled>
+                            📄 PDF'e Dönüştür
+                        </button>
+                    </div>
+
+                    <!-- Progress -->
+                    <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="progress-card">
+                            <div style="font-size:48px;margin-bottom:var(--sp-md);">📄</div>
+                            <div class="progress-card__title">Word → PDF Dönüştürülüyor...</div>
+                            <div id="progress-status">Dosya okunuyor...</div>
+                            <div id="progress-wrap" class="progress-bar-wrap">
+                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result -->
+                    <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="result-card">
+                            <span class="result-card__icon">✅</span>
+                            <div class="result-card__title">PDF Başarıyla Oluşturuldu!</div>
+                            <div class="result-card__sub" id="result-info">Word dosyanız PDF'e dönüştürüldü.</div>
+                            <div class="result-actions">
+                                <button id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ PDF
+                                    İndir</button>
+                                <button id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Cards -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg);margin-top:var(--sp-2xl);">
+                <div class="info-card" style="margin-bottom:0;">
+                    <div class="info-card__title">Desteklenen Özellikler</div>
+                    <ul>
+                        <li>Paragraflar, başlıklar ve listeler</li>
+                        <li>Kalın, italik ve altı çizili metin</li>
+                        <li>Gömülü görseller</li>
+                        <li>Tablolar ve düzen korunur</li>
+                    </ul>
+                </div>
+                <div class="info-card"
+                    style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);margin-bottom:0;">
+                    <div class="info-card__title" style="color:var(--brand-primary);">Gizliliğiniz</div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">Dosyanız yalnızca
+                        tarayıcınızda işlenir, hiçbir sunucuya yüklenmez. Dönüşüm tamamen istemci tarafında gerçekleşir.
+                    </p>
+                    <div style="margin-top:var(--sp-md);display:flex;flex-direction:column;gap:var(--sp-sm);">
+                        <a href="pdf-to-word.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+                            onmouseout="this.style.background='var(--bg-card)'">📝 PDF → Word</a>
+                        <a href="excel-to-pdf.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+                            onmouseout="this.style.background='var(--bg-card)'">📈 Excel → PDF</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer__bottom"><span>© 2025 PDFix.</span><a href="index.html"
+                    style="color:var(--brand-primary);">← Tüm Araçlar</a></div>
+        </div>
+    </footer>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+    <script src="js/lib/jspdf.umd.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/word-to-pdf.js"></script>
+</body>
+
+</html>

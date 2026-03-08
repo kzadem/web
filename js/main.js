@@ -204,13 +204,27 @@ function createDropZone(options = {}) {
   document.body.addEventListener('drop', (e) => e.preventDefault());
 
   const validateFile = (file) => {
-    const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-    if (!isPDF && accept.includes('.pdf')) {
-      Toast.show(`"${file.name}" is not a valid PDF file.`, 'error');
+    // Build accepted extensions and MIME types from accept string
+    const acceptParts = accept.split(',').map(s => s.trim().toLowerCase());
+    const acceptedExts = acceptParts.filter(p => p.startsWith('.'));
+    const acceptedMimes = acceptParts.filter(p => !p.startsWith('.'));
+
+    const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+    const fileMime = (file.type || '').toLowerCase();
+
+    const extOk = acceptedExts.length === 0 || acceptedExts.includes(fileExt);
+    const mimeOk = acceptedMimes.length === 0 || acceptedMimes.some(m => {
+      if (m.endsWith('/*')) return fileMime.startsWith(m.replace('/*', '/'));
+      return fileMime === m;
+    });
+
+    if (!extOk && !mimeOk) {
+      const allowed = acceptedExts.join(', ') || accept;
+      Toast.show(`"${file.name}" desteklenen formatta değil. (${allowed})`, 'error');
       return false;
     }
     if (file.size > maxFileSizeMB * 1024 * 1024) {
-      Toast.show(`"${file.name}" exceeds the ${maxFileSizeMB}MB limit.`, 'error');
+      Toast.show(`"${file.name}" ${maxFileSizeMB}MB sınırını aşıyor.`, 'error');
       return false;
     }
     return true;

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML → PDF – PDFix</title>
+    <meta name="description"
+        content="HTML dosyalarını veya HTML kodunu ücretsiz olarak PDF'e dönüştürün. Tamamen tarayıcıda çalışır." />
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/animations.css" />
+    <link rel="stylesheet" href="css/tool-page.css" />
+    <style>
+        .html-input-tabs {
+            display: flex;
+            gap: 4px;
+            margin-top: var(--sp-lg);
+        }
+
+        .html-input-tab {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .html-input-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .html-input-tab.active {
+            background: var(--bg-body);
+            color: var(--brand-primary);
+            border-color: var(--brand-primary);
+            border-bottom: 2px solid var(--bg-body);
+            margin-bottom: -1px;
+            z-index: 1;
+        }
+
+        .html-input-panel {
+            display: none;
+            border: 1px solid var(--border-color);
+            border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+            padding: var(--sp-lg);
+            background: var(--bg-card);
+        }
+
+        .html-input-panel.active {
+            display: block;
+        }
+
+        .html-textarea {
+            width: 100%;
+            min-height: 250px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+            padding: var(--sp-md);
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .html-textarea:focus {
+            border-color: var(--brand-primary);
+        }
+
+        .preview-frame {
+            width: 100%;
+            min-height: 300px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: #fff;
+            margin-top: var(--sp-md);
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+    <nav class="navbar" id="navbar"></nav>
+    <script src="js/navbar.js"></script>
+
+    <section class="page-hero" style="background:linear-gradient(180deg,rgba(114,9,183,0.06) 0%,transparent 100%);">
+        <div class="container">
+            <div class="breadcrumb"><a href="index.html">Ana Sayfa</a><span class="sep">›</span><span>HTML →
+                    PDF</span></div>
+            <div class="page-hero__icon" style="background:rgba(114,9,183,0.15);">🌐</div>
+            <h1 class="page-hero__title">HTML'den <span class="text-gradient">PDF'e</span> Dönüştür</h1>
+            <p class="page-hero__sub">HTML dosyanızı yükleyin veya HTML kodunu yapıştırın, PDF olarak indirin.</p>
+        </div>
+    </section>
+
+    <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
+        <div class="container">
+            <div class="tool-layout" style="grid-template-columns:1fr;">
+                <div class="tool-main">
+                    <!-- Tab Selection -->
+                    <div class="html-input-tabs">
+                        <button class="html-input-tab active" data-tab="file">📂 Dosya Yükle</button>
+                        <button class="html-input-tab" data-tab="code">✏️ HTML Yapıştır</button>
+                    </div>
+
+                    <!-- Tab Panel: File Upload -->
+                    <div class="html-input-panel active" id="panel-file">
+                        <div id="upload-zone" class="upload-zone" style="border:none;padding:var(--sp-lg) 0;">
+                            <div class="upload-zone__content">
+                                <div class="upload-zone__icon icon-bounce"
+                                    style="background:rgba(114,9,183,0.15);color:#7209B7;">🌐</div>
+                                <div class="upload-zone__title">HTML Dosyanızı Sürükleyin</div>
+                                <p class="upload-zone__sub">.html, .htm dosyaları</p>
+                                <div class="upload-zone__btn">
+                                    <button class="btn btn-primary btn-lg ripple-btn"
+                                        onclick="document.getElementById('file-input').click()">📂 HTML Dosyası
+                                        Seç</button>
+                                </div>
+                            </div>
+                            <input type="file" id="file-input" accept=".html,.htm,text/html" hidden />
+                        </div>
+                        <div id="file-list" class="file-list"></div>
+                    </div>
+
+                    <!-- Tab Panel: Code -->
+                    <div class="html-input-panel" id="panel-code">
+                        <textarea id="html-code" class="html-textarea"
+                            placeholder="HTML kodunuzu buraya yapıştırın...&#10;&#10;Örnek:&#10;<h1>Merhaba Dünya!</h1>&#10;<p>Bu bir <strong>deneme</strong> paragrafıdır.</p>"></textarea>
+                        <button class="btn btn-outline btn-sm" style="margin-top:var(--sp-sm);"
+                            id="preview-code-btn">👁️ Önizleme</button>
+                    </div>
+
+                    <!-- Preview -->
+                    <div id="preview-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div
+                            style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:var(--sp-sm);">
+                            📋 Önizleme
+                        </div>
+                        <iframe id="preview-frame" class="preview-frame" sandbox="allow-same-origin"></iframe>
+                    </div>
+
+                    <!-- Options -->
+                    <div id="options-section" style="margin-top:var(--sp-lg);">
+                        <div class="options-panel">
+                            <div class="options-panel__title">⚙️ PDF Ayarları</div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Sayfa Boyutu</div>
+                                </div>
+                                <select id="page-size" class="select">
+                                    <option value="a4" selected>A4</option>
+                                    <option value="letter">Letter</option>
+                                    <option value="legal">Legal</option>
+                                </select>
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Sayfa Yönü</div>
+                                </div>
+                                <select id="orientation" class="select">
+                                    <option value="portrait" selected>Dikey (Portrait)</option>
+                                    <option value="landscape">Yatay (Landscape)</option>
+                                </select>
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Kenar Boşluğu</div>
+                                </div>
+                                <select id="margin" class="select">
+                                    <option value="normal" selected>Normal (15mm)</option>
+                                    <option value="narrow">Dar (8mm)</option>
+                                    <option value="wide">Geniş (25mm)</option>
+                                    <option value="none">Yok</option>
+                                </select>
+                            </div>
+                            <div class="options-row">
+                                <div>
+                                    <div>Ölçek</div>
+                                    <div class="hint">İçeriği büyütme/küçültme oranı</div>
+                                </div>
+                                <select id="scale" class="select">
+                                    <option value="0.8">%80</option>
+                                    <option value="1" selected>%100</option>
+                                    <option value="1.2">%120</option>
+                                    <option value="1.5">%150</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                            style="width:100%;margin-top:var(--sp-lg);">
+                            🌐 PDF'e Dönüştür
+                        </button>
+                    </div>
+
+                    <!-- Progress -->
+                    <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="progress-card">
+                            <div style="font-size:48px;margin-bottom:var(--sp-md);">🌐</div>
+                            <div class="progress-card__title">HTML → PDF Dönüştürülüyor...</div>
+                            <div id="progress-status">HTML içeriği işleniyor...</div>
+                            <div id="progress-wrap" class="progress-bar-wrap">
+                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result -->
+                    <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
+                        <div class="result-card">
+                            <span class="result-card__icon">✅</span>
+                            <div class="result-card__title">PDF Başarıyla Oluşturuldu!</div>
+                            <div class="result-card__sub" id="result-info">HTML içeriğiniz PDF'e dönüştürüldü.</div>
+                            <div class="result-actions">
+                                <button id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ PDF
+                                    İndir</button>
+                                <button id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Cards -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-lg);margin-top:var(--sp-2xl);">
+                <div class="info-card" style="margin-bottom:0;">
+                    <div class="info-card__title">Özellikler</div>
+                    <ul>
+                        <li>HTML dosyası yükleme</li>
+                        <li>HTML kodu yapıştırma</li>
+                        <li>Canlı önizleme</li>
+                        <li>CSS stilleri korunur</li>
+                    </ul>
+                </div>
+                <div class="info-card"
+                    style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);margin-bottom:0;">
+                    <div class="info-card__title" style="color:var(--brand-primary);">İpuçları</div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">HTML dosyanızdaki görseller
+                        base64 veya harici URL olarak gömülüyse PDF'te de görünecektir. Inline CSS stilleri
+                        desteklenir.</p>
+                    <div style="margin-top:var(--sp-md);display:flex;flex-direction:column;gap:var(--sp-sm);">
+                        <a href="word-to-pdf.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+                            onmouseout="this.style.background='var(--bg-card)'">📄 Word → PDF</a>
+                        <a href="jpg-to-pdf.html"
+                            style="font-size:14px;color:var(--text-secondary);display:flex;align-items:center;gap:var(--sp-sm);padding:10px 12px;border-radius:var(--radius-sm);transition:all 0.2s;border:1px solid var(--border-color);background:var(--bg-card);"
+                            onmouseover="this.style.background='rgba(255,255,255,0.06)'"
+                            onmouseout="this.style.background='var(--bg-card)'">🗂️ JPG → PDF</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" style="margin-top:0;">
+        <div class="container">
+            <div class="footer__bottom"><span>© 2025 PDFix.</span><a href="index.html"
+                    style="color:var(--brand-primary);">← Tüm Araçlar</a></div>
+        </div>
+    </footer>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="js/lib/jspdf.umd.min.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/html-to-pdf.js"></script>
+</body>
+
+</html>
