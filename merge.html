@@ -142,8 +142,163 @@
 
     <!-- pdf-lib for REAL PDF merging in browser -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <!-- PDF.js for thumbnail rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
     <!-- main.js for navbar/particles only -->
     <script src="js/main.js"></script>
+
+    <style>
+        /* ── PDF Merge: Thumbnail Cards ── */
+        .pdf-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: var(--sp-md);
+        }
+
+        .pdf-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--sp-sm);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+            overflow: hidden;
+        }
+
+        .pdf-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .pdf-card__thumb {
+            width: 100%;
+            aspect-ratio: 210/297;
+            background: #f5f5f5;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: var(--sp-sm);
+            position: relative;
+        }
+
+        [data-theme="dark"] .pdf-card__thumb {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .pdf-card__thumb canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: var(--radius-md);
+        }
+
+        .pdf-card__thumb .thumb-placeholder {
+            font-size: 36px;
+            opacity: 0.3;
+        }
+
+        .pdf-card__thumb .thumb-loader {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        [data-theme="dark"] .pdf-card__thumb .thumb-loader {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .pdf-card__name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            margin-bottom: 2px;
+        }
+
+        .pdf-card__size {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .pdf-card__remove {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 59, 48, 0.9);
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.15s;
+            z-index: 5;
+            line-height: 1;
+        }
+
+        .pdf-card:hover .pdf-card__remove {
+            opacity: 1;
+        }
+
+        .pdf-card__remove:hover {
+            background: rgba(255, 59, 48, 1);
+            transform: scale(1.15);
+        }
+
+        .pdf-card__pages {
+            position: absolute;
+            bottom: 38px;
+            left: 6px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            z-index: 3;
+        }
+
+        /* ── Upload zone compact mode ── */
+        .upload-zone.compact {
+            padding: var(--sp-md) var(--sp-lg);
+            min-height: unset;
+            cursor: pointer;
+        }
+
+        .upload-zone.compact .zone-compact-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--sp-sm);
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .upload-zone.compact .zone-compact-content span {
+            font-size: 20px;
+        }
+    </style>
 
     <script>
         // ═══════════════════════════════════════════
@@ -178,35 +333,94 @@
                 if (window.Toast) window.Toast.show(msg, type || 'info');
             }
 
+            // ── Render PDF thumbnail ──
+            async function renderThumb(file, canvas) {
+                try {
+                    var arrayBuf = await file.arrayBuffer();
+                    var pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+                    var page = await pdf.getPage(1);
+                    var vp = page.getViewport({ scale: 1 });
+                    var scale = 200 / vp.width;
+                    var viewport = page.getViewport({ scale: scale });
+
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    var ctx = canvas.getContext('2d');
+                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+                    // Update page count badge
+                    var badge = canvas.closest('.pdf-card').querySelector('.pdf-card__pages');
+                    if (badge) badge.textContent = pdf.numPages + ' sayfa';
+
+                    // Remove loader
+                    var loader = canvas.parentElement.querySelector('.thumb-loader');
+                    if (loader) loader.remove();
+
+                    return pdf.numPages;
+                } catch (e) {
+                    console.warn('[PDFix] Thumb error for', file.name, e);
+                    var loader = canvas.parentElement.querySelector('.thumb-loader');
+                    if (loader) loader.textContent = '⚠️';
+                }
+            }
+
             // ── UI ──
             function refreshUI() {
                 var n = pdfFiles.length;
                 processBtn.disabled = n < 2;
                 processBtn.style.opacity = n < 2 ? '0.5' : '1';
                 fileSection.style.display = n > 0 ? 'block' : 'none';
-                zoneContent.style.display = n > 0 ? 'none' : '';
                 countEl.textContent = n > 0 ? '(' + n + ' dosya)' : '';
+
+                // Zone: show full or compact
+                if (n > 0) {
+                    zone.classList.add('compact');
+                    zoneContent.style.display = 'none';
+                    // Add compact content if not already there
+                    if (!zone.querySelector('.zone-compact-content')) {
+                        var compDiv = document.createElement('div');
+                        compDiv.className = 'zone-compact-content';
+                        compDiv.innerHTML = '<span>📂</span> Dosya eklemek için tıklayın veya sürükleyin';
+                        zone.appendChild(compDiv);
+                    }
+                } else {
+                    zone.classList.remove('compact');
+                    zoneContent.style.display = '';
+                    var existing = zone.querySelector('.zone-compact-content');
+                    if (existing) existing.remove();
+                }
             }
 
             function renderList() {
                 fileListEl.innerHTML = '';
+                fileListEl.className = 'pdf-card-grid';
                 for (var i = 0; i < pdfFiles.length; i++) {
-                    var f = pdfFiles[i];
-                    var div = document.createElement('div');
-                    div.className = 'file-item';
-                    div.innerHTML =
-                        '<div class="file-item__icon">📄</div>' +
-                        '<div class="file-item__info">' +
-                        '<div class="file-item__name">' + f.name + '</div>' +
-                        '<div class="file-item__size">' + fmtSize(f.size) + '</div>' +
-                        '</div>' +
-                        '<button type="button" class="file-item__remove" data-i="' + i + '" style="cursor:pointer;font-size:16px;color:var(--text-muted);background:none;border:none;">✕</button>';
-                    fileListEl.appendChild(div);
+                    (function (idx) {
+                        var f = pdfFiles[idx];
+                        var card = document.createElement('div');
+                        card.className = 'pdf-card';
+                        card.innerHTML =
+                            '<button type="button" class="pdf-card__remove" data-i="' + idx + '" title="Kaldır">✕</button>' +
+                            '<div class="pdf-card__thumb">' +
+                            '<canvas></canvas>' +
+                            '<div class="thumb-loader">Yükleniyor…</div>' +
+                            '</div>' +
+                            '<div class="pdf-card__pages">…</div>' +
+                            '<div class="pdf-card__name" title="' + f.name + '">' + f.name + '</div>' +
+                            '<div class="pdf-card__size">' + fmtSize(f.size) + '</div>';
+                        fileListEl.appendChild(card);
+
+                        // Render thumbnail
+                        var canvas = card.querySelector('canvas');
+                        renderThumb(f, canvas);
+                    })(i);
                 }
+
                 // Removal handlers
-                var btns = fileListEl.querySelectorAll('.file-item__remove');
+                var btns = fileListEl.querySelectorAll('.pdf-card__remove');
                 for (var j = 0; j < btns.length; j++) {
-                    btns[j].addEventListener('click', function () {
+                    btns[j].addEventListener('click', function (e) {
+                        e.stopPropagation();
                         pdfFiles.splice(parseInt(this.getAttribute('data-i')), 1);
                         renderList();
                         refreshUI();
@@ -233,7 +447,6 @@
             }
 
             // ── File Input Events ──
-            // ONLY the buttons trigger file input - zone does NOT auto-click
             document.getElementById('browse-btn').addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -244,6 +457,15 @@
                 e.preventDefault();
                 e.stopPropagation();
                 fileInput.click();
+            });
+
+            // Zone click: when compact (files loaded), clicking zone opens file dialog
+            zone.addEventListener('click', function (e) {
+                // Only trigger when in compact mode and not clicking a child button
+                if (zone.classList.contains('compact') && !e.target.closest('button')) {
+                    e.preventDefault();
+                    fileInput.click();
+                }
             });
 
             fileInput.addEventListener('change', function () {
@@ -282,6 +504,7 @@
                 // Show progress
                 progressSec.style.display = 'block';
                 fileSection.style.display = 'none';
+                zone.style.display = 'none';
                 resultSec.style.display = 'none';
                 processBtn.disabled = true;
                 processBtn.textContent = '⏳ Birleştiriliyor...';
@@ -347,6 +570,7 @@
                         toast('Birleştirme hatası: ' + (err.message || String(err)), 'error');
                         progressSec.style.display = 'none';
                         fileSection.style.display = 'block';
+                        zone.style.display = '';
                     }
 
                     processBtn.textContent = '🔗 PDF Dosyalarını Birleştir';
@@ -385,6 +609,7 @@
                 e.preventDefault();
                 resultSec.style.display = 'none';
                 progressSec.style.display = 'none';
+                zone.style.display = '';
                 mergedBlob = null;
                 pdfFiles = [];
                 renderList();
