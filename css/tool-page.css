@@ -1,4 +1,5 @@
-< !-- Tool Page Shared Styles --><style>.tool-layout {
+/* Tool Page Shared Styles */
+.tool-layout {
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: var(--sp-lg);
@@ -134,5 +135,3 @@
         grid-template-columns: 1fr;
     }
 }
-
-</style>
