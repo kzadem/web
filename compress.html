@@ -37,165 +37,159 @@
 
     <section style="padding: var(--sp-2xl) 0 var(--sp-4xl); position:relative;z-index:1;">
         <div class="container">
-            <div class="tool-layout">
-                <div class="tool-main">
 
-                    <div id="upload-zone" class="upload-zone">
-                        <div class="upload-zone__content">
-                            <div class="upload-zone__icon icon-bounce"
-                                style="background:rgba(6,214,160,0.15);color:var(--accent-teal);">⚡</div>
-                            <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
-                            <p class="upload-zone__sub">veya aşağıdaki butona tıklayın · Maksimum 100 MB</p>
-                            <div class="upload-zone__btn">
-                                <button class="btn btn-primary btn-lg ripple-btn"
-                                    onclick="document.getElementById('file-input').click()">
-                                    📂 PDF Seç
-                                </button>
-                            </div>
-                        </div>
-                        <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+            <div id="upload-zone" class="upload-zone">
+                <div class="upload-zone__content">
+                    <div class="upload-zone__icon icon-bounce"
+                        style="background:rgba(6,214,160,0.15);color:var(--accent-teal);">⚡</div>
+                    <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
+                    <p class="upload-zone__sub">veya aşağıdaki butona tıklayın · Maksimum 100 MB</p>
+                    <div class="upload-zone__btn">
+                        <button class="btn btn-primary btn-lg ripple-btn"
+                            onclick="document.getElementById('file-input').click()">
+                            📂 PDF Seç
+                        </button>
                     </div>
+                </div>
+            </div>
+            <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
 
-                    <div id="file-section" style="display:none; margin-top: var(--sp-lg);">
-                        <div id="file-list" class="file-list"></div>
+            <div id="file-section" style="display:none; margin-top: var(--sp-lg);">
+                <div id="file-list" class="file-list"></div>
 
-                        <div class="options-panel" style="margin-top:var(--sp-lg);">
-                            <div class="options-panel__title">🎛️ Sıkıştırma Kalitesi</div>
+                <div class="options-panel" style="margin-top:var(--sp-lg);">
+                    <div class="options-panel__title">🎛️ Sıkıştırma Kalitesi</div>
 
-                            <!-- Compression Level Visual -->
-                            <div
-                                style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-md);margin-bottom:var(--sp-md);">
-                                <label style="cursor:pointer;">
-                                    <input type="radio" name="compress-level" value="extreme" style="display:none;"
-                                        id="c-extreme" />
-                                    <div class="compress-option" id="co-extreme"
-                                        onclick="selectCompressLevel('extreme')" style="
+                    <!-- Compression Level Visual -->
+                    <div
+                        style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-md);margin-bottom:var(--sp-md);">
+                        <label style="cursor:pointer;">
+                            <input type="radio" name="compress-level" value="extreme" style="display:none;"
+                                id="c-extreme" />
+                            <div class="compress-option" id="co-extreme" onclick="selectCompressLevel('extreme')" style="
                   background:var(--bg-input);border:2px solid var(--border-color);
                   border-radius:var(--radius-md);padding:var(--sp-md);text-align:center;
                   transition:all 0.2s;cursor:pointer;
                 ">
-                                        <div style="font-size:24px;margin-bottom:4px;">🗜️</div>
-                                        <div style="font-size:13px;font-weight:700;">Maksimum</div>
-                                        <div style="font-size:11px;color:var(--text-muted);">%75 küçültme</div>
-                                    </div>
-                                </label>
-                                <label style="cursor:pointer;">
-                                    <input type="radio" name="compress-level" value="recommended" style="display:none;"
-                                        id="c-rec" checked />
-                                    <div class="compress-option" id="co-recommended"
-                                        onclick="selectCompressLevel('recommended')" style="
+                                <div style="font-size:24px;margin-bottom:4px;">🗜️</div>
+                                <div style="font-size:13px;font-weight:700;">Maksimum</div>
+                                <div style="font-size:11px;color:var(--text-muted);">%75 küçültme</div>
+                            </div>
+                        </label>
+                        <label style="cursor:pointer;">
+                            <input type="radio" name="compress-level" value="recommended" style="display:none;"
+                                id="c-rec" checked />
+                            <div class="compress-option" id="co-recommended"
+                                onclick="selectCompressLevel('recommended')" style="
                   background:rgba(255,107,53,0.1);border:2px solid var(--brand-primary);
                   border-radius:var(--radius-md);padding:var(--sp-md);text-align:center;
                   transition:all 0.2s;cursor:pointer;
                 ">
-                                        <div style="font-size:24px;margin-bottom:4px;">⭐</div>
-                                        <div style="font-size:13px;font-weight:700;color:var(--brand-primary);">Önerilen
-                                        </div>
-                                        <div style="font-size:11px;color:var(--text-muted);">%55 küçültme</div>
-                                    </div>
-                                </label>
-                                <label style="cursor:pointer;">
-                                    <input type="radio" name="compress-level" value="low" style="display:none;"
-                                        id="c-low" />
-                                    <div class="compress-option" id="co-low" onclick="selectCompressLevel('low')" style="
+                                <div style="font-size:24px;margin-bottom:4px;">⭐</div>
+                                <div style="font-size:13px;font-weight:700;color:var(--brand-primary);"> Önerilen
+                                </div>
+                                <div style="font-size:11px;color:var(--text-muted);">%55 küçültme</div>
+                            </div>
+                        </label>
+                        <label style="cursor:pointer;">
+                            <input type="radio" name="compress-level" value="low" style="display:none;" id="c-low" />
+                            <div class="compress-option" id="co-low" onclick="selectCompressLevel('low')" style="
                   background:var(--bg-input);border:2px solid var(--border-color);
                   border-radius:var(--radius-md);padding:var(--sp-md);text-align:center;
                   transition:all 0.2s;cursor:pointer;
                 ">
-                                        <div style="font-size:24px;margin-bottom:4px;">🌟</div>
-                                        <div style="font-size:13px;font-weight:700;">Düşük</div>
-                                        <div style="font-size:11px;color:var(--text-muted);">%30 küçültme</div>
-                                    </div>
-                                </label>
+                                <div style="font-size:24px;margin-bottom:4px;">🌟</div>
+                                <div style="font-size:13px;font-weight:700;">Düşük</div>
+                                <div style="font-size:11px;color:var(--text-muted);">%30 küçültme</div>
                             </div>
-
-                            <div class="options-row">
-                                <div>
-                                    <div>Görüntü Kalitesi</div>
-                                    <div class="hint">Sayısal değer: <span id="quality-val">72</span>%</div>
-                                </div>
-                                <input type="range" class="range-slider" min="20" max="100" value="72"
-                                    oninput="document.getElementById('quality-val').textContent = this.value" />
-                            </div>
-                        </div>
-
-                        <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
-                            style="width:100%;margin-top:var(--sp-lg);" disabled>
-                            ⚡ PDF'i Sıkıştır
-                        </button>
+                        </label>
                     </div>
 
-                    <div id="progress-section" style="display:none; margin-top:var(--sp-lg);">
-                        <div class="progress-card">
-                            <div style="font-size:48px;margin-bottom:var(--sp-md);">🗜️</div>
-                            <div class="progress-card__title">PDF Sıkıştırılıyor...</div>
-                            <div id="progress-status">Görüntüler optimize ediliyor...</div>
-                            <div id="progress-wrap" class="progress-bar-wrap">
-                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
-                            </div>
+                    <div class="options-row">
+                        <div>
+                            <div>Görüntü Kalitesi</div>
+                            <div class="hint">Sayısal değer: <span id="quality-val">72</span>%</div>
                         </div>
+                        <input type="range" class="range-slider" min="20" max="100" value="72"
+                            oninput="document.getElementById('quality-val').textContent = this.value" />
                     </div>
-
-                    <div id="result-section" style="display:none; margin-top:var(--sp-lg);">
-                        <div class="result-card">
-                            <span class="result-card__icon">✅</span>
-                            <div class="result-card__title">PDF Başarıyla Sıkıştırıldı!</div>
-                            <div
-                                style="display:flex;gap:var(--sp-lg);justify-content:center;margin-bottom:var(--sp-lg);">
-                                <div style="text-align:center;">
-                                    <div style="font-size:13px;color:var(--text-muted);">Önceki</div>
-                                    <div style="font-size:20px;font-weight:800;color:var(--accent-red);"
-                                        id="before-size">—</div>
-                                </div>
-                                <div style="font-size:24px;align-self:center;">→</div>
-                                <div style="text-align:center;">
-                                    <div style="font-size:13px;color:var(--text-muted);">Sonrası</div>
-                                    <div style="font-size:20px;font-weight:800;color:var(--accent-teal);"
-                                        id="after-size">—</div>
-                                </div>
-                                <div style="text-align:center;">
-                                    <div style="font-size:13px;color:var(--text-muted);">Kazanım</div>
-                                    <div style="font-size:20px;font-weight:800;" class="text-gradient">~55%</div>
-                                </div>
-                            </div>
-                            <div class="result-card__sub">Dosyanız optimize edildi ve indirmeye hazır.</div>
-                            <div class="result-actions">
-                                <button id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️
-                                    İndir</button>
-                                <button id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
 
-                <div class="tool-sidebar">
-                    <div class="info-card">
-                        <div class="info-card__title">Nasıl Çalışır?</div>
-                        <ul>
-                            <li>PDF dosyanızı yükleyin</li>
-                            <li>Sıkıştırma seviyesini seçin</li>
-                            <li>"Sıkıştır" butonuna tıklayın</li>
-                            <li>Küçültülmüş PDF'i indirin</li>
-                        </ul>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-card__title">Sıkıştırma Modları</div>
-                        <ul>
-                            <li>Maksimum: En küçük dosya boyutu</li>
-                            <li>Önerilen: Kalite ve boyut dengesi</li>
-                            <li>Düşük: En iyi görüntü kalitesi</li>
-                        </ul>
-                    </div>
-                    <div class="info-card"
-                        style="background: var(--brand-gradient-soft); border-color: rgba(255,107,53,0.2);">
-                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
-                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
-                            İşlemler tarayıcınızda gerçekleşir. Dosya sunucuya gönderilmez.
-                        </p>
+                <button id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                    style="width:100%;margin-top:var(--sp-lg);" disabled>
+                    ⚡ PDF'i Sıkıştır
+                </button>
+            </div>
+
+            <div id="progress-section" style="display:none; margin-top:var(--sp-lg);">
+                <div class="progress-card">
+                    <div style="font-size:48px;margin-bottom:var(--sp-md);">🗜️</div>
+                    <div class="progress-card__title">PDF Sıkıştırılıyor...</div>
+                    <div id="progress-status">Görüntüler optimize ediliyor...</div>
+                    <div id="progress-wrap" class="progress-bar-wrap">
+                        <div id="progress-bar" class="progress-bar" style="width:0%"></div>
                     </div>
                 </div>
             </div>
+
+            <div id="result-section" style="display:none; margin-top:var(--sp-lg);">
+                <div class="result-card">
+                    <span class="result-card__icon">✅</span>
+                    <div class="result-card__title">PDF Başarıyla Sıkıştırıldı!</div>
+                    <div style="display:flex;gap:var(--sp-lg);justify-content:center;margin-bottom:var(--sp-lg);">
+                        <div style="text-align:center;">
+                            <div style="font-size:13px;color:var(--text-muted);"> Önceki</div>
+                            <div style="font-size:20px;font-weight:800;color:var(--accent-red);" id="before-size">—
+                            </div>
+                        </div>
+                        <div style="font-size:24px;align-self:center;">→</div>
+                        <div style="text-align:center;">
+                            <div style="font-size:13px;color:var(--text-muted);">Sonrası</div>
+                            <div style="font-size:20px;font-weight:800;color:var(--accent-teal);" id="after-size">—
+                            </div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:13px;color:var(--text-muted);">Kazanım</div>
+                            <div style="font-size:20px;font-weight:800;" class="text-gradient">~55%</div>
+                        </div>
+                    </div>
+                    <div class="result-card__sub">Dosyanız optimize edildi ve indirmeye hazır.</div>
+                    <div class="result-actions">
+                        <button id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️
+                            İndir</button>
+                        <button id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Cards Row -->
+            <div class="info-cards-row">
+                <div class="info-card">
+                    <div class="info-card__title">Nasıl Çalışır?</div>
+                    <ul>
+                        <li>PDF dosyanızı yükleyin</li>
+                        <li>Sıkıştırma seviyesini seçin</li>
+                        <li>"Sıkıştır" butonuna tıklayın</li>
+                        <li>Küçültülmüş PDF'i indirin</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <div class="info-card__title">Sıkıştırma Modları</div>
+                    <ul>
+                        <li>Maksimum: En küçük dosya boyutu</li>
+                        <li>Önerilen: Kalite ve boyut dengesi</li>
+                        <li>Düşük: En iyi görüntü kalitesi</li>
+                    </ul>
+                </div>
+                <div class="info-card"
+                    style="background: var(--brand-gradient-soft); border-color: rgba(255,107,53,0.2);">
+                    <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                        İşlemler tarayıcınızda gerçekleşir. Dosya sunucuya gönderilmez.
+                    </p>
+                </div>
+            </div>
+
         </div>
     </section>
 

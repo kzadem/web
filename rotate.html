@@ -247,8 +247,8 @@
                             Seç</button>
                     </div>
                 </div>
-                <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
             </div>
+            <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
 
             <!-- Main Content (after file loaded) -->
             <div id="main-content" style="display:none;">
@@ -333,6 +333,34 @@
                             İndir</button>
                         <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden Başla</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Info Cards Row -->
+            <div class="info-cards-row">
+                <div class="info-card">
+                    <div class="info-card__title">Nasıl Kullanılır?</div>
+                    <ul>
+                        <li>PDF dosyanızı yükleyin</li>
+                        <li>Sayfaları tek tek veya toplu döndürün</li>
+                        <li>"Kaydet" butonuna tıklayın</li>
+                        <li>Döndürülmüş PDF'i indirin</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <div class="info-card__title">Özellikler</div>
+                    <ul>
+                        <li>Tek tek sayfa döndürme</li>
+                        <li>Toplu döndürme (90°, 180°, 270°)</li>
+                        <li>Görsel sayfa önizleme</li>
+                        <li>Orijinal kalite korunur</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);">
+                    <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                        Tüm işlemler tarayıcınızda gerçekleşir. Dosyalarınız sunucuya gönderilmez.
+                    </p>
                 </div>
             </div>
 

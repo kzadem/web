@@ -298,168 +298,173 @@
 
     <section style="padding:var(--sp-2xl) 0 var(--sp-4xl);position:relative;z-index:1;">
         <div class="container">
-            <div class="tool-layout">
-                <div class="tool-main">
 
-                    <!-- Upload Zone -->
-                    <div id="upload-zone" class="upload-zone">
-                        <div id="zone-content">
-                            <div class="upload-zone__icon icon-bounce"
-                                style="background:rgba(67,97,238,0.15);color:var(--accent-blue);">✂️</div>
-                            <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
-                            <p class="upload-zone__sub">veya butona tıklayın · Maksimum 100 MB</p>
-                            <div style="margin-top:var(--sp-lg);position:relative;z-index:10;">
-                                <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">📂 PDF
-                                    Seç</button>
-                            </div>
-                        </div>
-                        <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
+            <!-- Upload Zone -->
+            <div id="upload-zone" class="upload-zone">
+                <div id="zone-content">
+                    <div class="upload-zone__icon icon-bounce"
+                        style="background:rgba(67,97,238,0.15);color:var(--accent-blue);">✂️</div>
+                    <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
+                    <p class="upload-zone__sub">veya butona tıklayın · Maksimum 100 MB</p>
+                    <div style="margin-top:var(--sp-lg);position:relative;z-index:10;">
+                        <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">📂 PDF
+                            Seç</button>
                     </div>
+                </div>
+            </div>
+            <input type="file" id="file-input" accept=".pdf,application/pdf" hidden />
 
-                    <!-- Loaded File + Preview -->
-                    <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
+            <!-- Loaded File + Preview -->
+            <div id="file-section" style="display:none;margin-top:var(--sp-lg);">
 
-                        <!-- File info bar -->
-                        <div id="file-bar"
-                            style="display:flex;align-items:center;gap:var(--sp-md);padding:var(--sp-md);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
-                            <div style="font-size:28px;">📄</div>
-                            <div style="flex:1;">
-                                <div id="file-name" style="font-size:14px;font-weight:700;"></div>
-                                <div id="file-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px;">
-                                </div>
-                            </div>
-                            <button type="button" id="remove-file"
-                                style="cursor:pointer;font-size:18px;color:var(--text-muted);background:none;border:none;padding:4px 8px;">✕</button>
+                <!-- File info bar -->
+                <div id="file-bar"
+                    style="display:flex;align-items:center;gap:var(--sp-md);padding:var(--sp-md);background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);">
+                    <div style="font-size:28px;">📄</div>
+                    <div style="flex:1;">
+                        <div id="file-name" style="font-size:14px;font-weight:700;"></div>
+                        <div id="file-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px;">
                         </div>
+                    </div>
+                    <button type="button" id="remove-file"
+                        style="cursor:pointer;font-size:18px;color:var(--text-muted);background:none;border:none;padding:4px 8px;">✕</button>
+                </div>
 
-                        <!-- Page Preview Carousel -->
-                        <div class="page-carousel-wrap" id="carousel-wrap">
-                            <div class="page-carousel-header">
-                                <h3>📑 Sayfa Önizleme <span id="page-count-label"
-                                        style="color:var(--text-muted);font-weight:400;"></span></h3>
-                                <div class="page-actions">
-                                    <button type="button" class="btn btn-ghost btn-sm"
-                                        onclick="PDFSplit.selectAll()">Tümü</button>
-                                    <button type="button" class="btn btn-ghost btn-sm"
-                                        onclick="PDFSplit.deselectAll()">Hiçbiri</button>
-                                    <button type="button" class="btn btn-ghost btn-sm"
-                                        onclick="PDFSplit.selectOdd()">Tek</button>
-                                    <button type="button" class="btn btn-ghost btn-sm"
-                                        onclick="PDFSplit.selectEven()">Çift</button>
-                                </div>
-                            </div>
-                            <div class="page-carousel" id="page-carousel"></div>
+                <!-- Page Preview Carousel -->
+                <div class="page-carousel-wrap" id="carousel-wrap">
+                    <div class="page-carousel-header">
+                        <h3>📑 Sayfa Önizleme <span id="page-count-label"
+                                style="color:var(--text-muted);font-weight:400;"></span></h3>
+                        <div class="page-actions">
+                            <button type="button" class="btn btn-ghost btn-sm"
+                                onclick="PDFSplit.selectAll()">Tümü</button>
+                            <button type="button" class="btn btn-ghost btn-sm"
+                                onclick="PDFSplit.deselectAll()">Hiçbiri</button>
+                            <button type="button" class="btn btn-ghost btn-sm"
+                                onclick="PDFSplit.selectOdd()">Tek</button>
+                            <button type="button" class="btn btn-ghost btn-sm"
+                                onclick="PDFSplit.selectEven()">Çift</button>
                         </div>
+                    </div>
+                    <div class="page-carousel" id="page-carousel"></div>
+                </div>
 
-                        <!-- Mode Tabs -->
-                        <div style="margin-top:var(--sp-lg);">
-                            <div class="mode-tabs">
-                                <div class="mode-tab active" onclick="PDFSplit.setMode('visual')">✂️ Görsel Böl</div>
-                                <div class="mode-tab" onclick="PDFSplit.setMode('range')">📄 Aralık</div>
-                                <div class="mode-tab" onclick="PDFSplit.setMode('every')">📚 Her N Sayfa</div>
-                                <div class="mode-tab" onclick="PDFSplit.setMode('extract')">🎯 Sayfa Çıkar</div>
-                            </div>
-                        </div>
+                <!-- Mode Tabs -->
+                <div style="margin-top:var(--sp-lg);">
+                    <div class="mode-tabs">
+                        <div class="mode-tab active" onclick="PDFSplit.setMode('visual')">✂️ Görsel Böl</div>
+                        <div class="mode-tab" onclick="PDFSplit.setMode('range')">📄 Aralık</div>
+                        <div class="mode-tab" onclick="PDFSplit.setMode('every')">📚 Her N Sayfa</div>
+                        <div class="mode-tab" onclick="PDFSplit.setMode('extract')">🎯 Sayfa Çıkar</div>
+                    </div>
+                </div>
 
-                        <!-- Mode Options -->
-                        <div id="opts-visual" class="options-panel">
-                            <div class="options-panel__title">✂️ Görsel Bölme</div>
-                            <p style="font-size:13px;color:var(--text-secondary);">Yukarıdaki sayfalar arasındaki
-                                <strong style="color:var(--brand-primary);">✂️ makas</strong> simgelerine tıklayarak
-                                bölme noktalarını seçin. Kırmızı çizgi bölme noktasını gösterir.
-                            </p>
-                            <div id="visual-info" class="hint" style="margin-top:var(--sp-sm);">0 bölme noktası seçildi
-                                → 1 parça</div>
-                        </div>
+                <!-- Mode Options -->
+                <div id="opts-visual" class="options-panel">
+                    <div class="options-panel__title">✂️ Görsel Bölme</div>
+                    <p style="font-size:13px;color:var(--text-secondary);">Yukarıdaki sayfalar arasındaki
+                        <strong style="color:var(--brand-primary);">✂️ makas</strong> simgelerine tıklayarak
+                        bölme noktalarını seçin. Kırmızı çizgi bölme noktasını gösterir.
+                    </p>
+                    <div id="visual-info" class="hint" style="margin-top:var(--sp-sm);">0 bölme noktası seçildi
+                        → 1 parça</div>
+                </div>
 
-                        <div id="opts-range" class="options-panel" style="display:none;">
-                            <div class="options-panel__title">📄 Sayfa Aralıkları</div>
-                            <p style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--sp-sm);">Her aralık
-                                ayrı bir PDF dosyası olur.</p>
-                            <input type="text" id="range-input" value="" placeholder="Örn: 1-3, 5, 7-10" style="
+                <div id="opts-range" class="options-panel" style="display:none;">
+                    <div class="options-panel__title">📄 Sayfa Aralıkları</div>
+                    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:var(--sp-sm);">Her aralık
+                        ayrı bir PDF dosyası olur.</p>
+                    <input type="text" id="range-input" value="" placeholder="Örn: 1-3, 5, 7-10" style="
               width:100%;background:var(--bg-input);border:1px solid var(--border-color);
               color:var(--text-primary);border-radius:var(--radius-sm);
               padding:10px 14px;font-size:15px;font-family:inherit;outline:none;
             " />
-                        </div>
+                </div>
 
-                        <div id="opts-every" class="options-panel" style="display:none;">
-                            <div class="options-panel__title">📚 Her N Sayfada Böl</div>
-                            <div style="display:flex;align-items:center;gap:var(--sp-md);">
-                                <span style="font-size:13px;color:var(--text-secondary);">Her</span>
-                                <input type="number" id="every-n" value="1" min="1" style="
+                <div id="opts-every" class="options-panel" style="display:none;">
+                    <div class="options-panel__title">📚 Her N Sayfada Böl</div>
+                    <div style="display:flex;align-items:center;gap:var(--sp-md);">
+                        <span style="font-size:13px;color:var(--text-secondary);">Her</span>
+                        <input type="number" id="every-n" value="1" min="1" style="
                 background:var(--bg-input);border:1px solid var(--border-color);
                 color:var(--text-primary);border-radius:var(--radius-sm);
                 padding:8px 12px;font-size:15px;width:80px;outline:none;
               " />
-                                <span style="font-size:13px;color:var(--text-secondary);">sayfada böl</span>
-                            </div>
-                            <div id="every-preview" class="hint" style="margin-top:var(--sp-sm);"></div>
-                        </div>
-
-                        <div id="opts-extract" class="options-panel" style="display:none;">
-                            <div class="options-panel__title">🎯 Sayfa Çıkar</div>
-                            <p style="font-size:13px;color:var(--text-secondary);">Yukarıdaki sayfa kartlarına
-                                tıklayarak çıkarmak istediğiniz sayfaları seçin. Seçilen sayfalar tek bir PDF olarak
-                                birleştirilir.</p>
-                            <div id="extract-info" class="hint" style="margin-top:var(--sp-sm);">0 sayfa seçildi</div>
-                        </div>
-
-                        <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
-                            style="width:100%;margin-top:var(--sp-lg);" disabled>
-                            ✂️ PDF'i Böl
-                        </button>
+                        <span style="font-size:13px;color:var(--text-secondary);">sayfada böl</span>
                     </div>
-
-                    <!-- Progress -->
-                    <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
-                        <div class="progress-card">
-                            <div style="font-size:48px;margin-bottom:var(--sp-md);">✂️</div>
-                            <div class="progress-card__title">PDF Bölünüyor...</div>
-                            <div id="progress-status">Sayfalar işleniyor...</div>
-                            <div id="progress-wrap" class="progress-bar-wrap">
-                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Result -->
-                    <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
-                        <div class="result-card">
-                            <span class="result-card__icon">✅</span>
-                            <div class="result-card__title">PDF Başarıyla Bölündü!</div>
-                            <div class="result-card__sub" id="result-info"></div>
-                            <div id="result-parts" style="margin-top:var(--sp-lg);"></div>
-                            <div class="result-actions" style="margin-top:var(--sp-lg);">
-                                <button type="button" id="download-all-btn"
-                                    class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ Tümünü İndir (ZIP)</button>
-                                <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden
-                                    Başla</button>
-                            </div>
-                        </div>
-                    </div>
-
+                    <div id="every-preview" class="hint" style="margin-top:var(--sp-sm);"></div>
                 </div>
 
-                <div class="tool-sidebar">
-                    <div class="info-card">
-                        <div class="info-card__title">Nasıl Kullanılır?</div>
-                        <ul>
-                            <li>PDF dosyanızı yükleyin</li>
-                            <li>Sayfaları görsel olarak önizleyin</li>
-                            <li>Bölme modunu seçin</li>
-                            <li>Parçaları indirin</li>
-                        </ul>
-                    </div>
-                    <div class="info-card"
-                        style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);">
-                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
-                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
-                            Tüm işlemler tarayıcınızda gerçekleşir. Dosyalarınız sunucuya gönderilmez.
-                        </p>
+                <div id="opts-extract" class="options-panel" style="display:none;">
+                    <div class="options-panel__title">🎯 Sayfa Çıkar</div>
+                    <p style="font-size:13px;color:var(--text-secondary);">Yukarıdaki sayfa kartlarına
+                        tıklayarak çıkarmak istediğiniz sayfaları seçin. Seçilen sayfalar tek bir PDF olarak
+                        birleştirilir.</p>
+                    <div id="extract-info" class="hint" style="margin-top:var(--sp-sm);">0 sayfa seçildi</div>
+                </div>
+
+                <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                    style="width:100%;margin-top:var(--sp-lg);" disabled>
+                    ✂️ PDF'i Böl
+                </button>
+            </div>
+
+            <!-- Progress -->
+            <div id="progress-section" style="display:none;margin-top:var(--sp-lg);">
+                <div class="progress-card">
+                    <div style="font-size:48px;margin-bottom:var(--sp-md);">✂️</div>
+                    <div class="progress-card__title">PDF Bölünüyor...</div>
+                    <div id="progress-status">Sayfalar işleniyor...</div>
+                    <div id="progress-wrap" class="progress-bar-wrap">
+                        <div id="progress-bar" class="progress-bar" style="width:0%"></div>
                     </div>
                 </div>
             </div>
+
+            <!-- Result -->
+            <div id="result-section" style="display:none;margin-top:var(--sp-lg);">
+                <div class="result-card">
+                    <span class="result-card__icon">✅</span>
+                    <div class="result-card__title">PDF Başarıyla Bölündü!</div>
+                    <div class="result-card__sub" id="result-info"></div>
+                    <div id="result-parts" style="margin-top:var(--sp-lg);"></div>
+                    <div class="result-actions" style="margin-top:var(--sp-lg);">
+                        <button type="button" id="download-all-btn"
+                            class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ Tümünü İndir (ZIP)</button>
+                        <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden
+                            Başla</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Cards Row -->
+            <div class="info-cards-row">
+                <div class="info-card">
+                    <div class="info-card__title">Nasıl Kullanılır?</div>
+                    <ul>
+                        <li>PDF dosyanızı yükleyin</li>
+                        <li>Sayfaları görsel olarak önizleyin</li>
+                        <li>Bölme modunu seçin</li>
+                        <li>Parçaları indirin</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <div class="info-card__title">Özellikler</div>
+                    <ul>
+                        <li>4 farklı bölme modu</li>
+                        <li>Görsel sayfa önizleme</li>
+                        <li>Orijinal kalite korunur</li>
+                        <li>ZIP ile toplu indirme</li>
+                    </ul>
+                </div>
+                <div class="info-card" style="background:var(--brand-gradient-soft);border-color:rgba(255,107,53,0.2);">
+                    <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                        Tüm işlemler tarayıcınızda gerçekleşir. Dosyalarınız sunucuya gönderilmez.
+                    </p>
+                </div>
+            </div>
+
         </div>
     </section>
 

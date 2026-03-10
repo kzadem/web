@@ -122,4 +122,17 @@
     }
 }
 
+.info-cards-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--sp-md);
+    margin-top: var(--sp-2xl);
+}
+
+@media (max-width: 768px) {
+    .info-cards-row {
+        grid-template-columns: 1fr;
+    }
+}
+
 </style>
