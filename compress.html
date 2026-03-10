@@ -43,10 +43,9 @@
                     <div class="upload-zone__icon icon-bounce"
                         style="background:rgba(6,214,160,0.15);color:var(--accent-teal);">⚡</div>
                     <div class="upload-zone__title">PDF Dosyasını Sürükleyin</div>
-                    <p class="upload-zone__sub">veya aşağıdaki butona tıklayın · Maksimum 100 MB</p>
+                    <p class="upload-zone__sub">veya tıklayın · Maksimum 100 MB</p>
                     <div class="upload-zone__btn">
-                        <button class="btn btn-primary btn-lg ripple-btn"
-                            onclick="document.getElementById('file-input').click()">
+                        <button class="btn btn-primary btn-lg ripple-btn">
                             📂 PDF Seç
                         </button>
                     </div>
@@ -56,6 +55,19 @@
 
             <div id="file-section" style="display:none; margin-top: var(--sp-lg);">
                 <div id="file-list" class="file-list"></div>
+
+                <!-- PDF Preview -->
+                <div id="compress-preview"
+                    style="display:none;margin-top:var(--sp-md);text-align:center;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:var(--sp-md);overflow:hidden;">
+                </div>
+                <style>
+                    #compress-preview canvas {
+                        max-width: 100%;
+                        height: auto;
+                        border-radius: var(--radius-sm);
+                        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+                    }
+                </style>
 
                 <div class="options-panel" style="margin-top:var(--sp-lg);">
                     <div class="options-panel__title">🎛️ Sıkıştırma Kalitesi</div>

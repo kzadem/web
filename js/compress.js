@@ -34,18 +34,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedFile = null;
     let compressedBlob = null;
 
-    /* ── Single-click upload zone ─────────────────────────────────────── */
+    /* ── Drop zone setup ─────────────────────────────────────────────── */
     const uploadZone = document.getElementById('upload-zone');
     const fileInput = document.getElementById('file-input');
+
+    // Make the whole zone clickable (single click uploads)
     if (uploadZone && fileInput) {
         uploadZone.style.cursor = 'pointer';
         uploadZone.addEventListener('click', (e) => {
+            // Don't trigger if clicking remove button or the browse button (already handled)
             if (e.target.closest('.file-item__remove') || e.target.closest('button')) return;
             fileInput.click();
         });
     }
 
-    /* ── Drop zone setup ──────────────────────────────────────────────── */
     const dropZone = window.createDropZone({
         zoneSelector: '#upload-zone',
         inputId: 'file-input',
@@ -54,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
         onFilesAdded: (files) => {
             selectedFile = files.length > 0 ? files[0] : null;
             updateUI(files);
+            if (selectedFile) renderPreview(selectedFile);
         }
     });
 
@@ -82,6 +85,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     updateUI([]);
+
+    /* ── PDF Thumbnail Preview ────────────────────────────────────────── */
+    async function renderPreview(file) {
+        const previewEl = document.getElementById('compress-preview');
+        if (!previewEl) return;
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            const page = await pdf.getPage(1);
+            const vp = page.getViewport({ scale: 0.5 });
+            const canvas = document.createElement('canvas');
+            canvas.width = vp.width;
+            canvas.height = vp.height;
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+            previewEl.innerHTML = '';
+            previewEl.appendChild(canvas);
+            previewEl.style.display = 'block';
+        } catch (e) {
+            console.warn('Preview render failed:', e);
+        }
+    }
 
     /* ── Helper: format file size ─────────────────────────────────────── */
     function formatSize(bytes) {
