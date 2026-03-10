@@ -36,98 +36,97 @@
         </div>
     </section>
 
+    <!-- Hidden file input (outside zone to prevent click recursion) -->
+    <input type="file" id="file-input" accept=".pdf,application/pdf" multiple hidden />
+
     <section style="padding: var(--sp-2xl) 0 var(--sp-4xl); position:relative;z-index:1;">
         <div class="container">
-            <div class="tool-layout">
-                <div class="tool-main">
 
-                    <!-- Upload Zone - NO onclick on the div itself -->
-                    <div id="upload-zone" class="upload-zone">
-                        <div id="zone-content">
-                            <div class="upload-zone__icon icon-bounce">🔗</div>
-                            <div class="upload-zone__title">PDF Dosyalarını Sürükleyin</div>
-                            <p class="upload-zone__sub">veya aşağıdaki butona tıklayın · Maksimum 100 MB her dosya</p>
-                            <div style="margin-top:var(--sp-lg);position:relative;z-index:10;">
-                                <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">
-                                    📂 Dosya Seç
-                                </button>
-                            </div>
-                        </div>
-                        <input type="file" id="file-input" accept=".pdf,application/pdf" multiple hidden />
-                    </div>
-
-                    <!-- File List -->
-                    <div id="file-section" style="display:none; margin-top: var(--sp-lg);">
-                        <div
-                            style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-md);">
-                            <h3 style="font-size:15px;font-weight:700;">Seçilen Dosyalar <span id="file-count"
-                                    style="color:var(--text-muted);font-weight:500;"></span></h3>
-                            <button type="button" class="btn btn-ghost btn-sm" id="add-more-btn">+ Dosya Ekle</button>
-                        </div>
-                        <div id="file-list" class="file-list"></div>
-                        <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
-                            style="width:100%;margin-top:var(--sp-lg);" disabled>
-                            🔗 PDF Dosyalarını Birleştir
+            <!-- Upload Zone -->
+            <div id="upload-zone" class="upload-zone">
+                <div id="zone-content">
+                    <div class="upload-zone__icon icon-bounce">🔗</div>
+                    <div class="upload-zone__title">PDF Dosyalarını Sürükleyin</div>
+                    <p class="upload-zone__sub">veya aşağıdaki butona tıklayın · Maksimum 100 MB her dosya</p>
+                    <div style="margin-top:var(--sp-lg);position:relative;z-index:10;">
+                        <button type="button" class="btn btn-primary btn-lg ripple-btn" id="browse-btn">
+                            📂 Dosya Seç
                         </button>
-                    </div>
-
-                    <!-- Progress -->
-                    <div id="progress-section" style="display:none; margin-top:var(--sp-lg);">
-                        <div class="progress-card">
-                            <div style="font-size:48px;margin-bottom:var(--sp-md);">⚙️</div>
-                            <div class="progress-card__title">PDF'ler Birleştiriliyor...</div>
-                            <div id="progress-status">Dosyalar analiz ediliyor...</div>
-                            <div id="progress-wrap" class="progress-bar-wrap">
-                                <div id="progress-bar" class="progress-bar" style="width:0%"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Result -->
-                    <div id="result-section" style="display:none; margin-top:var(--sp-lg);">
-                        <div class="result-card">
-                            <span class="result-card__icon">✅</span>
-                            <div class="result-card__title">PDF'ler Başarıyla Birleştirildi!</div>
-                            <div class="result-card__sub" id="result-info">Dosyalarınız tek bir PDF'de birleştirildi.
-                            </div>
-                            <div class="result-actions">
-                                <button type="button" id="download-btn"
-                                    class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️ İndir</button>
-                                <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden
-                                    Başla</button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="tool-sidebar">
-                    <div class="info-card">
-                        <div class="info-card__title">Nasıl Kullanılır?</div>
-                        <ul>
-                            <li>PDF dosyalarınızı yükleyin veya sürükleyin</li>
-                            <li>"Birleştir" butonuna tıklayın</li>
-                            <li>Tek PDF'inizi indirin</li>
-                        </ul>
-                    </div>
-                    <div class="info-card">
-                        <div class="info-card__title">Özellikler</div>
-                        <ul>
-                            <li>Gerçek PDF birleştirme (pdf-lib)</li>
-                            <li>Tüm işlem tarayıcınızda çalışır</li>
-                            <li>Orijinal kalite korunur</li>
-                            <li>Veriler sunucuya yüklenmez</li>
-                        </ul>
-                    </div>
-                    <div class="info-card"
-                        style="background: var(--brand-gradient-soft); border-color: rgba(255,107,53,0.2);">
-                        <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
-                        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
-                            Tüm işlemler tarayıcınızda gerçekleşir. Dosyalarınız sunucuya gönderilmez.
-                        </p>
                     </div>
                 </div>
             </div>
+
+            <!-- File List -->
+            <div id="file-section" style="display:none; margin-top: var(--sp-lg);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp-md);">
+                    <h3 style="font-size:15px;font-weight:700;">Seçilen Dosyalar <span id="file-count"
+                            style="color:var(--text-muted);font-weight:500;"></span></h3>
+                    <button type="button" class="btn btn-ghost btn-sm" id="add-more-btn">+ Dosya Ekle</button>
+                </div>
+                <div id="file-list" class="file-list"></div>
+                <button type="button" id="process-btn" class="btn btn-primary btn-lg ripple-btn btn-glow"
+                    style="width:100%;margin-top:var(--sp-lg);" disabled>
+                    🔗 PDF Dosyalarını Birleştir
+                </button>
+            </div>
+
+            <!-- Progress -->
+            <div id="progress-section" style="display:none; margin-top:var(--sp-lg);">
+                <div class="progress-card">
+                    <div style="font-size:48px;margin-bottom:var(--sp-md);">⚙️</div>
+                    <div class="progress-card__title">PDF'ler Birleştiriliyor...</div>
+                    <div id="progress-status">Dosyalar analiz ediliyor...</div>
+                    <div id="progress-wrap" class="progress-bar-wrap">
+                        <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div id="result-section" style="display:none; margin-top:var(--sp-lg);">
+                <div class="result-card">
+                    <span class="result-card__icon">✅</span>
+                    <div class="result-card__title">PDF'ler Başarıyla Birleştirildi!</div>
+                    <div class="result-card__sub" id="result-info">Dosyalarınız tek bir PDF'de birleştirildi.
+                    </div>
+                    <div class="result-actions">
+                        <button type="button" id="download-btn" class="btn btn-primary btn-lg ripple-btn btn-glow">⬇️
+                            İndir</button>
+                        <button type="button" id="again-btn" class="btn btn-outline btn-lg">🔄 Yeniden
+                            Başla</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Cards - Horizontal Row -->
+            <div class="merge-info-row"
+                style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-md);margin-top:var(--sp-2xl);">
+                <div class="info-card">
+                    <div class="info-card__title">Nasıl Kullanılır?</div>
+                    <ul>
+                        <li>PDF dosyalarınızı yükleyin veya sürükleyin</li>
+                        <li>"Birleştir" butonuna tıklayın</li>
+                        <li>Tek PDF'inizi indirin</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <div class="info-card__title">Özellikler</div>
+                    <ul>
+                        <li>Gerçek PDF birleştirme (pdf-lib)</li>
+                        <li>Tüm işlem tarayıcınızda çalışır</li>
+                        <li>Orijinal kalite korunur</li>
+                        <li>Veriler sunucuya yüklenmez</li>
+                    </ul>
+                </div>
+                <div class="info-card"
+                    style="background: var(--brand-gradient-soft); border-color: rgba(255,107,53,0.2);">
+                    <div class="info-card__title" style="color:var(--brand-primary);">Güvenliğiniz</div>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+                        Tüm işlemler tarayıcınızda gerçekleşir. Dosyalarınız sunucuya gönderilmez.
+                    </p>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -297,6 +296,12 @@
 
         .upload-zone.compact .zone-compact-content span {
             font-size: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .merge-info-row {
+                grid-template-columns: 1fr !important;
+            }
         }
     </style>
 
