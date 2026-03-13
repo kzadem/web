@@ -397,6 +397,10 @@
                                 <div class="pos-btn" data-pos="bottom-center">Alt Orta</div>
                                 <div class="pos-btn" data-pos="bottom-right">Sağ Alt</div>
                             </div>
+                            <div style="margin-top:6px;">
+                                <div class="pos-btn" data-pos="top-bottom"
+                                    style="width:100%;padding:10px;font-size:11px;">⬆️⬇️ Üst + Alt (Aynı Anda)</div>
+                            </div>
                         </div>
 
                         <div class="setting-group">
@@ -661,21 +665,32 @@
                 var angVal = parseInt(document.getElementById('wm-angle').value);
                 var angle = isNaN(angVal) ? -45 : angVal;
 
-                var el = document.getElementById('preview-text');
-                el.textContent = text;
                 var r = parseInt(color.substr(1, 2), 16), g = parseInt(color.substr(3, 2), 16), b = parseInt(color.substr(5, 2), 16);
-                el.style.color = 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
-                el.style.fontSize = Math.max(12, size * 0.33) + 'px';
-                el.style.transform = 'rotate(' + angle + 'deg)';
+                var colorRgba = 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
+                var fSize = Math.max(12, size * 0.33) + 'px';
+                var rotateStyle = 'rotate(' + angle + 'deg)';
 
                 var overlay = document.getElementById('wm-overlay');
-                var jc = 'center', ai = 'center';
-                if (wmPosition.indexOf('left') !== -1) jc = 'flex-start';
-                if (wmPosition.indexOf('right') !== -1) jc = 'flex-end';
-                if (wmPosition.indexOf('top') !== -1) ai = 'flex-start';
-                if (wmPosition.indexOf('bottom') !== -1) ai = 'flex-end';
-                overlay.style.justifyContent = jc;
-                overlay.style.alignItems = ai;
+
+                if (wmPosition === 'top-bottom') {
+                    // Dual mode: show text at both top and bottom
+                    overlay.style.flexDirection = 'column';
+                    overlay.style.justifyContent = 'space-between';
+                    overlay.style.alignItems = 'center';
+                    overlay.innerHTML = '<span style="font-weight:900;white-space:nowrap;color:' + colorRgba + ';font-size:' + fSize + ';transform:' + rotateStyle + '">' + text + '</span>' +
+                        '<span style="font-weight:900;white-space:nowrap;color:' + colorRgba + ';font-size:' + fSize + ';transform:' + rotateStyle + '">' + text + '</span>';
+                } else {
+                    // Single mode
+                    overlay.style.flexDirection = '';
+                    var jc = 'center', ai = 'center';
+                    if (wmPosition.indexOf('left') !== -1) jc = 'flex-start';
+                    if (wmPosition.indexOf('right') !== -1) jc = 'flex-end';
+                    if (wmPosition.indexOf('top') !== -1) ai = 'flex-start';
+                    if (wmPosition.indexOf('bottom') !== -1) ai = 'flex-end';
+                    overlay.style.justifyContent = jc;
+                    overlay.style.alignItems = ai;
+                    overlay.innerHTML = '<span id="preview-text" style="font-weight:900;white-space:nowrap;color:' + colorRgba + ';font-size:' + fSize + ';transform:' + rotateStyle + '">' + text + '</span>';
+                }
             }
 
             function hexToRgb(hex) {
@@ -717,27 +732,31 @@
                     try {
                         var doc = await PDFLib.PDFDocument.load(pdfBuffer);
                         doc.registerFontkit(fontkit);
-                        // Use a Unicode-compatible font for Turkish chars (İ, ş, ğ, ü, ö, ç)
-                        var fontUrl = 'https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-ext-400-normal.woff';
-                        var fontBytes;
-                        try {
-                            var resp = await fetch(fontUrl);
-                            fontBytes = await resp.arrayBuffer();
-                        } catch (e) {
-                            // Fallback: try alternate URL
+                        // Use a Unicode-compatible TTF font for Turkish chars (İ, Ş, Ğ, Ü, Ö, Ç)
+                        // pdf-lib only supports TTF/OTF, NOT woff/woff2
+                        var fontUrls = [
+                            'https://cdn.jsdelivr.net/gh/nicholasgasior/gfonts@master/fonts/inter/Inter-Regular.ttf',
+                            'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf',
+                            'https://cdn.jsdelivr.net/gh/rsms/inter@v4.0/docs/font-files/InterDisplay-Regular.otf'
+                        ];
+                        var fontBytes = null;
+                        for (var fi = 0; fi < fontUrls.length; fi++) {
                             try {
-                                var resp2 = await fetch('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf');
-                                fontBytes = await resp2.arrayBuffer();
-                            } catch (e2) {
-                                // Last fallback: use Helvetica but strip non-WinAnsi chars
-                                fontBytes = null;
-                            }
+                                statusEl.textContent = 'Font yükleniyor...';
+                                var resp = await fetch(fontUrls[fi]);
+                                if (resp.ok) {
+                                    fontBytes = await resp.arrayBuffer();
+                                    if (fontBytes.byteLength > 1000) break; // valid font
+                                    fontBytes = null;
+                                }
+                            } catch (e) { fontBytes = null; }
                         }
                         var font;
                         if (fontBytes) {
                             font = await doc.embedFont(fontBytes, { subset: true });
                         } else {
                             font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+                            toast('Türkçe karakter desteği için font yüklenemedi. Özel karakterler görünmeyebilir.', 'error');
                         }
                         var textWidth = font.widthOfTextAtSize(text, fontSize);
 
@@ -748,17 +767,29 @@
                             var page = doc.getPage(pages[i]);
                             var w = page.getWidth(), h = page.getHeight();
 
-                            var x = w / 2 - textWidth / 2, y = h / 2;
-                            if (wmPosition.indexOf('left') !== -1) x = 40;
-                            if (wmPosition.indexOf('right') !== -1) x = w - textWidth - 40;
-                            if (wmPosition.indexOf('top') !== -1) y = h - 60;
-                            if (wmPosition.indexOf('bottom') !== -1) y = 40;
+                            // Calculate positions to draw
+                            var positions = [];
+                            if (wmPosition === 'top-bottom') {
+                                // Draw at both top-center and bottom-center
+                                positions.push({ x: w / 2 - textWidth / 2, y: h - 60 });
+                                positions.push({ x: w / 2 - textWidth / 2, y: 40 });
+                            } else {
+                                var x = w / 2 - textWidth / 2, y = h / 2;
+                                if (wmPosition.indexOf('left') !== -1) x = 40;
+                                if (wmPosition.indexOf('right') !== -1) x = w - textWidth - 40;
+                                if (wmPosition.indexOf('top') !== -1) y = h - 60;
+                                if (wmPosition.indexOf('bottom') !== -1) y = 40;
+                                positions.push({ x: x, y: y });
+                            }
 
-                            page.drawText(text, {
-                                x: x, y: y, size: fontSize, font: font,
-                                color: PDFLib.rgb(rgb.r, rgb.g, rgb.b), opacity: opacity,
-                                rotate: PDFLib.degrees(angle)
-                            });
+                            for (var pi = 0; pi < positions.length; pi++) {
+                                page.drawText(text, {
+                                    x: positions[pi].x, y: positions[pi].y,
+                                    size: fontSize, font: font,
+                                    color: PDFLib.rgb(rgb.r, rgb.g, rgb.b), opacity: opacity,
+                                    rotate: PDFLib.degrees(angle)
+                                });
+                            }
                         }
 
                         statusEl.textContent = 'Kaydediliyor...'; bar.style.width = '90%';
