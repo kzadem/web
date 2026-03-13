@@ -934,18 +934,32 @@
                         var doc = await PDFLib.PDFDocument.load(pdfBuffer);
                         doc.registerFontkit(fontkit);
 
-                        // Load Unicode font for Turkish characters
-                        var fontBytes;
-                        try {
-                            var resp = await fetch('https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf');
-                            fontBytes = await resp.arrayBuffer();
-                        } catch (e) { fontBytes = null; }
+                        // Load Unicode TTF font for Turkish characters
+                        // pdf-lib only supports TTF/OTF, NOT woff/woff2
+                        var fontUrls = [
+                            'https://cdn.jsdelivr.net/gh/nicholasgasior/gfonts@master/fonts/inter/Inter-Regular.ttf',
+                            'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf',
+                            'https://cdn.jsdelivr.net/gh/rsms/inter@v4.0/docs/font-files/InterDisplay-Regular.otf'
+                        ];
+                        var fontBytes = null;
+                        for (var fi = 0; fi < fontUrls.length; fi++) {
+                            try {
+                                statusEl.textContent = 'Font yükleniyor...';
+                                var resp = await fetch(fontUrls[fi]);
+                                if (resp.ok) {
+                                    fontBytes = await resp.arrayBuffer();
+                                    if (fontBytes.byteLength > 1000) break; // valid font
+                                    fontBytes = null;
+                                }
+                            } catch (e) { fontBytes = null; }
+                        }
 
                         var font;
                         if (fontBytes) {
                             font = await doc.embedFont(fontBytes, { subset: true });
                         } else {
                             font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+                            toast('Türkçe karakter desteği için font yüklenemedi. Özel karakterler görünmeyebilir.', 'error');
                         }
 
                         for (var i = 0; i < pages.length; i++) {
