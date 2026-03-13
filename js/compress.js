@@ -24,10 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/lib/pdf.worker.min.js';
 
     /* ── Compression presets ──────────────────────────────────────────── */
+    // Higher scale = sharper text, lower JPEG quality = smaller file
+    // Text readability requires minimum scale 1.5 and quality 0.50
     const PRESETS = {
-        extreme: { scale: 0.75, jpegQuality: 0.35 },
-        recommended: { scale: 1.0, jpegQuality: 0.55 },
-        low: { scale: 1.5, jpegQuality: 0.82 }
+        extreme: { scale: 1.5, jpegQuality: 0.50 },
+        recommended: { scale: 1.8, jpegQuality: 0.70 },
+        low: { scale: 2.0, jpegQuality: 0.92 }
     };
 
     /* ── State ────────────────────────────────────────────────────────── */
@@ -143,8 +145,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const preset = PRESETS[level];
         const sliderQuality = getQualitySlider();
 
-        // Blend preset quality with slider quality
-        const finalQuality = Math.min(preset.jpegQuality * (sliderQuality / 0.72), 0.95);
+        // Use slider to fine-tune quality (0..1 range, default 0.72)
+        // Slider adjusts quality proportionally: lower slider = more compression
+        const finalQuality = Math.max(0.40, Math.min(preset.jpegQuality * (sliderQuality / 0.72), 0.95));
         const scale = preset.scale;
 
         progressStat.textContent = `${numPages} sayfa işlenecek...`;
