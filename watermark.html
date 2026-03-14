@@ -526,6 +526,7 @@
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/font-loader.js"></script>
 
     <script>
         var WM = (function () {
@@ -732,23 +733,8 @@
                     try {
                         var doc = await PDFLib.PDFDocument.load(pdfBuffer);
                         doc.registerFontkit(fontkit);
-                        // Use a Unicode-compatible TTF font for Turkish chars (İ, Ş, Ğ, Ü, Ö, Ç)
-                        // pdf-lib only supports real TTF/OTF
-                        var fontUrls = [
-                            'js/lib/NotoSans-Regular.ttf',
-                            'https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSans/hinted/ttf/NotoSans-Regular.ttf'
-                        ];
-                        var fontBytes = null;
-                        for (var fi = 0; fi < fontUrls.length; fi++) {
-                            try {
-                                statusEl.textContent = 'Font yükleniyor...';
-                                var resp = await fetch(fontUrls[fi]);
-                                if (resp.ok) {
-                                    var buf = await resp.arrayBuffer();
-                                    if (buf.byteLength > 1000) { fontBytes = buf; break; }
-                                }
-                            } catch (e) { /* try next */ }
-                        }
+                        statusEl.textContent = 'Font yükleniyor...';
+                        var fontBytes = await FontLoader.load('NotoSans-Regular');
                         var font;
                         if (fontBytes) {
                             try {
@@ -759,7 +745,6 @@
                             }
                         } else {
                             font = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
-                            toast('Türkçe karakter desteği için font yüklenemedi. Özel karakterler görünmeyebilir.', 'error');
                         }
                         var textWidth = font.widthOfTextAtSize(text, fontSize);
 
@@ -771,18 +756,34 @@
                             var w = page.getWidth(), h = page.getHeight();
 
                             // Calculate positions to draw
+                            // pdf-lib rotates text around (x,y) origin, so we must offset
+                            // to visually center the rotated text at the desired position
+                            var rad = angle * Math.PI / 180;
+                            var cosA = Math.cos(rad), sinA = Math.sin(rad);
+                            var textHeight = fontSize * 0.75; // approximate ascender height
+
+                            function calcPos(cx, cy) {
+                                // cx, cy = desired visual center of the text
+                                // Offset so rotated text is centered at (cx, cy)
+                                return {
+                                    x: cx - (textWidth / 2) * cosA + (textHeight / 2) * sinA,
+                                    y: cy - (textWidth / 2) * sinA - (textHeight / 2) * cosA
+                                };
+                            }
+
                             var positions = [];
+                            var margin = 50;
+
                             if (wmPosition === 'top-bottom') {
-                                // Draw at both top-center and bottom-center
-                                positions.push({ x: w / 2 - textWidth / 2, y: h - 60 });
-                                positions.push({ x: w / 2 - textWidth / 2, y: 40 });
+                                positions.push(calcPos(w / 2, h - margin));
+                                positions.push(calcPos(w / 2, margin));
                             } else {
-                                var x = w / 2 - textWidth / 2, y = h / 2;
-                                if (wmPosition.indexOf('left') !== -1) x = 40;
-                                if (wmPosition.indexOf('right') !== -1) x = w - textWidth - 40;
-                                if (wmPosition.indexOf('top') !== -1) y = h - 60;
-                                if (wmPosition.indexOf('bottom') !== -1) y = 40;
-                                positions.push({ x: x, y: y });
+                                var cx = w / 2, cy = h / 2;
+                                if (wmPosition.indexOf('left') !== -1) cx = margin + textWidth / 4;
+                                if (wmPosition.indexOf('right') !== -1) cx = w - margin - textWidth / 4;
+                                if (wmPosition.indexOf('top') !== -1) cy = h - margin;
+                                if (wmPosition.indexOf('bottom') !== -1) cy = margin;
+                                positions.push(calcPos(cx, cy));
                             }
 
                             for (var pi = 0; pi < positions.length; pi++) {

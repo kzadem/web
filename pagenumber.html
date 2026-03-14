@@ -592,6 +592,7 @@
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/font-loader.js"></script>
 
     <script>
         var PN = (function () {
@@ -934,23 +935,8 @@
                         var doc = await PDFLib.PDFDocument.load(pdfBuffer);
                         doc.registerFontkit(fontkit);
 
-                        // Load Unicode TTF font for Turkish characters
-                        // pdf-lib only supports real TTF/OTF
-                        var fontUrls = [
-                            'js/lib/NotoSans-Regular.ttf',
-                            'https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSans/hinted/ttf/NotoSans-Regular.ttf'
-                        ];
-                        var fontBytes = null;
-                        for (var fi = 0; fi < fontUrls.length; fi++) {
-                            try {
-                                statusEl.textContent = 'Font yükleniyor...';
-                                var resp = await fetch(fontUrls[fi]);
-                                if (resp.ok) {
-                                    var buf = await resp.arrayBuffer();
-                                    if (buf.byteLength > 1000) { fontBytes = buf; break; }
-                                }
-                            } catch (e) { /* try next */ }
-                        }
+                        statusEl.textContent = 'Font yükleniyor...';
+                        var fontBytes = await FontLoader.load('NotoSans-Regular');
 
                         var font;
                         if (fontBytes) {

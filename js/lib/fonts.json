@@ -1,0 +1,15 @@
+{
+  "fonts": [
+    {
+      "name": "NotoSans-Regular",
+      "file": "NotoSans-Regular.ttf",
+      "description": "Noto Sans Regular — Tam Unicode ve Türkçe karakter desteği (İ, Ş, Ğ, Ü, Ö, Ç)",
+      "sizeKB": 607,
+      "downloadUrl": "https://cdn.jsdelivr.net/gh/notofonts/notofonts.github.io/fonts/NotoSans/hinted/ttf/NotoSans-Regular.ttf",
+      "usedBy": [
+        "watermark.html",
+        "pagenumber.html"
+      ]
+    }
+  ]
+}
